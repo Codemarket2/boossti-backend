@@ -2,12 +2,11 @@ version: 0.2
 phases:
   install:
     commands:
-      - npm install -g serverless
       - npm install -g yarn
       - yarn install
   pre_build:
     commands:
-      - echo "==> CODEBUILD_GIT_BRANCH = $CODEBUILD_GIT_BRANCH "
+      # - yarn test
       - echo "Creating .env file"
       - echo "BRANCH_NAME=$BRANCH_NAME\nMONGO_USERNAME=$MONGO_USERNAME\nMONGO_PASSWORD=$MONGO_PASSWORD" > .env
   build:
