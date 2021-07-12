@@ -1,0 +1,134 @@
+schema {
+  query: Query
+  mutation: Mutation
+  # subscription: Subscription
+}
+
+type Query {
+  getUsers(
+    page: Int
+    limit: Int
+    search: String
+    lowerRange: AWSDateTime
+    higherRange: AWSDateTime
+    sortBy: String
+    active: Boolean
+  ): UserSearch @aws_cognito_user_pools(cognito_groups: ["superadmin"])
+  getUserById(id: ID!): User
+  getUserByCognitoUserId(userId: String!): User
+  getLists(page: Int, limit: Int, active: Boolean): ListSearch
+  getList(_id: ID!): List
+}
+
+type Mutation {
+  createUser(
+    userId: String!
+    name: String!
+    email: String!
+    picture: String
+  ): User @aws_cognito_user_pools(cognito_groups: ["superadmin"])
+  updateUser(
+    userId: String!
+    updatedBy: String!
+    name: String
+    email: String
+    picture: String
+    subscription: SubscriptionInput
+  ): User
+  updateUserStatus(userId: String!, updatedBy: String!, status: Boolean!): User
+    @aws_cognito_user_pools(cognito_groups: ["superadmin"])
+  cancelUserSubscription(userId: String!): User
+  createList(name: String!, active: Boolean, items: [ListItemInput]): List
+    @aws_cognito_user_pools(cognito_groups: ["superadmin"])
+  updateList(
+    _id: ID!
+    name: String
+    active: Boolean
+    inUse: Boolean
+    items: [ListItemInput]
+  ): List @aws_cognito_user_pools(cognito_groups: ["superadmin"])
+  deleteList(_id: ID!): Boolean
+    @aws_cognito_user_pools(cognito_groups: ["superadmin"])
+  addListItem(
+    listId: ID!
+    title: String
+    description: String
+    active: Boolean
+  ): List @aws_cognito_user_pools(cognito_groups: ["superadmin"])
+  updateListItem(
+    listId: ID!
+    _id: ID!
+    title: String
+    description: String
+    active: Boolean
+  ): List @aws_cognito_user_pools(cognito_groups: ["superadmin"])
+  deleteListItem(listId: ID!, _id: ID!): Boolean
+    @aws_cognito_user_pools(cognito_groups: ["superadmin"])
+}
+
+# type Subscription {}
+
+type UserSearch @aws_cognito_user_pools(cognito_groups: ["superadmin"]) {
+  users: [User]
+  count: Int
+}
+
+type User @aws_cognito_user_pools(cognito_groups: ["superadmin"]) {
+  _id: ID!
+  userId: String!
+  name: String!
+  email: String!
+  picture: String
+  active: Boolean!
+  confirmed: Boolean!
+  createdAt: String
+  createdBy: String
+  updatedAt: String
+  updatedBy: String
+  subscription: TSubscription
+}
+
+type TSubscription {
+  _id: ID
+  active: Boolean
+  subscriptionType: String
+  description: String
+  amount: Float
+  subscribedOn: AWSDateTime
+  expiringOn: AWSDateTime
+}
+
+input SubscriptionInput {
+  active: Boolean!
+  subscriptionType: String!
+  description: String!
+  amount: Float!
+  subscribedOn: AWSDateTime
+  expiringOn: AWSDateTime
+}
+
+type ListSearch {
+  data: [List]
+  count: Int
+}
+
+type List {
+  _id: ID
+  name: String
+  active: Boolean
+  inUse: Boolean
+  items: [ListItem]
+}
+
+type ListItem {
+  _id: ID
+  title: String
+  description: String
+  active: Boolean
+}
+
+input ListItemInput {
+  title: String
+  description: String
+  active: Boolean
+}
