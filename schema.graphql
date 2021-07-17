@@ -1,7 +1,12 @@
 schema {
   query: Query
   mutation: Mutation
-  # subscription: Subscription
+  subscription: Subscription
+}
+
+type Subscription {
+  addedPost: Post @aws_subscribe(mutations: ["createPost"])
+  updatedPost: Post @aws_subscribe(mutations: ["updatePost"])
 }
 
 type Query {
@@ -16,8 +21,13 @@ type Query {
   ): UserSearch @aws_cognito_user_pools(cognito_groups: ["superadmin"])
   getUserById(id: ID!): User
   getUserByCognitoUserId(userId: String!): User
-  getLists(page: Int, limit: Int, active: Boolean): ListSearch
+  getLists(page: Int, limit: Int, active: Boolean): Lists
   getList(_id: ID!): List
+  getPosts(page: Int, limit: Int, sortBy: String, search: String): Posts
+  getMyPosts(page: Int, limit: Int, sortBy: String, search: String): Posts
+  getPost(_id: ID!): Post
+  getMyBookmarks(page: Int, limit: Int, search: String): Bookmarks
+  getBookmark(_id: ID!): Bookmark
 }
 
 type Mutation {
@@ -64,9 +74,44 @@ type Mutation {
   ): List @aws_cognito_user_pools(cognito_groups: ["superadmin"])
   deleteListItem(listId: ID!, _id: ID!): Boolean
     @aws_cognito_user_pools(cognito_groups: ["superadmin"])
+  createPost(body: String!): Post
+  updatePost(_id: ID!, body: String): Post
+  deletePost(_id: ID!): Boolean
+  createBookmark(parentId: String, bookmark: String!): Bookmark
+  updateBookmark(_id: ID!, parentId: String, bookmark: String): Bookmark
+  deleteBookmark(_id: ID!): Boolean
 }
 
 # type Subscription {}
+
+type Bookmarks {
+  data: [Bookmark]
+  count: Int
+}
+
+type Bookmark {
+  _id: ID
+  parentId: String
+  bookmark: String
+  createdBy: ID
+  updatedBy: ID
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+type Posts {
+  data: [Post]
+  count: Int
+}
+
+type Post {
+  _id: ID
+  body: String
+  createdBy: User
+  updatedBy: ID
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
 
 type UserSearch @aws_cognito_user_pools(cognito_groups: ["superadmin"]) {
   users: [User]
@@ -107,7 +152,7 @@ input SubscriptionInput {
   expiringOn: AWSDateTime
 }
 
-type ListSearch {
+type Lists {
   data: [List]
   count: Int
 }

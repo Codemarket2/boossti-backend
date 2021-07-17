@@ -137,3 +137,24 @@ export const adminToggleUserStatus = (username: string, status: boolean) => {
   }
   return cognitoIdp.adminDisableUser(params).promise();
 };
+
+export const adminUpdateUserAttribute = (
+  username = '',
+  attribute: { Name: string; Value: string }
+) => {
+  const params = {
+    UserPoolId: USER_POOL_ID || '',
+    Username: username,
+    UserAttributes: [attribute],
+  };
+
+  return cognitoIdp.adminUpdateUserAttributes(params).promise();
+};
+
+export const adminConfirmSignUp = (username = '') => {
+  const params = {
+    UserPoolId: USER_POOL_ID || '',
+    Username: username,
+  };
+  return cognitoIdp.adminConfirmSignUp(params).promise();
+};

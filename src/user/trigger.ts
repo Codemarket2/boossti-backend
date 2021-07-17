@@ -1,17 +1,20 @@
 import {
   PreSignUpTriggerEvent,
   PostAuthenticationTriggerEvent,
+  PostConfirmationTriggerEvent,
 } from 'aws-lambda';
 import {
   preSignUpTrigger,
   postAuthenticationTrigger,
+  // postConfirmationTrigger,
 } from './utils/cognitoTriggers';
-import { DB } from '../utils/DB';
 
 export const handler = async (
-  event: PreSignUpTriggerEvent | PostAuthenticationTriggerEvent
+  event:
+    | PreSignUpTriggerEvent
+    | PostConfirmationTriggerEvent
+    | PostAuthenticationTriggerEvent
 ): Promise<any> => {
-  await DB();
   if (event.triggerSource && event.triggerSource.includes('PreSignUp_')) {
     return await preSignUpTrigger(event);
   }
@@ -21,4 +24,11 @@ export const handler = async (
   ) {
     return await postAuthenticationTrigger(event);
   }
+  // if (
+  //   event.triggerSource &&
+  //   event.triggerSource === 'PostConfirmation_ConfirmSignUp'
+  // ) {
+  //   return await postConfirmationTrigger(event);
+  // }
+  return event;
 };

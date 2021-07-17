@@ -8,7 +8,7 @@ phases:
       - yarn install
   pre_build:
     commands:
-      # - yarn test
+      - yarn test
       - echo "Creating .env file"
       - echo "BRANCH_NAME=$BRANCH_NAME\nMONGO_USERNAME=$MONGO_USERNAME\nMONGO_PASSWORD=$MONGO_PASSWORD" > .env
   build:
