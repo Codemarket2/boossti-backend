@@ -10,7 +10,7 @@
 /build
 
 # typescript
-*.js
+# *.js
 *.d.ts
 
 # misc
