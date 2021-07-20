@@ -22,7 +22,13 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       updatedBy = identity.claims.sub;
     }
 
-    const { page = 1, limit = 50, search = '', active = null } = args;
+    const {
+      page = 1,
+      limit = 50,
+      search = '',
+      active = null,
+      sortBy = '-createdAt',
+    } = args;
 
     switch (fieldName) {
       case 'getBookmark':
@@ -37,7 +43,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         })
           .limit(limit * 1)
           .skip((page - 1) * limit)
-          .exec();
+          .sort(sortBy);
         count = await Bookmark.countDocuments({
           createdBy: tempUser._id,
           bookmark: { $regex: search, $options: 'i' },

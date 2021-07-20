@@ -26,7 +26,12 @@ type Query {
   getPosts(page: Int, limit: Int, sortBy: String, search: String): Posts
   getMyPosts(page: Int, limit: Int, sortBy: String, search: String): Posts
   getPost(_id: ID!): Post
-  getMyBookmarks(page: Int, limit: Int, search: String): Bookmarks
+  getMyBookmarks(
+    page: Int
+    limit: Int
+    sortBy: String
+    search: String
+  ): Bookmarks
   getBookmark(_id: ID!): Bookmark
 }
 
