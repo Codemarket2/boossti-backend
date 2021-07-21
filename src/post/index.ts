@@ -1,25 +1,43 @@
-/* eslint-disable no-case-declarations */
+import * as mongoose from 'mongoose';
 import { DB } from '../utils/DB';
 import { Post } from './utils/postModel';
 import { User } from '../user/utils/userModel';
 import { AppSyncEvent } from '../utils/cutomTypes';
+
+interface IUser {
+  name: string;
+  picture: string;
+  _id: mongoose.Types.ObjectId;
+}
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
     await DB();
     const { fieldName } = event.info;
     const { arguments: args, identity } = event;
+    // console.log('identity', identity);
     let data: any = [];
     let count = 0;
     const tempFilter: any = {};
     let createdBy;
-    let updatedBy;
-    const tempPost: any = null;
-    let tempUser: any = null;
+    let user: any;
+    let tempPost: any;
+    let tempUser: any;
+    const res: any = {};
 
-    if (identity && identity.claims && identity.claims.sub) {
+    if (identity && identity.claims && identity.claims['custom:_id']) {
       createdBy = identity.claims.sub;
-      updatedBy = identity.claims.sub;
+      user = {
+        _id: mongoose.Types.ObjectId(identity.claims['custom:_id']),
+        name: identity.claims.name,
+        picture: identity.claims.picture,
+      };
+      // data = await Post.find({
+      //   createdBy: identity.claims['custom:_id'],
+      //   // createdBy: mongoose.Types.ObjectId(identity.claims['custom:_id']),
+      //   body: { $regex: '', $options: 'i' },
+      // });
+      // console.log('data', data);
     }
 
     const {
@@ -37,7 +55,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     };
 
     switch (fieldName) {
-      case 'getPosts':
+      case 'getPosts': {
         if (active !== null) {
           tempFilter.active = active;
         }
@@ -57,14 +75,14 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           data,
           count,
         };
-      case 'getPost':
+      }
+      case 'getPost': {
         return await Post.findById(args._id).populate(userPopulate);
-      case 'getMyPosts':
-        tempUser = await User.findOne({
-          userId: createdBy,
-        });
+      }
+      case 'getMyPosts': {
+        tempUser = await User.findById(user._id);
         data = await Post.find({
-          createdBy: tempUser._id,
+          createdBy: user._id,
           body: { $regex: search, $options: 'i' },
         })
           .populate(userPopulate)
@@ -72,42 +90,62 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           .skip((page - 1) * limit)
           .sort(sortBy);
         count = await Post.countDocuments({
-          createdBy: tempUser._id,
+          createdBy: user._id,
           body: { $regex: search, $options: 'i' },
         });
         return {
           data,
           count,
         };
-      case 'createPost':
-        tempUser = await User.findOne({
-          userId: createdBy,
-        }).select(userSelect);
+      }
+      case 'getPostsByUserId': {
+        tempUser = await User.findById(args.userId);
+        data = await Post.find({
+          createdBy: args.userId,
+          body: { $regex: search, $options: 'i' },
+        })
+          .populate(userPopulate)
+          .limit(limit * 1)
+          .skip((page - 1) * limit)
+          .sort(sortBy);
+        count = await Post.countDocuments({
+          createdBy: args.userId,
+          body: { $regex: search, $options: 'i' },
+        });
         return {
-          ...(await Post.create({
-            ...args,
-            createdBy: tempUser._id,
-          })),
+          data,
+          count,
+        };
+      }
+      case 'createPost': {
+        return {
+          ...(
+            await Post.create({
+              ...args,
+              createdBy: user._id,
+            })
+          ).toJSON(),
+          createdBy: user,
+        };
+      }
+      case 'updatePost': {
+        tempPost = await Post.findOneAndUpdate(
+          { _id: args._id, createdBy: user._id },
+          { ...args, updatedAt: new Date(), updatedBy: user._id },
+          {
+            new: true,
+            runValidators: true,
+          }
+        );
+        return {
+          ...tempPost.toJSON(),
           createdBy: tempUser,
         };
-      case 'updatePost':
-        tempUser = await User.findOne({
-          userId: createdBy,
-        }).select(userSelect);
-        return {
-          ...(await Post.findByIdAndUpdate(
-            args._id,
-            { ...args, updatedAt: new Date(), updatedBy: tempUser._id },
-            {
-              new: true,
-              runValidators: true,
-            }
-          )),
-          createdBy: tempUser,
-        };
-      case 'deletePost':
-        await Post.findByIdAndDelete(args._id);
+      }
+      case 'deletePost': {
+        await Post.findOneAndDelete({ _id: args._id, createdBy: user._id });
         return true;
+      }
       default:
         throw new Error(
           'Something went wrong! Please check your Query or Mutation'

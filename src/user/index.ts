@@ -69,8 +69,8 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           users,
           count,
         };
-      case 'getUserById':
-        return await User.findById(args.id);
+      case 'getUser':
+        return await User.findById(args._id);
       case 'getUserByCognitoUserId':
         return await User.findOne({
           userId: args.userId,

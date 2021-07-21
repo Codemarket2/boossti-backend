@@ -19,12 +19,19 @@ type Query {
     sortBy: String
     active: Boolean
   ): UserSearch @aws_cognito_user_pools(cognito_groups: ["superadmin"])
-  getUserById(id: ID!): User
+  getUser(_id: ID!): User @aws_api_key @aws_cognito_user_pools
   getUserByCognitoUserId(userId: String!): User
   getLists(page: Int, limit: Int, active: Boolean): Lists
   getList(_id: ID!): List
   getPosts(page: Int, limit: Int, sortBy: String, search: String): Posts
   getMyPosts(page: Int, limit: Int, sortBy: String, search: String): Posts
+  getPostsByUserId(
+    userId: ID!
+    page: Int
+    limit: Int
+    sortBy: String
+    search: String
+  ): Posts @aws_api_key @aws_cognito_user_pools
   getPost(_id: ID!): Post
   getMyBookmarks(
     page: Int
@@ -104,12 +111,12 @@ type Bookmark {
   updatedAt: AWSDateTime
 }
 
-type Posts {
+type Posts @aws_api_key @aws_cognito_user_pools {
   data: [Post]
   count: Int
 }
 
-type Post {
+type Post @aws_api_key @aws_cognito_user_pools {
   _id: ID
   body: String
   createdBy: User
@@ -123,7 +130,7 @@ type UserSearch @aws_cognito_user_pools(cognito_groups: ["superadmin"]) {
   count: Int
 }
 
-type User @aws_cognito_user_pools(cognito_groups: ["superadmin"]) {
+type User @aws_api_key @aws_cognito_user_pools {
   _id: ID!
   userId: String!
   name: String!
