@@ -28,7 +28,7 @@ Use the package manager [yarn](https://yarnpkg.com) to install dependecies.(Don'
 
 ### `yarn install`
 
-Duplicate .env-sample and rename to .env and add your mongodb username and password, add your git branch (eg sumij)
+Duplicate .env-sample and rename to .env and add your MONGO_USERNAME and MONGO_PASSWORD, add your STAGE (eg dev-sumij)
 
 ## Commands
 
