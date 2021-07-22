@@ -7,5 +7,5 @@ export default function main(app: sst.App): void {
     runtime: 'nodejs12.x',
   });
 
-  new MyStack(app, `${process.env.BRANCH_NAME}-stack`);
+  new MyStack(app, `stack`);
 }

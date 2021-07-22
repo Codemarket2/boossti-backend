@@ -5,10 +5,6 @@
   "scripts": {
     "test": "jest",
     "sst:test": "sst test",
-    "start": "sst start",
-    "build": "sst build",
-    "deploy": "sst deploy",
-    "delete": "sst remove",
     "prepare": "husky install"
   },
   "devDependencies": {

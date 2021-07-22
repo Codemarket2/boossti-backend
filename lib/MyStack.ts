@@ -23,42 +23,38 @@ export default class MyStack extends sst.Stack {
     const userPol = UserPool.fromUserPoolId(this, 'UserPool', USER_POOL_ID);
 
     // Create the AppSync GraphQL API
-    const api = new sst.AppSyncApi(
-      this,
-      process.env.BRANCH_NAME || 'default-service-name',
-      {
-        graphqlApi: {
-          schema: 'schema.graphql',
-          authorizationConfig: {
-            defaultAuthorization: {
-              authorizationType: AuthorizationType.USER_POOL,
-              userPoolConfig: {
-                userPool: userPol,
-                defaultAction: UserPoolDefaultAction.ALLOW,
+    const api = new sst.AppSyncApi(this, 'graphql', {
+      graphqlApi: {
+        schema: 'schema.graphql',
+        authorizationConfig: {
+          defaultAuthorization: {
+            authorizationType: AuthorizationType.USER_POOL,
+            userPoolConfig: {
+              userPool: userPol,
+              defaultAction: UserPoolDefaultAction.ALLOW,
+            },
+          },
+          additionalAuthorizationModes: [
+            {
+              authorizationType: AuthorizationType.API_KEY,
+              apiKeyConfig: {
+                expires: Expiration.after(Duration.days(365)),
               },
             },
-            additionalAuthorizationModes: [
-              {
-                authorizationType: AuthorizationType.API_KEY,
-                apiKeyConfig: {
-                  expires: Expiration.after(Duration.days(365)),
-                },
-              },
-            ],
-          },
+          ],
         },
-        defaultFunctionProps: {
-          timeout: 20,
-          environment: {
-            SENDER_EMAIL: SENDER_EMAIL,
-            DATABASE: `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@codemarket-staging.k16z7.mongodb.net/${projectName}?retryWrites=true&w=majority`,
-            USER_POOL_ID: USER_POOL_ID,
-          },
+      },
+      defaultFunctionProps: {
+        timeout: 20,
+        environment: {
+          SENDER_EMAIL: SENDER_EMAIL,
+          DATABASE: `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@codemarket-staging.k16z7.mongodb.net/${projectName}?retryWrites=true&w=majority`,
+          USER_POOL_ID: USER_POOL_ID,
         },
-        dataSources: dataSources,
-        resolvers: { ...resolvers },
-      }
-    );
+      },
+      dataSources: dataSources,
+      resolvers: { ...resolvers },
+    });
 
     // // Enable the AppSync API to access the DynamoDB table
     api.attachPermissions(sst.PermissionType.ALL);

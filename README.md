@@ -1,45 +1,59 @@
 # Vijaa Backend
 
-This project was bootstrapped with [Create Serverless Stack](https://docs.serverless-stack.com/packages/create-serverless-stack).
+How to setup AWS AppSync GraphQL Backend and test using Live Lambda Development
 
-Start by installing the dependencies.
+## Setup AWS CLI
+
+Install [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html).
+
+Configure your AWS cli with the credentials
 
 ```bash
-$ npm install
+$ aws configure
+AWS Access Key ID [None]: AKIAIOSFODNN7EXAMPLE
+AWS Secret Access Key [None]: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+Default region name [None]: us-west-2
+Default output format [None]: json
 ```
+
+If you are doing first time setup create your new branch if you havn't already. (Skip this step if you already have a branch)
+
+{branch-name} = <your-first-name>+<first-letter-of-lastname> eg - sumij
+
+### `git checkout -b {branch-name}`
+
+## Installation
+
+Use the package manager [yarn](https://yarnpkg.com) to install dependecies.(Don't use npm install)
+
+### `yarn install`
+
+Duplicate .env-sample and rename to .env and add your mongodb username and password, add your git branch (eg sumij)
 
 ## Commands
 
-### `npm run start`
+Starts the local Lambda development environment.(for local testing always use dev-{with-your-branchname}eg dev-sumij)
 
-Starts the local Lambda development environment.
+### `npx sst start --stage dev-{your-branchname}`
 
-### `npm run build`
+Build your app and synthesize your stacks. (for build always use prod-{with-your-branchname} eg prod-sumij)
 
-Build your app and synthesize your stacks.
-
-Generates a `.build/` directory with the compiled files and a `.build/cdk.out/` directory with the synthesized CloudFormation stacks.
-
-### `npm run deploy [stack]`
-
-Deploy all your stacks to AWS. Or optionally deploy a specific stack.
-
-### `npm run remove [stack]`
-
-Remove all your stacks and all of their resources from AWS. Or optionally remove a specific stack.
-
-### `npm run test`
+### `npx sst build --stage prod-{your-branchname}`
 
 Runs your tests using Jest. Takes all the [Jest CLI options](https://jestjs.io/docs/en/cli).
 
-## Documentation
+### `npm run test`
 
-Learn more about the Serverless Stack.
+Deploy all your stacks to AWS. Or optionally deploy a specific stack. (for deploy always use prod-{with-your-branchname} eg prod-sumij)
 
-- [Docs](https://docs.serverless-stack.com)
-- [@serverless-stack/cli](https://docs.serverless-stack.com/packages/cli)
-- [@serverless-stack/resources](https://docs.serverless-stack.com/packages/resources)
+### `npx sst deploy --stage prod-{your-branchname}`
 
-## Community
+Remove all your stacks and all of their resources from AWS. Or optionally remove a specific stack.
 
-[Follow us on Twitter](https://twitter.com/ServerlessStack) or [post on our forums](https://discourse.serverless-stack.com).
+1 Remove Debug Stack
+
+### `npx sst remove --stage dev-{your-branchname}`
+
+2 Remove Production Stack
+
+### `npx sst remove --stage prod-{your-branchname}`

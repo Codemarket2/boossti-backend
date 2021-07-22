@@ -14,7 +14,7 @@ phases:
   build:
     commands:
       - echo Starting Deployment
-      - yarn deploy
+      - yarn deploy --stage $STAGE
   post_build:
     commands:
       - echo Build Completed on `date`
