@@ -11,7 +11,9 @@ export const mockEvent = {
       sourceIp: [],
       defaultAuthStrategy: mockUserId,
       groups: [],
-      // "custom:_id": "",
+      'custom:_id': 'vivek',
+      name: 'string',
+      picture: 'string',
     },
   },
 };
