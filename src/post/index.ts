@@ -4,40 +4,24 @@ import { Post } from './utils/postModel';
 import { User } from '../user/utils/userModel';
 import { AppSyncEvent } from '../utils/cutomTypes';
 
-interface IUser {
-  name: string;
-  picture: string;
-  _id: mongoose.Types.ObjectId;
-}
-
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
     await DB();
     const { fieldName } = event.info;
     const { arguments: args, identity } = event;
-    // console.log('identity', identity);
     let data: any = [];
     let count = 0;
     const tempFilter: any = {};
-    let createdBy;
     let user: any;
     let tempPost: any;
     let tempUser: any;
-    const res: any = {};
 
     if (identity && identity.claims && identity.claims['custom:_id']) {
-      createdBy = identity.claims.sub;
       user = {
         _id: mongoose.Types.ObjectId(identity.claims['custom:_id']),
         name: identity.claims.name,
         picture: identity.claims.picture,
       };
-      // data = await Post.find({
-      //   createdBy: identity.claims['custom:_id'],
-      //   // createdBy: mongoose.Types.ObjectId(identity.claims['custom:_id']),
-      //   body: { $regex: '', $options: 'i' },
-      // });
-      // console.log('data', data);
     }
 
     const {
@@ -139,7 +123,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         );
         return {
           ...tempPost.toJSON(),
-          createdBy: tempUser,
+          createdBy: user,
         };
       }
       case 'deletePost': {
