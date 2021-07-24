@@ -9,8 +9,12 @@
 # production
 /build
 
+# Allow Javascript
+!jest-mongodb-config.js
+!jest.config.js
+
 # typescript
-# *.js
+*.js
 *.d.ts
 
 # misc
