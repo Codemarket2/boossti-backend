@@ -86,8 +86,8 @@ type Mutation {
   ): List @aws_cognito_user_pools(cognito_groups: ["superadmin"])
   deleteListItem(listId: ID!, _id: ID!): Boolean
     @aws_cognito_user_pools(cognito_groups: ["superadmin"])
-  createPost(body: String!, images: [String]): Post
-  updatePost(_id: ID!, body: String, images: [String]): Post
+  createPost(body: String!, media: [MediaInput]): Post
+  updatePost(_id: ID!, body: String, media: [MediaInput]): Post
   deletePost(_id: ID!): Boolean
   createBookmark(parentId: String, bookmark: String!): Bookmark
   updateBookmark(_id: ID!, parentId: String, bookmark: String): Bookmark
@@ -119,11 +119,21 @@ type Posts @aws_api_key @aws_cognito_user_pools {
 type Post @aws_api_key @aws_cognito_user_pools {
   _id: ID
   body: String
-  images: [String]
+  media: [Media]
   createdBy: User
   updatedBy: ID
   createdAt: AWSDateTime
   updatedAt: AWSDateTime
+}
+
+type Media {
+  url: String
+  caption: String
+}
+
+input MediaInput {
+  url: String
+  caption: String
 }
 
 type UserSearch @aws_cognito_user_pools(cognito_groups: ["superadmin"]) {

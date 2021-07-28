@@ -2,8 +2,8 @@ import * as mongoose from 'mongoose';
 
 const postSchema = new mongoose.Schema({
   body: String,
-  images: {
-    type: [String],
+  media: {
+    type: [{ url: String, caption: String }],
     default: [],
   },
   createdBy: {
