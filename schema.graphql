@@ -126,7 +126,7 @@ type Post @aws_api_key @aws_cognito_user_pools {
   updatedAt: AWSDateTime
 }
 
-type Media {
+type Media @aws_api_key @aws_cognito_user_pools {
   url: String
   caption: String
 }
