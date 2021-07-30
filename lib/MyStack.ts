@@ -48,7 +48,7 @@ export default class MyStack extends sst.Stack {
         timeout: 20,
         environment: {
           SENDER_EMAIL: SENDER_EMAIL,
-          DATABASE: `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@codemarket-staging.k16z7.mongodb.net/${projectName}?retryWrites=true&w=majority`,
+          DATABASE: `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@codemarket-staging.k16z7.mongodb.net/${projectName}-${scope.stage}?retryWrites=true&w=majority`,
           USER_POOL_ID: USER_POOL_ID,
         },
       },
