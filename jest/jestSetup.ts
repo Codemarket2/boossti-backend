@@ -1,4 +1,6 @@
 import * as mongoose from 'mongoose';
+import { User } from '../src/user/utils/userModel';
+import { mockUser } from './defaultArguments';
 
 jest.mock('../src/utils/DB', () => {
   const DB = () => {};
@@ -6,6 +8,7 @@ jest.mock('../src/utils/DB', () => {
 });
 
 beforeAll(async () => {
+  // console.log('beforeAll');
   await mongoose.connect(
     global.__MONGO_URI__,
     {
@@ -23,9 +26,13 @@ beforeAll(async () => {
   );
 });
 
+beforeEach(async () => {
+  // await User.deleteMany({});
+  await User.create(mockUser);
+});
+
 afterEach(async () => {
   const { collections } = mongoose.connection;
-
   for (const key in collections) {
     const collection = collections[key];
     await collection.deleteMany({});

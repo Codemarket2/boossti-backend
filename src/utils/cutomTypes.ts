@@ -11,12 +11,14 @@ interface AppSyncIdentityCognito {
   picture: string;
 }
 
+export interface IIdentity {
+  claims: AppSyncIdentityCognito;
+}
+
 export type AppSyncEvent = {
   info: {
     fieldName: string;
   };
   arguments: any;
-  identity: {
-    claims: AppSyncIdentityCognito;
-  };
+  identity: IIdentity;
 };

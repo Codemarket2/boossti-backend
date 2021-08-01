@@ -1,5 +1,5 @@
-import * as mongoose from 'mongoose';
 import { DB } from '../utils/DB';
+import { getCurretnUser } from '../utils/authentication';
 import { Post } from './utils/postModel';
 import { User } from '../user/utils/userModel';
 import { AppSyncEvent } from '../utils/cutomTypes';
@@ -12,17 +12,8 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     let data: any = [];
     let count = 0;
     const tempFilter: any = {};
-    let user: any;
     let tempPost: any;
-    let tempUser: any;
-
-    if (identity && identity.claims && identity.claims['custom:_id']) {
-      user = {
-        _id: mongoose.Types.ObjectId(identity.claims['custom:_id']),
-        name: identity.claims.name,
-        picture: identity.claims.picture,
-      };
-    }
+    let user = await getCurretnUser(identity);
 
     const {
       page = 1,
@@ -64,7 +55,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         return await Post.findById(args._id).populate(userPopulate);
       }
       case 'getMyPosts': {
-        tempUser = await User.findById(user._id);
+        await User.findById(user._id);
         data = await Post.find({
           createdBy: user._id,
           body: { $regex: search, $options: 'i' },
@@ -83,7 +74,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         };
       }
       case 'getPostsByUserId': {
-        tempUser = await User.findById(args.userId);
+        await User.findById(args.userId);
         data = await Post.find({
           createdBy: args.userId,
           body: { $regex: search, $options: 'i' },
