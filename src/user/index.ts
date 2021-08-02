@@ -3,6 +3,7 @@ import { DB } from '../utils/DB';
 import { User } from './utils/userModel';
 import { adminToggleUserStatus } from './utils/helper';
 import { AppSyncEvent } from '../utils/cutomTypes';
+import { getCurretnUser } from '../utils/authentication';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -13,6 +14,8 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     let tempSubscription = {};
     let users: any = [];
     let count = 0;
+
+    let authUser = await getCurretnUser(identity);
 
     switch (fieldName) {
       case 'getUsers':
@@ -78,7 +81,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       case 'createUser':
         return await User.create({
           ...args,
-          createdBy: identity.claims.sub,
+          createdBy: authUser._id,
         });
       case 'updateUserStatus':
         await adminToggleUserStatus(args.userId, args.status);
@@ -87,7 +90,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
             userId: args.userId,
           },
           {
-            updatedBy: identity.claims.sub,
+            updatedBy: authUser._id,
             active: args.status,
             updatedAt: new Date(),
           },
