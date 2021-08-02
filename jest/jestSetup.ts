@@ -7,10 +7,17 @@ jest.mock('../src/utils/DB', () => {
   return { DB };
 });
 
+function getMongoUrl() {
+  // Replace the db name to use a unique db name for each test
+  return (
+    global.__MONGO_URI__.split('/').slice(0, -1).join('/') +
+    `/${global.__MONGO_DB_NAME__}`
+  );
+}
+
 beforeAll(async () => {
-  // console.log('beforeAll');
   await mongoose.connect(
-    global.__MONGO_URI__,
+    getMongoUrl(),
     {
       useNewUrlParser: true,
       useCreateIndex: true,
@@ -27,7 +34,6 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  // await User.deleteMany({});
   await User.create(mockUser);
 });
 

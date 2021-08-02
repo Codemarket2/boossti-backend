@@ -1,6 +1,5 @@
 import '../jest/jestSetup';
 import { handler } from '../src/post';
-import { User } from '../src/user/utils/userModel';
 import { mockUser, createMockEvent } from '../jest/defaultArguments';
 
 const mockPost = {
@@ -24,19 +23,17 @@ describe('Post Lambda Tests', () => {
 
   it('getPostsByUserId test', async () => {
     await handler(createPostEvent);
-    const user = await User.findOne({ userId: mockUser.userId });
-    console.log('getPostsByUserId user', user);
-    // const res = await handler(
-    //   createMockEvent('getPostsByUserId', { userId: user._id })
-    // );
-    // expect(res.count).toBe(1);
-    // expect(res.data.length).toBe(1);
-    // const post = res.data[0];
-    // expect(post.body).toBe(mockPost.body);
-    // expect(post.media.length).toBe(mockPost.media.length);
-    // expect(post.createdBy._id).toBeDefined();
-    // expect(post.createdBy.name).toBe(mockUser.name);
-    // expect(post.createdBy.picture).toBe(mockUser.picture);
+    const res = await handler(
+      createMockEvent('getPostsByUserId', { userId: mockUser._id })
+    );
+    expect(res.count).toBe(1);
+    expect(res.data.length).toBe(1);
+    const post = res.data[0];
+    expect(post.body).toBe(mockPost.body);
+    expect(post.media.length).toBe(mockPost.media.length);
+    expect(post.createdBy._id).toBeDefined();
+    expect(post.createdBy.name).toBe(mockUser.name);
+    expect(post.createdBy.picture).toBe(mockUser.picture);
   });
 
   it('getPosts test', async () => {

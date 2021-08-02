@@ -35,6 +35,7 @@ jest.mock('../src/user/utils/helper', () => {
 describe('User Lambda Tests', () => {
   it('getUsers test', async () => {
     const users = await handler(getUsersEvent);
+    // console.log('users', users);
     expect(users.count).toBeGreaterThanOrEqual(0);
     expect(users.users.length).toBeGreaterThanOrEqual(0);
   });
