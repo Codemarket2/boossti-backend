@@ -11,6 +11,7 @@
     "@aws-cdk/assert": "1.111.0",
     "@shelf/jest-mongodb": "^2.0.1",
     "@types/aws-lambda": "^8.10.70",
+    "@types/mongoose": "^5.11.97",
     "husky": "^7.0.1",
     "jest": "^27.0.6",
     "ts-jest": "^27.0.3"

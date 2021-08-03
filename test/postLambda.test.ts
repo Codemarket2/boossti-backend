@@ -47,7 +47,6 @@ describe('Post Lambda Tests', () => {
     const post = await handler(
       createMockEvent('getPost', { _id: mockPost._id })
     );
-    console.log('post', post);
     expect(post._id).toBeDefined();
     expect(post.body).toBe(mockPost.body);
     expect(post.media.length).toBe(mockPost.media.length);

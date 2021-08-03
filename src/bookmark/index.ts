@@ -15,7 +15,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     // let createdBy;
     // let tempUser: any = null;
 
-    let user = await getCurretnUser(identity);
+    const user = await getCurretnUser(identity);
 
     // if (identity && identity.claims && identity.claims.sub) {
     //   createdBy = identity.claims.sub;

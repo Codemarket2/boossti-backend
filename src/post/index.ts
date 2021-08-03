@@ -13,7 +13,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     let count = 0;
     const tempFilter: any = {};
     let tempPost: any;
-    let user = await getCurretnUser(identity);
+    const user = await getCurretnUser(identity);
 
     const {
       page = 1,

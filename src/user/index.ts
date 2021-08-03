@@ -15,7 +15,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     let users: any = [];
     let count = 0;
 
-    let authUser = await getCurretnUser(identity);
+    const authUser = await getCurretnUser(identity);
 
     switch (fieldName) {
       case 'getUsers':

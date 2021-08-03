@@ -7,6 +7,10 @@ const listItemSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  media: {
+    type: [{ url: String, caption: String }],
+    default: [],
+  },
 });
 
 const listSchema = new mongoose.Schema({

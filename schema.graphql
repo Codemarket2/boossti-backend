@@ -76,6 +76,7 @@ type Mutation {
     title: String
     description: String
     active: Boolean
+    media: [MediaInput]
   ): List @aws_cognito_user_pools(cognito_groups: ["superadmin"])
   updateListItem(
     listId: ID!
@@ -83,6 +84,7 @@ type Mutation {
     title: String
     description: String
     active: Boolean
+    media: [MediaInput]
   ): List @aws_cognito_user_pools(cognito_groups: ["superadmin"])
   deleteListItem(listId: ID!, _id: ID!): Boolean
     @aws_cognito_user_pools(cognito_groups: ["superadmin"])
@@ -193,10 +195,12 @@ type ListItem {
   title: String
   description: String
   active: Boolean
+  media: [Media]
 }
 
 input ListItemInput {
   title: String
   description: String
   active: Boolean
+  media: [MediaInput]
 }
