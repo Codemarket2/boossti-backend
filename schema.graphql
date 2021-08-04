@@ -21,8 +21,8 @@ type Query {
   ): UserSearch @aws_cognito_user_pools(cognito_groups: ["superadmin"])
   getUser(_id: ID!): User @aws_api_key @aws_cognito_user_pools
   getUserByCognitoUserId(userId: String!): User
-  getLists(page: Int, limit: Int, active: Boolean): Lists
-  getList(_id: ID!): List
+  # getLists(page: Int, limit: Int, active: Boolean): Lists
+  # getList(_id: ID!): List
   getPosts(page: Int, limit: Int, sortBy: String, search: String): Posts
   getMyPosts(page: Int, limit: Int, sortBy: String, search: String): Posts
   getPostsByUserId(
@@ -60,16 +60,16 @@ type Mutation {
   updateUserStatus(userId: String!, updatedBy: String!, status: Boolean!): User
     @aws_cognito_user_pools(cognito_groups: ["superadmin"])
   cancelUserSubscription(userId: String!): User
-  createList(name: String!, active: Boolean, items: [ListItemInput]): List
-    @aws_cognito_user_pools(cognito_groups: ["superadmin"])
-  updateList(
-    _id: ID!
-    name: String
-    active: Boolean
-    inUse: Boolean
-    items: [ListItemInput]
-  ): List @aws_cognito_user_pools(cognito_groups: ["superadmin"])
-  deleteList(_id: ID!): Boolean
+    # createList(name: String!, active: Boolean, items: [ListItemInput]): List
+    #   @aws_cognito_user_pools(cognito_groups: ["superadmin"])
+    # updateList(
+    #   _id: ID!
+    #   name: String
+    #   active: Boolean
+    #   inUse: Boolean
+    #   items: [ListItemInput]
+    # ): List @aws_cognito_user_pools(cognito_groups: ["superadmin"])
+    # deleteList(_id: ID!): Boolean
     @aws_cognito_user_pools(cognito_groups: ["superadmin"])
   addListItem(
     listId: ID!
@@ -95,8 +95,6 @@ type Mutation {
   updateBookmark(_id: ID!, parentId: String, bookmark: String): Bookmark
   deleteBookmark(_id: ID!): Boolean
 }
-
-# type Subscription {}
 
 type Bookmarks {
   data: [Bookmark]
@@ -177,17 +175,21 @@ input SubscriptionInput {
   expiringOn: AWSDateTime
 }
 
-type Lists {
-  data: [List]
+type ListTypes {
+  data: [ListType]
   count: Int
 }
 
-type List {
+type ListType {
   _id: ID
   name: String
   active: Boolean
   inUse: Boolean
-  items: [ListItem]
+}
+
+type ListItems {
+  data: [ListItem]
+  count: Int
 }
 
 type ListItem {
@@ -195,12 +197,38 @@ type ListItem {
   title: String
   description: String
   active: Boolean
-  media: [Media]
+  extra: [Extra]
 }
 
-input ListItemInput {
-  title: String
-  description: String
-  active: Boolean
-  media: [MediaInput]
+type Extra {
+  key: String
+  value: String
 }
+
+# type Lists {
+#   data: [List]
+#   count: Int
+# }
+
+# type List {
+#   _id: ID
+#   name: String
+#   active: Boolean
+#   inUse: Boolean
+#   items: [ListItem]
+# }
+
+# type ListItem {
+#   _id: ID
+#   title: String
+#   description: String
+#   active: Boolean
+#   media: [Media]
+# }
+
+# input ListItemInput {
+#   title: String
+#   description: String
+#   active: Boolean
+#   media: [MediaInput]
+# }

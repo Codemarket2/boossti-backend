@@ -1,10 +1,12 @@
 export const listResolvers = {
-  'Query  getLists': 'listLambda',
+  'Query  getListTypes': 'listLambda',
+  'Query  getListItems': 'listLambda',
   'Query  getList': 'listLambda',
-  'Mutation createList': 'listLambda',
-  'Mutation updateList': 'listLambda',
-  'Mutation deleteList': 'listLambda',
-  'Mutation addListItem': 'listLambda',
+  'Query  getListItemsByType': 'listLambda',
+  'Mutation createListType': 'listLambda',
+  'Mutation createListItem': 'listLambda',
   'Mutation updateListItem': 'listLambda',
+  'Mutation updateListType': 'listLambda',
   'Mutation deleteListItem': 'listLambda',
+  'Mutation deleteListType': 'listLambda',
 };

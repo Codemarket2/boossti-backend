@@ -1,99 +1,111 @@
-/* eslint-disable no-case-declarations */
 import { DB } from '../utils/DB';
-import { List } from './utils/listModel';
+import ListType from './utils/listTypeModel';
+import ListItem from './utils/listItemModel';
+import { getCurretnUser } from '../utils/authentication';
 import { AppSyncEvent } from '../utils/cutomTypes';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
     await DB();
     const { fieldName } = event.info;
-    const { arguments: args, identity } = event;
-    let data: any = [];
-    let count = 0;
-    const tempFilter: any = {};
-    let createdBy;
-    let updatedBy;
-    let tempList: any = null;
-
-    if (identity && identity.claims && identity.claims.sub) {
-      createdBy = identity.claims.sub;
-      updatedBy = identity.claims.sub;
+    const { identity } = event;
+    const user = await getCurretnUser(identity);
+    let args = { ...event.arguments };
+    if (user && user._id) {
+      args = { ...args, createdBy: user._id, updatedBy: user._id };
     }
-
     switch (fieldName) {
-      case 'getLists':
-        const { page = 1, limit = 50, search = '', active = null } = args;
-
+      case 'getListTypes': {
+        const { page = 1, limit = 20, search = '', active = null } = args;
+        const tempFilter: any = {};
         if (active !== null) {
           tempFilter.active = active;
         }
-
-        data = await List.find({
+        const data = await ListType.find({
           ...tempFilter,
           name: { $regex: search, $options: 'i' },
         })
           .limit(limit * 1)
-          .skip((page - 1) * limit)
-          .exec();
-
-        count = await List.countDocuments({
+          .skip((page - 1) * limit);
+        const count = await ListType.countDocuments({
           ...tempFilter,
           name: { $regex: search, $options: 'i' },
         });
-
         return {
           data,
           count,
         };
-      case 'getList':
-        return await List.findById(args._id);
-      case 'createList':
-        return await List.create({
-          ...args,
-          createdBy,
+      }
+      case 'getListItems': {
+        const { page = 1, limit = 20, search = '', active = null } = args;
+        const tempFilter: any = {};
+        if (active !== null) {
+          tempFilter.active = active;
+        }
+        const data = await ListItem.find({
+          ...tempFilter,
+          $or: [
+            { title: { $regex: search, $options: 'i' } },
+            { description: { $regex: search, $options: 'i' } },
+          ],
+        })
+          .limit(limit * 1)
+          .skip((page - 1) * limit);
+        const count = await ListItem.countDocuments({
+          ...tempFilter,
+          $or: [
+            { title: { $regex: search, $options: 'i' } },
+            { description: { $regex: search, $options: 'i' } },
+          ],
         });
-      case 'updateList':
-        return await List.findByIdAndUpdate(
-          args._id,
-          { ...args, updatedAt: new Date(), updatedBy },
-          {
-            new: true,
-            runValidators: true,
-          }
-        );
-      case 'addListItem':
-        tempList = await List.findById(args.listId);
-        tempList.items.push({ ...args });
-        await tempList.save();
-        return tempList;
-      case 'updateListItem':
-        return await List.findOneAndUpdate(
-          { _id: args.listId, 'items._id': args._id },
-          {
-            $set: {
-              'items.$': { ...args },
-            },
-          },
-          {
-            new: true,
-            runValidators: true,
-          }
-        );
-      case 'deleteListItem':
-        tempList = await List.findById(args.listId);
-        tempList.items.pull(args._id);
-        await tempList.save();
+        return {
+          data,
+          count,
+        };
+      }
+      case 'getList': {
+        let data: any = null;
+        data = await ListType.findById(args._id);
+        if (!data) {
+          data = await ListItem.findById(args._id);
+        }
+        return data;
+      }
+      case 'getListItemsByType': {
+        await ListType.find({ types: { $elemMatch: args.types } });
+      }
+      case 'createListType': {
+        return await ListType.create(args);
+      }
+      case 'createListItem': {
+        return await ListItem.create(args);
+      }
+      case 'updateListItem': {
+        return await ListItem.findByIdAndUpdate(args._id, args, {
+          new: true,
+          runValidators: true,
+        });
+      }
+      case 'updateListType': {
+        return await ListType.findByIdAndUpdate(args._id, args, {
+          new: true,
+          runValidators: true,
+        });
+      }
+      case 'deleteListItem': {
+        await ListItem.findByIdAndDelete(args._id);
         return true;
-      case 'deleteList':
-        await List.findByIdAndDelete(args._id);
+      }
+      case 'deleteListType': {
+        await ListType.findByIdAndDelete(args._id);
         return true;
+      }
       default:
         throw new Error(
           'Something went wrong! Please check your Query or Mutation'
         );
     }
   } catch (error) {
-    // console.log('error', error);
     const error2 = error;
     throw error2;
   }
