@@ -8,11 +8,17 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
     await DB();
     const { fieldName } = event.info;
-    const { identity } = event;
+    const { identity } = event; // arguments: args
     const user = await getCurretnUser(identity);
     let args = { ...event.arguments };
-    if (user && user._id) {
-      args = { ...args, createdBy: user._id, updatedBy: user._id };
+    if (fieldName.toLocaleLowerCase().includes('create') && user && user._id) {
+      args = { ...args, createdBy: user._id };
+    } else if (
+      fieldName.toLocaleLowerCase().includes('update') &&
+      user &&
+      user._id
+    ) {
+      args = { ...args, updatedBy: user._id };
     }
     switch (fieldName) {
       case 'getListTypes': {
@@ -37,11 +43,21 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         };
       }
       case 'getListItems': {
-        const { page = 1, limit = 20, search = '', active = null } = args;
+        const {
+          page = 1,
+          limit = 20,
+          search = '',
+          active = null,
+          types = [],
+        } = args;
         const tempFilter: any = {};
         if (active !== null) {
           tempFilter.active = active;
         }
+        if (types.length > 0) {
+          tempFilter.types = { $elemMatch: { $in: types } };
+        }
+
         const data = await ListItem.find({
           ...tempFilter,
           $or: [
@@ -70,9 +86,6 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           data = await ListItem.findById(args._id);
         }
         return data;
-      }
-      case 'getListItemsByType': {
-        await ListType.find({ types: { $elemMatch: args.types } });
       }
       case 'createListType': {
         return await ListType.create(args);
