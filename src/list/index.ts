@@ -20,6 +20,13 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     ) {
       args = { ...args, updatedBy: user._id };
     }
+
+    const itemTypeSelect = '_id name';
+    const itemTypePopulate = {
+      path: 'types',
+      select: itemTypeSelect,
+    };
+
     switch (fieldName) {
       case 'getListTypes': {
         const { page = 1, limit = 20, search = '', active = null } = args;
@@ -65,6 +72,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
             { description: { $regex: search, $options: 'i' } },
           ],
         })
+          .populate(itemTypePopulate)
           .limit(limit * 1)
           .skip((page - 1) * limit);
         const count = await ListItem.countDocuments({
@@ -83,7 +91,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         let data: any = null;
         data = await ListType.findById(args._id);
         if (!data) {
-          data = await ListItem.findById(args._id);
+          data = await ListItem.findById(args._id).populate(itemTypePopulate);
         }
         return data;
       }
@@ -91,13 +99,15 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         return await ListType.create(args);
       }
       case 'createListItem': {
-        return await ListItem.create(args);
+        const listItem = await ListItem.create(args);
+        return await listItem.populate(itemTypePopulate).execPopulate();
       }
       case 'updateListItem': {
-        return await ListItem.findByIdAndUpdate(args._id, args, {
+        const listItem: any = await ListItem.findByIdAndUpdate(args._id, args, {
           new: true,
           runValidators: true,
         });
+        return await listItem.populate(itemTypePopulate).execPopulate();
       }
       case 'updateListType': {
         return await ListType.findByIdAndUpdate(args._id, args, {
@@ -110,8 +120,15 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         return true;
       }
       case 'deleteListType': {
-        await ListType.findByIdAndDelete(args._id);
-        return true;
+        const count = await ListItem.countDocuments({
+          types: { $elemMatch: { $in: [args._id] } },
+        });
+        if (count === 0) {
+          await ListType.findByIdAndDelete(args._id);
+          return true;
+        } else {
+          throw new Error('This type is being used in a item');
+        }
       }
       default:
         throw new Error(

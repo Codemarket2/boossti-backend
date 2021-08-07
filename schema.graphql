@@ -32,10 +32,9 @@ type Query {
     limit: Int
     active: Boolean
     search: String
-    types: [String]
-  ): ListTypes
+    types: [ID]
+  ): ListItems
   getList(_id: ID!): List
-  getListItemsByType(types: String!): List
   getPosts(page: Int, limit: Int, sortBy: String, search: String): Posts
   getMyPosts(page: Int, limit: Int, sortBy: String, search: String): Posts
   getPostsByUserId(
@@ -75,17 +74,17 @@ type Mutation {
   cancelUserSubscription(userId: String!): User
   createListType(name: String!, active: Boolean): ListType
   createListItem(
-    types: [String!]
+    types: [ID!]
     title: String!
     description: String
     media: [MediaInput]
     extra: [ExtraInput]
     active: Boolean
   ): ListItem
-  updateListItem(_id: ID!, name: String, active: Boolean): ListType
-  updateListType(
+  updateListType(_id: ID!, name: String, active: Boolean): ListType
+  updateListItem(
     _id: ID!
-    types: [String]
+    types: [ID]
     title: String
     description: String
     media: [MediaInput]
@@ -206,6 +205,8 @@ type ListItem {
   description: String
   active: Boolean
   extra: [Extra]
+  media: [Media]
+  types: [ListType]
 }
 
 type Extra {
@@ -217,31 +218,3 @@ input ExtraInput {
   key: String
   value: String
 }
-
-# type Lists {
-#   data: [List]
-#   count: Int
-# }
-
-# type List {
-#   _id: ID
-#   name: String
-#   active: Boolean
-#   inUse: Boolean
-#   items: [ListItem]
-# }
-
-# type ListItem {
-#   _id: ID
-#   title: String
-#   description: String
-#   active: Boolean
-#   media: [Media]
-# }
-
-# input ListItemInput {
-#   title: String
-#   description: String
-#   active: Boolean
-#   media: [MediaInput]
-# }

@@ -14,6 +14,10 @@ const listItemSchema = new mongoose.Schema({
 });
 
 const listSchema = new mongoose.Schema({
+  cancerTypes: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'ListItem',
+  },
   name: String,
   active: {
     type: Boolean,
