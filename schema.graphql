@@ -72,7 +72,12 @@ type Mutation {
   updateUserStatus(userId: String!, updatedBy: String!, status: Boolean!): User
     @aws_cognito_user_pools(cognito_groups: ["superadmin"])
   cancelUserSubscription(userId: String!): User
-  createListType(name: String!, active: Boolean): ListType
+  createListType(
+    name: String!
+    description: String
+    media: [MediaInput]
+    active: Boolean
+  ): ListType
   createListItem(
     types: [ID!]
     title: String!
@@ -81,7 +86,13 @@ type Mutation {
     extra: [ExtraInput]
     active: Boolean
   ): ListItem
-  updateListType(_id: ID!, name: String, active: Boolean): ListType
+  updateListType(
+    _id: ID!
+    name: String
+    description: String
+    media: [MediaInput]
+    active: Boolean
+  ): ListType
   updateListItem(
     _id: ID!
     types: [ID]
@@ -190,6 +201,8 @@ type ListTypes {
 type ListType {
   _id: ID
   name: String
+  description: String
+  media: [Media]
   active: Boolean
   inUse: Boolean
 }

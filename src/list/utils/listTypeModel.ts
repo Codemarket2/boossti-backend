@@ -2,6 +2,8 @@ import { Schema, model, Model, Document } from 'mongoose';
 
 export interface IListtype extends Document {
   name: string;
+  description: string;
+  media: [{ url: string; caption: string }];
   active: boolean;
   inUse: boolean;
   createdBy: Schema.Types.ObjectId;
@@ -13,6 +15,11 @@ export interface IListtype extends Document {
 const ListTypeSchema = new Schema(
   {
     name: String,
+    description: String,
+    media: {
+      type: [{ url: String, caption: String }],
+      default: [],
+    },
     active: {
       type: Boolean,
       default: true,
