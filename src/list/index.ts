@@ -21,7 +21,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       args = { ...args, updatedBy: user._id };
     }
 
-    const itemTypeSelect = '_id name';
+    const itemTypeSelect = '_id name slug';
     const itemTypePopulate = {
       path: 'types',
       select: itemTypeSelect,
@@ -87,13 +87,17 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           count,
         };
       }
-      case 'getList': {
-        let data: any = null;
-        data = await ListType.findById(args._id);
-        if (!data) {
-          data = await ListItem.findById(args._id).populate(itemTypePopulate);
-        }
-        return data;
+      case 'getListTypeBySlug': {
+        return await ListType.findOne({ slug: args.slug });
+      }
+      case 'getListItemBySlug': {
+        return await ListItem.findOne({ slug: args.slug }).populate('types');
+      }
+      case 'getListType': {
+        return await ListType.findById(args._id);
+      }
+      case 'getListItem': {
+        return await ListItem.findById(args._id).populate('types');
       }
       case 'createListType': {
         return await ListType.create(args);

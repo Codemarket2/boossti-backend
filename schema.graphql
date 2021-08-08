@@ -34,7 +34,10 @@ type Query {
     search: String
     types: [ID]
   ): ListItems
-  getList(_id: ID!): List
+  getListType(_id: ID!): ListType
+  getListItem(_id: ID!): ListItem
+  getListTypeBySlug(slug: String!): ListType
+  getListItemBySlug(slug: String!): ListItem
   getPosts(page: Int, limit: Int, sortBy: String, search: String): Posts
   getMyPosts(page: Int, limit: Int, sortBy: String, search: String): Posts
   getPostsByUserId(
@@ -191,8 +194,6 @@ input SubscriptionInput {
   expiringOn: AWSDateTime
 }
 
-union List = ListType | ListItem
-
 type ListTypes {
   data: [ListType]
   count: Int
@@ -201,6 +202,7 @@ type ListTypes {
 type ListType {
   _id: ID
   name: String
+  slug: String
   description: String
   media: [Media]
   active: Boolean
@@ -215,6 +217,7 @@ type ListItems {
 type ListItem {
   _id: ID
   title: String
+  slug: String
   description: String
   active: Boolean
   extra: [Extra]

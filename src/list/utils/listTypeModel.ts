@@ -1,4 +1,6 @@
 import { Schema, model, Model, Document } from 'mongoose';
+import slug from 'mongoose-slug-generator';
+// import * as slug from 'mongoose-slug-generator';
 
 export interface IListtype extends Document {
   name: string;
@@ -14,7 +16,8 @@ export interface IListtype extends Document {
 
 const ListTypeSchema = new Schema(
   {
-    name: String,
+    name: { type: String, unique: true },
+    slug: { type: String, slug: 'name' },
     description: String,
     media: {
       type: [{ url: String, caption: String }],
@@ -39,6 +42,9 @@ const ListTypeSchema = new Schema(
   },
   { timestamps: true }
 );
+
+ListTypeSchema.index({ slug: 1 });
+ListTypeSchema.plugin(slug);
 
 const ListType: Model<IListtype> = model('ListType', ListTypeSchema);
 

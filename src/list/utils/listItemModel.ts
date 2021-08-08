@@ -1,7 +1,10 @@
 import { Schema, model, Model, Document } from 'mongoose';
+// import * as slug from 'mongoose-slug-generator';
+import slug from 'mongoose-slug-generator';
 
 export interface IListItem extends Document {
   title: string;
+  slug: string;
   description: string;
   media: [{ url: string; caption: string }];
   active: boolean;
@@ -15,7 +18,8 @@ export interface IListItem extends Document {
 const ListItemSchema: Schema = new Schema(
   {
     types: [{ type: Schema.Types.ObjectId, ref: 'ListType' }],
-    title: String,
+    title: { type: String, unique: true },
+    slug: { type: String, slug: 'title' },
     description: String,
     media: {
       type: [{ url: String, caption: String }],
@@ -37,6 +41,9 @@ const ListItemSchema: Schema = new Schema(
   },
   { timestamps: true }
 );
+
+ListItemSchema.index({ slug: 1 });
+ListItemSchema.plugin(slug);
 
 const ListItem: Model<IListItem> = model('ListItem', ListItemSchema);
 
