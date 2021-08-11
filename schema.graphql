@@ -79,6 +79,7 @@ type Mutation {
     title: String!
     description: String
     media: [MediaInput]
+    fields: [InputTypeField]
     active: Boolean
   ): ListType
   createListItem(
@@ -94,6 +95,7 @@ type Mutation {
     title: String
     description: String
     media: [MediaInput]
+    fields: [InputTypeField]
     active: Boolean
   ): ListType
   updateListItem(
@@ -205,8 +207,21 @@ type ListType {
   slug: String
   description: String
   media: [Media]
+  fields: [TypeField]
   active: Boolean
   inUse: Boolean
+}
+
+type TypeField {
+  label: String
+  fieldType: String
+  typeId: ID
+}
+
+input InputTypeField {
+  label: String
+  fieldType: String
+  typeId: ID
 }
 
 type ListItems {

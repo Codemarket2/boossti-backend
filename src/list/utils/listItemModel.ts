@@ -1,6 +1,4 @@
 import { Schema, model, Model, Document } from 'mongoose';
-// import * as slug from 'mongoose-slug-generator';
-// import slug from 'mongoose-slug-generator';
 
 export interface IListItem extends Document {
   title: string;
