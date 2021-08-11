@@ -4,12 +4,12 @@ import { mockUser, createMockEvent } from '../jest/defaultArguments';
 
 const mockListType = {
   _id: '60fc4d29f11b170008d9ec48',
-  name: 'Doctors',
+  title: 'Doctors',
   media: [],
 };
 const updatedMockListType = {
   ...mockListType,
-  name: 'Hospital',
+  title: 'Hospital',
 };
 
 const mockListItem = {
@@ -61,7 +61,7 @@ describe('List Lambda Tests', () => {
       createMockEvent('getListType', { _id: mockListType._id })
     );
     expect(listType._id).toBeDefined();
-    expect(listType.name).toBe(mockListType.name);
+    expect(listType.title).toBe(mockListType.title);
     expect(listType.createdBy).toMatchObject(mockUser._id);
     expect(listType.createdAt).toBeDefined();
     expect(listType.updatedAt).toBeDefined();
@@ -86,11 +86,11 @@ describe('List Lambda Tests', () => {
     await handler(createListTypeEvent);
     const listType = await handler(
       createMockEvent('getListTypeBySlug', {
-        slug: mockListType.name.toLowerCase(),
+        slug: mockListType.title.toLowerCase(),
       })
     );
     expect(listType._id).toBeDefined();
-    expect(listType.name).toBe(mockListType.name);
+    expect(listType.title).toBe(mockListType.title);
     expect(listType.createdBy).toMatchObject(mockUser._id);
     expect(listType.createdAt).toBeDefined();
     expect(listType.updatedAt).toBeDefined();
@@ -117,7 +117,7 @@ describe('List Lambda Tests', () => {
   it('createListType test', async () => {
     const listType = await handler(createListTypeEvent);
     expect(listType._id).toBeDefined();
-    expect(listType.name).toBe(mockListType.name);
+    expect(listType.title).toBe(mockListType.title);
     expect(listType.createdBy).toMatchObject(mockUser._id);
     expect(listType.createdAt).toBeDefined();
     expect(listType.updatedAt).toBeDefined();
@@ -142,7 +142,7 @@ describe('List Lambda Tests', () => {
       createMockEvent('updateListType', updatedMockListType)
     );
     expect(listType._id).toBeDefined();
-    expect(listType.name).toBe(updatedMockListType.name);
+    expect(listType.title).toBe(updatedMockListType.title);
     expect(listType.createdBy).toMatchObject(mockUser._id);
     expect(listType.createdAt).toBeDefined();
     expect(listType.updatedAt).toBeDefined();

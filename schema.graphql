@@ -76,7 +76,7 @@ type Mutation {
     @aws_cognito_user_pools(cognito_groups: ["superadmin"])
   cancelUserSubscription(userId: String!): User
   createListType(
-    name: String!
+    title: String!
     description: String
     media: [MediaInput]
     active: Boolean
@@ -91,7 +91,7 @@ type Mutation {
   ): ListItem
   updateListType(
     _id: ID!
-    name: String
+    title: String
     description: String
     media: [MediaInput]
     active: Boolean
@@ -201,7 +201,7 @@ type ListTypes {
 
 type ListType {
   _id: ID
-  name: String
+  title: String
   slug: String
   description: String
   media: [Media]

@@ -1,3 +1,4 @@
+import slugify from 'slugify';
 import { DB } from '../utils/DB';
 import ListType from './utils/listTypeModel';
 import ListItem from './utils/listItemModel';
@@ -8,7 +9,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
     await DB();
     const { fieldName } = event.info;
-    const { identity } = event; // arguments: args
+    const { identity } = event;
     const user = await getCurretnUser(identity);
     let args = { ...event.arguments };
     if (fieldName.toLocaleLowerCase().includes('create') && user && user._id) {
@@ -21,7 +22,11 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       args = { ...args, updatedBy: user._id };
     }
 
-    const itemTypeSelect = '_id name slug';
+    if (Object.prototype.hasOwnProperty.call(args, 'title')) {
+      args = { ...args, slug: slugify(args.title, { lower: true }) };
+    }
+
+    const itemTypeSelect = '_id title slug';
     const itemTypePopulate = {
       path: 'types',
       select: itemTypeSelect,
@@ -36,13 +41,13 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         }
         const data = await ListType.find({
           ...tempFilter,
-          name: { $regex: search, $options: 'i' },
+          title: { $regex: search, $options: 'i' },
         })
           .limit(limit * 1)
           .skip((page - 1) * limit);
         const count = await ListType.countDocuments({
           ...tempFilter,
-          name: { $regex: search, $options: 'i' },
+          title: { $regex: search, $options: 'i' },
         });
         return {
           data,

@@ -1,4 +1,4 @@
-import * as mongoose from 'mongoose';
+import { Types } from 'mongoose';
 export const mockUserId = 'cd345194-e2bb-4f6f-af12-4669accd2cf2';
 export const mock_id = '60fc4d29f11b170008d9ec48';
 
@@ -22,7 +22,7 @@ export const mockEvent = {
 };
 
 export const mockUser = {
-  _id: mongoose.Types.ObjectId(mock_id),
+  _id: Types.ObjectId(mock_id),
   name: 'Mr Robot',
   email: 'mrrobot@domain.com',
   picture:
