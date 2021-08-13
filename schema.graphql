@@ -55,6 +55,7 @@ type Query {
     search: String
   ): Bookmarks
   getBookmark(_id: ID!): Bookmark
+  getFieldsByType(page: Int, limit: Int, parentId: ID!, search: String): Fields
 }
 
 type Mutation {
@@ -79,7 +80,7 @@ type Mutation {
     title: String!
     description: String
     media: [MediaInput]
-    fields: [InputTypeField]
+    # fields: [InputTypeField]
     active: Boolean
   ): ListType
   createListItem(
@@ -95,7 +96,7 @@ type Mutation {
     title: String
     description: String
     media: [MediaInput]
-    fields: [InputTypeField]
+    # fields: [InputTypeField]
     active: Boolean
   ): ListType
   updateListItem(
@@ -115,6 +116,20 @@ type Mutation {
   createBookmark(parentId: String, bookmark: String!): Bookmark
   updateBookmark(_id: ID!, parentId: String, bookmark: String): Bookmark
   deleteBookmark(_id: ID!): Boolean
+  createField(
+    label: String!
+    fieldType: String!
+    typeId: ID
+    multipleValue: Boolean
+  ): Field
+  updateField(
+    _id: ID!
+    label: String
+    fieldType: String
+    typeId: ID
+    multipleValue: Boolean
+  ): Field
+  deleteField(_id: ID!): Boolean
 }
 
 type Bookmarks {
@@ -207,21 +222,26 @@ type ListType {
   slug: String
   description: String
   media: [Media]
-  fields: [TypeField]
+  # fields: [TypeField]
   active: Boolean
   inUse: Boolean
 }
 
-type TypeField {
-  label: String
-  fieldType: String
-  typeId: ID
+type Fields {
+  data: [Field]
+  count: Int
 }
 
-input InputTypeField {
+type Field {
+  _id: ID
   label: String
+  multipleValue: Boolean
   fieldType: String
-  typeId: ID
+  typeId: ListType
+  createdBy: User
+  updatedBy: ID
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
 }
 
 type ListItems {

@@ -1,3 +1,5 @@
+import { Schema, Document } from 'mongoose';
+
 interface AppSyncIdentityCognito {
   sub: string;
   issuer: string;
@@ -22,3 +24,14 @@ export type AppSyncEvent = {
   arguments: any;
   identity: IIdentity;
 };
+
+export interface ISchema extends Document {
+  createdBy: Schema.Types.ObjectId;
+  updatedBy?: Schema.Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
+}
+export interface IMedia {
+  url: string;
+  caption: string;
+}

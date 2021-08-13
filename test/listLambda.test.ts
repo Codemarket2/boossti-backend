@@ -2,7 +2,7 @@ import '../jest/jestSetup';
 import { handler } from '../src/list';
 import { mockUser, createMockEvent } from '../jest/defaultArguments';
 
-const mockListType = {
+export const mockListType = {
   _id: '60fc4d29f11b170008d9ec48',
   title: 'Doctors',
   media: [],

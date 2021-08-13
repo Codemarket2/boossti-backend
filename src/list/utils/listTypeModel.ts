@@ -1,15 +1,12 @@
-import { Schema, model, Model, Document } from 'mongoose';
+import { Schema, model, Model } from 'mongoose';
+import { ISchema, IMedia } from '../../utils/cutomTypes';
 
-export interface IListtype extends Document {
+export interface IListtype extends ISchema {
   title: string;
   description: string;
-  media: [{ url: string; caption: string }];
+  media: [IMedia];
   active: boolean;
   inUse: boolean;
-  createdBy: Schema.Types.ObjectId;
-  updatedBy?: Schema.Types.ObjectId;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
 const ListTypeSchema = new Schema(
@@ -19,19 +16,6 @@ const ListTypeSchema = new Schema(
     description: String,
     media: {
       type: [{ url: String, caption: String }],
-      default: [],
-    },
-    fields: {
-      type: [
-        {
-          label: String,
-          fieldType: String,
-          typeId: {
-            type: Schema.Types.ObjectId,
-            ref: 'ListType',
-          },
-        },
-      ],
       default: [],
     },
     active: {
@@ -55,7 +39,6 @@ const ListTypeSchema = new Schema(
 );
 
 ListTypeSchema.index({ slug: 1 });
-// ListTypeSchema.plugin(slug);
 
 const ListType: Model<IListtype> = model('ListType', ListTypeSchema);
 
