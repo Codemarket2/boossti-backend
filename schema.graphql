@@ -55,7 +55,7 @@ type Query {
     search: String
   ): Bookmarks
   getBookmark(_id: ID!): Bookmark
-  getFieldsByType(page: Int, limit: Int, parentId: ID!, search: String): Fields
+  getFieldsByType(parentId: ID!, page: Int, limit: Int, search: String): Fields
 }
 
 type Mutation {
@@ -71,16 +71,13 @@ type Mutation {
     name: String
     email: String
     picture: String
-    subscription: SubscriptionInput
   ): User
   updateUserStatus(userId: String!, updatedBy: String!, status: Boolean!): User
     @aws_cognito_user_pools(cognito_groups: ["superadmin"])
-  cancelUserSubscription(userId: String!): User
   createListType(
     title: String!
     description: String
     media: [MediaInput]
-    # fields: [InputTypeField]
     active: Boolean
   ): ListType
   createListItem(
@@ -96,7 +93,6 @@ type Mutation {
     title: String
     description: String
     media: [MediaInput]
-    # fields: [InputTypeField]
     active: Boolean
   ): ListType
   updateListItem(
@@ -117,17 +113,18 @@ type Mutation {
   updateBookmark(_id: ID!, parentId: String, bookmark: String): Bookmark
   deleteBookmark(_id: ID!): Boolean
   createField(
+    parentId: ID!
     label: String!
     fieldType: String!
     typeId: ID
-    multipleValue: Boolean
+    multipleValues: Boolean
   ): Field
   updateField(
     _id: ID!
     label: String
     fieldType: String
     typeId: ID
-    multipleValue: Boolean
+    multipleValues: Boolean
   ): Field
   deleteField(_id: ID!): Boolean
 }
@@ -189,26 +186,6 @@ type User @aws_api_key @aws_cognito_user_pools {
   createdBy: String
   updatedAt: String
   updatedBy: String
-  subscription: TSubscription
-}
-
-type TSubscription {
-  _id: ID
-  active: Boolean
-  subscriptionType: String
-  description: String
-  amount: Float
-  subscribedOn: AWSDateTime
-  expiringOn: AWSDateTime
-}
-
-input SubscriptionInput {
-  active: Boolean!
-  subscriptionType: String!
-  description: String!
-  amount: Float!
-  subscribedOn: AWSDateTime
-  expiringOn: AWSDateTime
 }
 
 type ListTypes {
@@ -235,7 +212,7 @@ type Fields {
 type Field {
   _id: ID
   label: String
-  multipleValue: Boolean
+  multipleValues: Boolean
   fieldType: String
   typeId: ListType
   createdBy: User

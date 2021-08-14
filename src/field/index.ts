@@ -35,12 +35,6 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     switch (fieldName) {
       case 'getFieldsByType': {
         const { page = 1, limit = 20, search = '', parentId } = args;
-        let tempFilter: any = {};
-
-        if (parentId) {
-          tempFilter.parentId = parentId;
-        }
-
         const data = await Field.find({
           parentId,
           label: { $regex: search, $options: 'i' },
@@ -74,6 +68,8 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         return true;
       }
       default:
+        await ListType.findOne();
+        await User.findOne();
         throw new Error(
           'Something went wrong! Please check your Query or Mutation'
         );

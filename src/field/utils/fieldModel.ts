@@ -3,7 +3,7 @@ import { ISchema } from '../../utils/cutomTypes';
 
 interface IField extends ISchema {
   label: string;
-  multipleValue: boolean;
+  multipleValues: boolean;
   fieldType: string;
   typeId: string;
 }
