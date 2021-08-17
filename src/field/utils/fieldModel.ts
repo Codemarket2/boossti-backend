@@ -4,6 +4,7 @@ import { ISchema } from '../../utils/cutomTypes';
 interface IField extends ISchema {
   label: string;
   multipleValues: boolean;
+  oneUserMultipleValues: boolean;
   fieldType: string;
   typeId: string;
 }
@@ -22,6 +23,10 @@ const FieldSchema = new Schema(
       ref: 'ListType',
     },
     multipleValues: {
+      type: Boolean,
+      default: true,
+    },
+    oneUserMultipleValues: {
       type: Boolean,
       default: true,
     },

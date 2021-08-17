@@ -56,6 +56,12 @@ type Query {
   ): Bookmarks
   getBookmark(_id: ID!): Bookmark
   getFieldsByType(parentId: ID!, page: Int, limit: Int, search: String): Fields
+  getFieldValuesByField(
+    field: ID!
+    page: Int
+    limit: Int
+    onlyShowByUser: Boolean
+  ): FieldValues
 }
 
 type Mutation {
@@ -127,6 +133,9 @@ type Mutation {
     multipleValues: Boolean
   ): Field
   deleteField(_id: ID!): Boolean
+  createFieldValue(field: ID!, value: String, itemId: ID): FieldValue
+  updateFieldValue(_id: ID!, field: ID, value: String, itemId: ID): FieldValue
+  deleteFieldValue(_id: ID!): Boolean
 }
 
 type Bookmarks {
@@ -199,7 +208,6 @@ type ListType {
   slug: String
   description: String
   media: [Media]
-  # fields: [TypeField]
   active: Boolean
   inUse: Boolean
 }
@@ -213,8 +221,25 @@ type Field {
   _id: ID
   label: String
   multipleValues: Boolean
+  oneUserMultipleValues: Boolean
   fieldType: String
   typeId: ListType
+  createdBy: User
+  updatedBy: ID
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+type FieldValues {
+  data: [FieldValue]
+  count: Int
+}
+
+type FieldValue {
+  _id: ID
+  field: ID
+  value: String
+  itemId: ListItem
   createdBy: User
   updatedBy: ID
   createdAt: AWSDateTime
