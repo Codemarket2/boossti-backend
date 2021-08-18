@@ -56,7 +56,8 @@ type Query {
   ): Bookmarks
   getBookmark(_id: ID!): Bookmark
   getFieldsByType(parentId: ID!, page: Int, limit: Int, search: String): Fields
-  getFieldValuesByField(
+  getFieldValuesByItem(
+    parentId: ID!
     field: ID!
     page: Int
     limit: Int
@@ -124,6 +125,7 @@ type Mutation {
     fieldType: String!
     typeId: ID
     multipleValues: Boolean
+    oneUserMultipleValues: Boolean
   ): Field
   updateField(
     _id: ID!
@@ -131,10 +133,16 @@ type Mutation {
     fieldType: String
     typeId: ID
     multipleValues: Boolean
+    oneUserMultipleValues: Boolean
   ): Field
   deleteField(_id: ID!): Boolean
-  createFieldValue(field: ID!, value: String, itemId: ID): FieldValue
-  updateFieldValue(_id: ID!, field: ID, value: String, itemId: ID): FieldValue
+  createFieldValue(
+    parentId: ID!
+    field: ID!
+    value: String
+    itemId: ID
+  ): FieldValue
+  updateFieldValue(_id: ID!, value: String, itemId: ID): FieldValue
   deleteFieldValue(_id: ID!): Boolean
 }
 
@@ -237,6 +245,7 @@ type FieldValues {
 
 type FieldValue {
   _id: ID
+  parentId: ID
   field: ID
   value: String
   itemId: ListItem

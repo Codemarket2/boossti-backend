@@ -77,18 +77,30 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         await Field.findByIdAndDelete(args._id);
         return true;
       }
-      case 'getFieldValuesByField': {
-        const { page = 1, limit = 20, field, onlyShowByUser = null } = args;
+      case 'getFieldValuesByItem': {
+        const {
+          page = 1,
+          limit = 20,
+          parentId,
+          field,
+          onlyShowByUser = null,
+        } = args;
         const tempFilter: any = {};
+
         if (onlyShowByUser) {
           tempFilter.createdBy = user._id;
         }
-        const data = await FieldValue.find({ field, ...tempFilter })
+
+        const data = await FieldValue.find({ ...tempFilter, parentId, field })
           .populate(fieldValuePopulate)
           .limit(limit * 1)
           .skip((page - 1) * limit);
 
-        const count = await FieldValue.countDocuments({ field, ...tempFilter });
+        const count = await FieldValue.countDocuments({
+          ...tempFilter,
+          parentId,
+          field,
+        });
 
         return {
           data,

@@ -9,6 +9,11 @@ interface IFieldValue extends ISchema {
 
 const FieldValueSchema = new Schema(
   {
+    parentId: {
+      type: Schema.Types.ObjectId,
+      ref: 'ListItem',
+      required: true,
+    },
     field: {
       type: Schema.Types.ObjectId,
       ref: 'Field',

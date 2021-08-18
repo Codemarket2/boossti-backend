@@ -45,8 +45,10 @@ const updatedMockField = {
 const mockFieldValue = {
   _id: '60fc4d29f11b170008d9ec22',
   value: 'Apple',
+  parentId: mockField._id,
   field: mockField._id,
 };
+
 const updatedMockFieldValue = {
   ...mockFieldValue,
   value: 'Google',
@@ -128,16 +130,19 @@ describe('Field Lambda Tests', () => {
     expect(res).toBe(true);
   });
 
-  it('getFieldValuesByField test', async () => {
+  it('getFieldValuesByItem test', async () => {
     await preFieldValue();
     const res = await handler(
-      createMockEvent('getFieldValuesByField', { field: mockField._id })
+      createMockEvent('getFieldValuesByItem', {
+        parentId: mockField._id,
+        field: mockField._id,
+      })
     );
     expect(res.count).toBe(1);
     expect(res.data.length).toBe(1);
     const field = res.data[0];
     expect(field._id).toBeDefined();
-    expect(field.field.toString()).toBe(mockFieldValue.field);
+    expect(field.parentId.toString()).toBe(mockFieldValue.parentId);
     expect(field.value).toBe(mockFieldValue.value);
     expect(field.createdBy._id).toBeDefined();
     expect(field.createdBy.name).toBe(mockUser.name);
@@ -155,7 +160,7 @@ describe('Field Lambda Tests', () => {
       })
     );
     expect(field._id).toBeDefined();
-    expect(field.field.toString()).toBe(mockFieldValue.field);
+    expect(field.parentId.toString()).toBe(mockFieldValue.parentId);
     expect(field.value).toBe(mockFieldValue.value);
     expect(field.itemId._id.toString()).toBe(mockListItem._id);
     expect(field.itemId.title).toBe(mockListItem.title);
@@ -170,7 +175,7 @@ describe('Field Lambda Tests', () => {
       createMockEvent('updateFieldValue', updatedMockFieldValue)
     );
     expect(field._id).toBeDefined();
-    expect(field.field.toString()).toBe(updatedMockFieldValue.field);
+    expect(field.parentId.toString()).toBe(updatedMockFieldValue.parentId);
     expect(field.value).toBe(updatedMockFieldValue.value);
     expect(field.createdBy._id).toBeDefined();
     expect(field.createdBy.name).toBe(mockUser.name);
