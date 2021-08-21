@@ -1,6 +1,9 @@
 import { DB } from '../utils/DB';
+import ListType from '../list/utils/listTypeModel';
+import ListItem from '../list/utils/listItemModel';
 import { getCurretnUser } from '../utils/authentication';
 import { Post } from './utils/postModel';
+import { getTags } from './utils/getTags';
 import { User } from '../user/utils/userModel';
 import { AppSyncEvent } from '../utils/cutomTypes';
 
@@ -29,6 +32,11 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       select: userSelect,
     };
 
+    const postPopulate = [
+      userPopulate,
+      { path: 'tags.tag', refPath: 'ListItem' },
+    ];
+
     switch (fieldName) {
       case 'getPosts': {
         if (active !== null) {
@@ -38,7 +46,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           ...tempFilter,
           body: { $regex: search, $options: 'i' },
         })
-          .populate(userPopulate)
+          .populate(postPopulate)
           .limit(limit * 1)
           .skip((page - 1) * limit)
           .sort(sortBy);
@@ -46,6 +54,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           ...tempFilter,
           body: { $regex: search, $options: 'i' },
         });
+        console.log('data', data[0].tags);
         return {
           data,
           count,
@@ -93,20 +102,23 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         };
       }
       case 'createPost': {
+        const tags = await getTags(args.body);
         return {
           ...(
             await Post.create({
               ...args,
               createdBy: user._id,
+              tags,
             })
           ).toJSON(),
           createdBy: user,
         };
       }
       case 'updatePost': {
+        const tags = await getTags(args.body);
         tempPost = await Post.findOneAndUpdate(
           { _id: args._id, createdBy: user._id },
-          { ...args, updatedAt: new Date(), updatedBy: user._id },
+          { ...args, updatedAt: new Date(), updatedBy: user._id, tags },
           {
             new: true,
             runValidators: true,
@@ -122,12 +134,17 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         return true;
       }
       default:
+        if (args.registerModel) {
+          await ListType.findOne();
+          await ListItem.findOne();
+        }
         throw new Error(
           'Something went wrong! Please check your Query or Mutation'
         );
     }
   } catch (error) {
-    // console.log('error', error);
+    console.log('fieldName', event.info.fieldName);
+    console.log('error', error);
     const error2 = error;
     throw error2;
   }
