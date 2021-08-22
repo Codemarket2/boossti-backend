@@ -15,7 +15,6 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     let data: any = [];
     let count = 0;
     const tempFilter: any = {};
-    let tempPost: any;
     const user = await getCurretnUser(identity);
 
     const {
@@ -34,7 +33,15 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
 
     const postPopulate = [
       userPopulate,
-      { path: 'tags.tag', select: 'title description media' },
+      {
+        path: 'tags.tag',
+        select: 'title description media slug types',
+        populate: {
+          path: 'types',
+          model: 'ListType',
+          select: 'slug',
+        },
+      },
     ];
 
     switch (fieldName) {
@@ -61,7 +68,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         };
       }
       case 'getPost': {
-        return await Post.findById(args._id).populate(userPopulate);
+        return await Post.findById(args._id).populate(postPopulate);
       }
       case 'getMyPosts': {
         await User.findById(user._id);
@@ -69,7 +76,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           createdBy: user._id,
           body: { $regex: search, $options: 'i' },
         })
-          .populate(userPopulate)
+          .populate(postPopulate)
           .limit(limit * 1)
           .skip((page - 1) * limit)
           .sort(sortBy);
@@ -103,20 +110,16 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       }
       case 'createPost': {
         const tags = await getTags(args.body);
-        return {
-          ...(
-            await Post.create({
-              ...args,
-              createdBy: user._id,
-              tags,
-            })
-          ).toJSON(),
-          createdBy: user,
-        };
+        const post = await Post.create({
+          ...args,
+          createdBy: user._id,
+          tags,
+        });
+        return await post.populate(postPopulate).execPopulate();
       }
       case 'updatePost': {
         const tags = await getTags(args.body);
-        tempPost = await Post.findOneAndUpdate(
+        const post: any = await Post.findOneAndUpdate(
           { _id: args._id, createdBy: user._id },
           { ...args, updatedAt: new Date(), updatedBy: user._id, tags },
           {
@@ -124,10 +127,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
             runValidators: true,
           }
         );
-        return {
-          ...tempPost.toJSON(),
-          createdBy: user,
-        };
+        return await post.populate(postPopulate).execPopulate();
       }
       case 'deletePost': {
         await Post.findOneAndDelete({ _id: args._id, createdBy: user._id });
@@ -143,8 +143,6 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         );
     }
   } catch (error) {
-    console.log('fieldName', event.info.fieldName);
-    console.log('error', error);
     const error2 = error;
     throw error2;
   }

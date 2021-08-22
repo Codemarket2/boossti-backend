@@ -5,7 +5,7 @@ import { mockUser, createMockEvent } from '../jest/defaultArguments';
 
 const mockPost = {
   _id: '60fc4d29f11b170008d9ec48',
-  body: 'Hello Guys @@@__611003ae70e3a6000870e145^^__Doctors@@@^^^ yes new post',
+  body: 'Hello Guys @@@__611003ae70e3a6000870e145^^__Doctors@@@^^^ yes @@@__60fc4d29f11b170008d9ec99^^__Dr John@@@^^^ new post',
   media: [],
 };
 
@@ -20,8 +20,17 @@ export const mockListType = {
   description: 'Doctors description',
 };
 
+const mockListItem = {
+  _id: '60fc4d29f11b170008d9ec99',
+  types: [mockListType._id],
+  title: 'Dr John',
+  description: 'NYC',
+  media: [],
+};
+
 const createPostEvent = createMockEvent('createPost', mockPost);
 const createListTypeEvent = createMockEvent('createListType', mockListType);
+const createListItemEvent = createMockEvent('createListItem', mockListItem);
 
 // yarn test test/postLambda.test.ts
 
@@ -34,6 +43,7 @@ describe('Post Lambda Tests', () => {
 
   it('getPostsByUserId test', async () => {
     await listHandler(createListTypeEvent);
+    await listHandler(createListItemEvent);
     await handler(createPostEvent);
     const res = await handler(
       createMockEvent('getPostsByUserId', { userId: mockUser._id })
@@ -47,6 +57,7 @@ describe('Post Lambda Tests', () => {
     expect(post.createdBy.name).toBe(mockUser.name);
     expect(post.createdBy.picture).toBe(mockUser.picture);
     const tag = post.tags[0];
+    // console.log(post.tags[1].tag.types);
     expect(tag.tag._id.toString()).toBe(mockListType._id);
     expect(tag.tag.title).toBe(mockListType.title);
   });

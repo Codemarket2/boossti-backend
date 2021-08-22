@@ -167,7 +167,7 @@ type Posts @aws_api_key @aws_cognito_user_pools {
 }
 
 type Tags {
-  tag: ListType
+  tag: ListItem
 }
 
 type Post @aws_api_key @aws_cognito_user_pools {
