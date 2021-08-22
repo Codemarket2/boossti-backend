@@ -166,10 +166,15 @@ type Posts @aws_api_key @aws_cognito_user_pools {
   count: Int
 }
 
+type Tags {
+  tag: ListType
+}
+
 type Post @aws_api_key @aws_cognito_user_pools {
   _id: ID
   body: String
   media: [Media]
+  tags: [Tags]
   createdBy: User
   updatedBy: ID
   createdAt: AWSDateTime

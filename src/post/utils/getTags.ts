@@ -27,8 +27,7 @@ export const getTags = async (body) => {
     });
     itemTags = itemTags.map((l) => ({ tag: l._id, tagModel: 'ListItem' }));
     tags = [...typeTags, ...itemTags];
-    // console.log('tags2', tags2);
   }
-  console.log('tags', tags);
+  // console.log('tags', tags);
   return tags;
 };

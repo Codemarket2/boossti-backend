@@ -4,7 +4,7 @@ const tagSchema = new mongoose.Schema({
   tag: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
-    refPath: 'tagModel',
+    refPath: 'tags.tagModel',
   },
   tagModel: {
     type: String,
@@ -19,10 +19,8 @@ const postSchema = new mongoose.Schema({
     type: [{ url: String, caption: String }],
     default: [],
   },
-  tags: {
-    type: [tagSchema],
-    default: [],
-  },
+  // tags: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ListType' }],
+  tags: [tagSchema],
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

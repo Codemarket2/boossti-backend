@@ -34,7 +34,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
 
     const postPopulate = [
       userPopulate,
-      { path: 'tags.tag', refPath: 'ListItem' },
+      { path: 'tags.tag', select: 'title description media' },
     ];
 
     switch (fieldName) {
@@ -54,7 +54,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           ...tempFilter,
           body: { $regex: search, $options: 'i' },
         });
-        console.log('data', data[0].tags);
+        // console.log('data', data[0].tags);
         return {
           data,
           count,
@@ -88,7 +88,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           createdBy: args.userId,
           body: { $regex: search, $options: 'i' },
         })
-          .populate(userPopulate)
+          .populate(postPopulate)
           .limit(limit * 1)
           .skip((page - 1) * limit)
           .sort(sortBy);
