@@ -4,7 +4,6 @@ const commentSchema = new mongoose.Schema({
   body: String,
   parentId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Post",
     required: true,
   },
   createdBy: {
