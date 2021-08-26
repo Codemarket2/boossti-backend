@@ -1,99 +1,150 @@
-/* eslint-disable no-case-declarations */
+import slugify from 'slugify';
 import { DB } from '../utils/DB';
-import { List } from './utils/listModel';
+import ListType from './utils/listTypeModel';
+import ListItem from './utils/listItemModel';
+import { getCurretnUser } from '../utils/authentication';
 import { AppSyncEvent } from '../utils/cutomTypes';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
     await DB();
     const { fieldName } = event.info;
-    const { arguments: args, identity } = event;
-    let data: any = [];
-    let count = 0;
-    const tempFilter: any = {};
-    let createdBy;
-    let updatedBy;
-    let tempList: any = null;
-
-    if (identity && identity.claims && identity.claims.sub) {
-      createdBy = identity.claims.sub;
-      updatedBy = identity.claims.sub;
+    const { identity } = event;
+    const user = await getCurretnUser(identity);
+    let args = { ...event.arguments };
+    if (fieldName.toLocaleLowerCase().includes('create') && user && user._id) {
+      args = { ...args, createdBy: user._id };
+    } else if (
+      fieldName.toLocaleLowerCase().includes('update') &&
+      user &&
+      user._id
+    ) {
+      args = { ...args, updatedBy: user._id };
     }
 
-    switch (fieldName) {
-      case 'getLists':
-        const { page = 1, limit = 50, search = '', active = null } = args;
+    if (Object.prototype.hasOwnProperty.call(args, 'title')) {
+      args = { ...args, slug: slugify(args.title, { lower: true }) };
+    }
 
+    const itemTypeSelect = '_id title slug';
+    const itemTypePopulate = {
+      path: 'types',
+      select: itemTypeSelect,
+    };
+
+    switch (fieldName) {
+      case 'getListTypes': {
+        const { page = 1, limit = 20, search = '', active = null } = args;
+        const tempFilter: any = {};
         if (active !== null) {
           tempFilter.active = active;
         }
-
-        data = await List.find({
+        const data = await ListType.find({
           ...tempFilter,
-          name: { $regex: search, $options: 'i' },
+          title: { $regex: search, $options: 'i' },
         })
           .limit(limit * 1)
-          .skip((page - 1) * limit)
-          .exec();
-
-        count = await List.countDocuments({
+          .skip((page - 1) * limit);
+        const count = await ListType.countDocuments({
           ...tempFilter,
-          name: { $regex: search, $options: 'i' },
+          title: { $regex: search, $options: 'i' },
         });
-
         return {
           data,
           count,
         };
-      case 'getList':
-        return await List.findById(args._id);
-      case 'createList':
-        return await List.create({
-          ...args,
-          createdBy,
+      }
+      case 'getListItems': {
+        const {
+          page = 1,
+          limit = 20,
+          search = '',
+          active = null,
+          types = [],
+        } = args;
+        const tempFilter: any = {};
+        if (active !== null) {
+          tempFilter.active = active;
+        }
+        if (types.length > 0) {
+          tempFilter.types = { $elemMatch: { $in: types } };
+        }
+
+        const data = await ListItem.find({
+          ...tempFilter,
+          $or: [
+            { title: { $regex: search, $options: 'i' } },
+            { description: { $regex: search, $options: 'i' } },
+          ],
+        })
+          .populate(itemTypePopulate)
+          .limit(limit * 1)
+          .skip((page - 1) * limit);
+        const count = await ListItem.countDocuments({
+          ...tempFilter,
+          $or: [
+            { title: { $regex: search, $options: 'i' } },
+            { description: { $regex: search, $options: 'i' } },
+          ],
         });
-      case 'updateList':
-        return await List.findByIdAndUpdate(
-          args._id,
-          { ...args, updatedAt: new Date(), updatedBy },
-          {
-            new: true,
-            runValidators: true,
-          }
-        );
-      case 'addListItem':
-        tempList = await List.findById(args.listId);
-        tempList.items.push({ ...args });
-        await tempList.save();
-        return tempList;
-      case 'updateListItem':
-        return await List.findOneAndUpdate(
-          { _id: args.listId, 'items._id': args._id },
-          {
-            $set: {
-              'items.$': { ...args },
-            },
-          },
-          {
-            new: true,
-            runValidators: true,
-          }
-        );
-      case 'deleteListItem':
-        tempList = await List.findById(args.listId);
-        tempList.items.pull(args._id);
-        await tempList.save();
+        return {
+          data,
+          count,
+        };
+      }
+      case 'getListTypeBySlug': {
+        return await ListType.findOne({ slug: args.slug });
+      }
+      case 'getListItemBySlug': {
+        return await ListItem.findOne({ slug: args.slug }).populate('types');
+      }
+      case 'getListType': {
+        return await ListType.findById(args._id);
+      }
+      case 'getListItem': {
+        return await ListItem.findById(args._id).populate('types');
+      }
+      case 'createListType': {
+        return await ListType.create(args);
+      }
+      case 'createListItem': {
+        const listItem = await ListItem.create(args);
+        return await listItem.populate(itemTypePopulate).execPopulate();
+      }
+      case 'updateListItem': {
+        const listItem: any = await ListItem.findByIdAndUpdate(args._id, args, {
+          new: true,
+          runValidators: true,
+        });
+        return await listItem.populate(itemTypePopulate).execPopulate();
+      }
+      case 'updateListType': {
+        return await ListType.findByIdAndUpdate(args._id, args, {
+          new: true,
+          runValidators: true,
+        });
+      }
+      case 'deleteListItem': {
+        await ListItem.findByIdAndDelete(args._id);
         return true;
-      case 'deleteList':
-        await List.findByIdAndDelete(args._id);
-        return true;
+      }
+      case 'deleteListType': {
+        const count = await ListItem.countDocuments({
+          types: { $elemMatch: { $in: [args._id] } },
+        });
+        if (count === 0) {
+          await ListType.findByIdAndDelete(args._id);
+          return true;
+        } else {
+          throw new Error('This type is being used in a item');
+        }
+      }
       default:
         throw new Error(
           'Something went wrong! Please check your Query or Mutation'
         );
     }
   } catch (error) {
-    // console.log('error', error);
     const error2 = error;
     throw error2;
   }

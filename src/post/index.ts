@@ -1,6 +1,9 @@
 import { DB } from '../utils/DB';
+import ListType from '../list/utils/listTypeModel';
+import ListItem from '../list/utils/listItemModel';
 import { getCurretnUser } from '../utils/authentication';
 import { Post } from './utils/postModel';
+import { getTags } from './utils/getTags';
 import { User } from '../user/utils/userModel';
 import { AppSyncEvent } from '../utils/cutomTypes';
 
@@ -12,8 +15,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     let data: any = [];
     let count = 0;
     const tempFilter: any = {};
-    let tempPost: any;
-    let user = await getCurretnUser(identity);
+    const user = await getCurretnUser(identity);
 
     const {
       page = 1,
@@ -29,6 +31,19 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       select: userSelect,
     };
 
+    const postPopulate = [
+      userPopulate,
+      {
+        path: 'tags.tag',
+        select: 'title description media slug types',
+        populate: {
+          path: 'types',
+          model: 'ListType',
+          select: 'slug',
+        },
+      },
+    ];
+
     switch (fieldName) {
       case 'getPosts': {
         if (active !== null) {
@@ -38,7 +53,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           ...tempFilter,
           body: { $regex: search, $options: 'i' },
         })
-          .populate(userPopulate)
+          .populate(postPopulate)
           .limit(limit * 1)
           .skip((page - 1) * limit)
           .sort(sortBy);
@@ -46,13 +61,14 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           ...tempFilter,
           body: { $regex: search, $options: 'i' },
         });
+        // console.log('data', data[0].tags);
         return {
           data,
           count,
         };
       }
       case 'getPost': {
-        return await Post.findById(args._id).populate(userPopulate);
+        return await Post.findById(args._id).populate(postPopulate);
       }
       case 'getMyPosts': {
         await User.findById(user._id);
@@ -60,7 +76,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           createdBy: user._id,
           body: { $regex: search, $options: 'i' },
         })
-          .populate(userPopulate)
+          .populate(postPopulate)
           .limit(limit * 1)
           .skip((page - 1) * limit)
           .sort(sortBy);
@@ -79,7 +95,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           createdBy: args.userId,
           body: { $regex: search, $options: 'i' },
         })
-          .populate(userPopulate)
+          .populate(postPopulate)
           .limit(limit * 1)
           .skip((page - 1) * limit)
           .sort(sortBy);
@@ -93,41 +109,40 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         };
       }
       case 'createPost': {
-        return {
-          ...(
-            await Post.create({
-              ...args,
-              createdBy: user._id,
-            })
-          ).toJSON(),
-          createdBy: user,
-        };
+        const tags = await getTags(args.body);
+        const post = await Post.create({
+          ...args,
+          createdBy: user._id,
+          tags,
+        });
+        return await post.populate(postPopulate).execPopulate();
       }
       case 'updatePost': {
-        tempPost = await Post.findOneAndUpdate(
+        const tags = await getTags(args.body);
+        const post: any = await Post.findOneAndUpdate(
           { _id: args._id, createdBy: user._id },
-          { ...args, updatedAt: new Date(), updatedBy: user._id },
+          { ...args, updatedAt: new Date(), updatedBy: user._id, tags },
           {
             new: true,
             runValidators: true,
           }
         );
-        return {
-          ...tempPost.toJSON(),
-          createdBy: user,
-        };
+        return await post.populate(postPopulate).execPopulate();
       }
       case 'deletePost': {
         await Post.findOneAndDelete({ _id: args._id, createdBy: user._id });
         return true;
       }
       default:
+        if (args.registerModel) {
+          await ListType.findOne();
+          await ListItem.findOne();
+        }
         throw new Error(
           'Something went wrong! Please check your Query or Mutation'
         );
     }
   } catch (error) {
-    // console.log('error', error);
     const error2 = error;
     throw error2;
   }

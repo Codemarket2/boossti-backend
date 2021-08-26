@@ -21,8 +21,23 @@ type Query {
   ): UserSearch @aws_cognito_user_pools(cognito_groups: ["superadmin"])
   getUser(_id: ID!): User @aws_api_key @aws_cognito_user_pools
   getUserByCognitoUserId(userId: String!): User
-  getLists(page: Int, limit: Int, active: Boolean): Lists
-  getList(_id: ID!): List
+  getListTypes(
+    page: Int
+    limit: Int
+    active: Boolean
+    search: String
+  ): ListTypes
+  getListItems(
+    page: Int
+    limit: Int
+    active: Boolean
+    search: String
+    types: [ID]
+  ): ListItems
+  getListType(_id: ID!): ListType
+  getListItem(_id: ID!): ListItem
+  getListTypeBySlug(slug: String!): ListType
+  getListItemBySlug(slug: String!): ListItem
   getPosts(page: Int, limit: Int, sortBy: String, search: String): Posts
   getMyPosts(page: Int, limit: Int, sortBy: String, search: String): Posts
   getPostsByUserId(
@@ -40,6 +55,14 @@ type Query {
     search: String
   ): Bookmarks
   getBookmark(_id: ID!): Bookmark
+  getFieldsByType(parentId: ID!, page: Int, limit: Int, search: String): Fields
+  getFieldValuesByItem(
+    parentId: ID!
+    field: ID!
+    page: Int
+    limit: Int
+    onlyShowByUser: Boolean
+  ): FieldValues
 }
 
 type Mutation {
@@ -55,46 +78,79 @@ type Mutation {
     name: String
     email: String
     picture: String
-    subscription: SubscriptionInput
   ): User
   updateUserStatus(userId: String!, updatedBy: String!, status: Boolean!): User
     @aws_cognito_user_pools(cognito_groups: ["superadmin"])
-  cancelUserSubscription(userId: String!): User
-  createList(name: String!, active: Boolean, items: [ListItemInput]): List
-    @aws_cognito_user_pools(cognito_groups: ["superadmin"])
-  updateList(
-    _id: ID!
-    name: String
+  createListType(
+    title: String!
+    description: String
+    media: [MediaInput]
     active: Boolean
-    inUse: Boolean
-    items: [ListItemInput]
-  ): List @aws_cognito_user_pools(cognito_groups: ["superadmin"])
-  deleteList(_id: ID!): Boolean
-    @aws_cognito_user_pools(cognito_groups: ["superadmin"])
-  addListItem(
-    listId: ID!
+  ): ListType
+  createListItem(
+    types: [ID!]
+    title: String!
+    description: String
+    media: [MediaInput]
+    extra: [ExtraInput]
+    active: Boolean
+  ): ListItem
+  updateListType(
+    _id: ID!
     title: String
     description: String
+    media: [MediaInput]
     active: Boolean
-  ): List @aws_cognito_user_pools(cognito_groups: ["superadmin"])
+  ): ListType
   updateListItem(
-    listId: ID!
     _id: ID!
+    types: [ID]
     title: String
     description: String
+    media: [MediaInput]
+    extra: [ExtraInput]
     active: Boolean
-  ): List @aws_cognito_user_pools(cognito_groups: ["superadmin"])
-  deleteListItem(listId: ID!, _id: ID!): Boolean
-    @aws_cognito_user_pools(cognito_groups: ["superadmin"])
+  ): ListItem
+  deleteListItem(_id: ID!): Boolean
+  deleteListType(_id: ID!): Boolean
   createPost(body: String!, media: [MediaInput]): Post
   updatePost(_id: ID!, body: String, media: [MediaInput]): Post
   deletePost(_id: ID!): Boolean
   createBookmark(parentId: String, bookmark: String!): Bookmark
   updateBookmark(_id: ID!, parentId: String, bookmark: String): Bookmark
   deleteBookmark(_id: ID!): Boolean
+  createField(
+    parentId: ID!
+    label: String!
+    fieldType: String!
+    typeId: ID
+    multipleValues: Boolean
+    oneUserMultipleValues: Boolean
+  ): Field
+  updateField(
+    _id: ID!
+    label: String
+    fieldType: String
+    typeId: ID
+    multipleValues: Boolean
+    oneUserMultipleValues: Boolean
+  ): Field
+  deleteField(_id: ID!): Boolean
+  createFieldValue(
+    parentId: ID!
+    field: ID!
+    value: String
+    media: [MediaInput]
+    itemId: ID
+  ): FieldValue
+  updateFieldValue(
+    _id: ID!
+    value: String
+    media: [MediaInput]
+    itemId: ID
+  ): FieldValue
+  deleteFieldValue(_id: ID!): Boolean
 }
-
-# type Subscription {}
 
 type Bookmarks {
   data: [Bookmark]
@@ -116,10 +172,15 @@ type Posts @aws_api_key @aws_cognito_user_pools {
   count: Int
 }
 
+type Tags {
+  tag: ListItem
+}
+
 type Post @aws_api_key @aws_cognito_user_pools {
   _id: ID
   body: String
   media: [Media]
+  tags: [Tags]
   createdBy: User
   updatedBy: ID
   createdAt: AWSDateTime
@@ -153,50 +214,81 @@ type User @aws_api_key @aws_cognito_user_pools {
   createdBy: String
   updatedAt: String
   updatedBy: String
-  subscription: TSubscription
 }
 
-type TSubscription {
-  _id: ID
-  active: Boolean
-  subscriptionType: String
-  description: String
-  amount: Float
-  subscribedOn: AWSDateTime
-  expiringOn: AWSDateTime
-}
-
-input SubscriptionInput {
-  active: Boolean!
-  subscriptionType: String!
-  description: String!
-  amount: Float!
-  subscribedOn: AWSDateTime
-  expiringOn: AWSDateTime
-}
-
-type Lists {
-  data: [List]
+type ListTypes {
+  data: [ListType]
   count: Int
 }
 
-type List {
+type ListType {
   _id: ID
-  name: String
+  title: String
+  slug: String
+  description: String
+  media: [Media]
   active: Boolean
   inUse: Boolean
-  items: [ListItem]
+}
+
+type Fields {
+  data: [Field]
+  count: Int
+}
+
+type Field {
+  _id: ID
+  label: String
+  multipleValues: Boolean
+  oneUserMultipleValues: Boolean
+  fieldType: String
+  typeId: ListType
+  createdBy: User
+  updatedBy: ID
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+type FieldValues {
+  data: [FieldValue]
+  count: Int
+}
+
+type FieldValue {
+  _id: ID
+  parentId: ID
+  field: ID
+  value: String
+  media: [Media]
+  itemId: ListItem
+  createdBy: User
+  updatedBy: ID
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+type ListItems {
+  data: [ListItem]
+  count: Int
 }
 
 type ListItem {
   _id: ID
   title: String
+  slug: String
   description: String
   active: Boolean
+  extra: [Extra]
+  media: [Media]
+  types: [ListType]
 }
 
-input ListItemInput {
-  title: String
-  description: String
-  active: Boolean
+type Extra {
+  key: String
+  value: String
+}
+
+input ExtraInput {
+  key: String
+  value: String
 }
