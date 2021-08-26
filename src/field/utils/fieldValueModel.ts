@@ -20,6 +20,10 @@ const FieldValueSchema = new Schema(
       required: true,
     },
     value: { type: String },
+    media: {
+      type: [{ url: String, caption: String }],
+      default: [],
+    },
     itemId: {
       type: Schema.Types.ObjectId,
       ref: 'ListItem',
