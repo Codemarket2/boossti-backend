@@ -1,10 +1,28 @@
 import { DB } from '../utils/DB';
 import ListType from '../list/utils/listTypeModel';
+import ListItem from '../list/utils/listItemModel';
 import { User } from '../user/utils/userModel';
 import Field from './utils/fieldModel';
+import FieldValue from './utils/fieldValueModel';
 import { getCurretnUser } from '../utils/authentication';
 import { AppSyncEvent } from '../utils/cutomTypes';
 import { userPopulate } from '../utils/populate';
+
+const fieldPopulate = [
+  userPopulate,
+  {
+    path: 'typeId',
+    select: 'title slug',
+  },
+];
+
+const fieldValuePopulate = [
+  userPopulate,
+  {
+    path: 'itemId',
+    select: 'title slug',
+  },
+];
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -24,14 +42,6 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       args = { ...args, updatedBy: user._id };
     }
 
-    const populate = [
-      userPopulate,
-      {
-        path: 'typeId',
-        select: 'title',
-      },
-    ];
-
     switch (fieldName) {
       case 'getFieldsByType': {
         const { page = 1, limit = 20, search = '', parentId } = args;
@@ -39,7 +49,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           parentId,
           label: { $regex: search, $options: 'i' },
         })
-          .populate(populate)
+          .populate(fieldPopulate)
           .limit(limit * 1)
           .skip((page - 1) * limit);
 
@@ -54,22 +64,74 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       }
       case 'createField': {
         const field = await Field.create(args);
-        return await field.populate(populate).execPopulate();
+        return await field.populate(fieldPopulate).execPopulate();
       }
       case 'updateField': {
         const field: any = await Field.findByIdAndUpdate(args._id, args, {
           new: true,
           runValidators: true,
         });
-        return await field.populate(populate).execPopulate();
+        return await field.populate(fieldPopulate).execPopulate();
       }
       case 'deleteField': {
         await Field.findByIdAndDelete(args._id);
         return true;
       }
+      case 'getFieldValuesByItem': {
+        const {
+          page = 1,
+          limit = 20,
+          parentId,
+          field,
+          onlyShowByUser = null,
+        } = args;
+        const tempFilter: any = {};
+
+        if (onlyShowByUser) {
+          tempFilter.createdBy = user._id;
+        }
+
+        const data = await FieldValue.find({ ...tempFilter, parentId, field })
+          .populate(fieldValuePopulate)
+          .limit(limit * 1)
+          .skip((page - 1) * limit);
+
+        const count = await FieldValue.countDocuments({
+          ...tempFilter,
+          parentId,
+          field,
+        });
+
+        return {
+          data,
+          count,
+        };
+      }
+      case 'createFieldValue': {
+        const fieldValue = await FieldValue.create(args);
+        return await fieldValue.populate(fieldValuePopulate).execPopulate();
+      }
+      case 'updateFieldValue': {
+        const fieldValue: any = await FieldValue.findByIdAndUpdate(
+          args._id,
+          args,
+          {
+            new: true,
+            runValidators: true,
+          }
+        );
+        return await fieldValue.populate(fieldValuePopulate).execPopulate();
+      }
+      case 'deleteFieldValue': {
+        await FieldValue.findByIdAndDelete(args._id);
+        return true;
+      }
       default:
-        await ListType.findOne();
-        await User.findOne();
+        if (args.registerModel) {
+          await ListType.findOne();
+          await User.findOne();
+          await ListItem.findOne();
+        }
         throw new Error(
           'Something went wrong! Please check your Query or Mutation'
         );

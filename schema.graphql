@@ -56,6 +56,13 @@ type Query {
   ): Bookmarks
   getBookmark(_id: ID!): Bookmark
   getFieldsByType(parentId: ID!, page: Int, limit: Int, search: String): Fields
+  getFieldValuesByItem(
+    parentId: ID!
+    field: ID!
+    page: Int
+    limit: Int
+    onlyShowByUser: Boolean
+  ): FieldValues
 
   getComment(_id: ID!): Comment
   getCommentsByParentID(parentId: ID!): Comments
@@ -121,6 +128,7 @@ type Mutation {
     fieldType: String!
     typeId: ID
     multipleValues: Boolean
+    oneUserMultipleValues: Boolean
   ): Field
   updateField(
     _id: ID!
@@ -128,8 +136,23 @@ type Mutation {
     fieldType: String
     typeId: ID
     multipleValues: Boolean
+    oneUserMultipleValues: Boolean
   ): Field
   deleteField(_id: ID!): Boolean
+  createFieldValue(
+    parentId: ID!
+    field: ID!
+    value: String
+    media: [MediaInput]
+    itemId: ID
+  ): FieldValue
+  updateFieldValue(
+    _id: ID!
+    value: String
+    media: [MediaInput]
+    itemId: ID
+  ): FieldValue
+  deleteFieldValue(_id: ID!): Boolean
 
   createComment(parentId: ID!, body: String!): Comment
   updateComment(_id: ID!, body: String): Comment
@@ -169,10 +192,15 @@ type Posts @aws_api_key @aws_cognito_user_pools {
   count: Int
 }
 
+type Tags {
+  tag: ListItem
+}
+
 type Post @aws_api_key @aws_cognito_user_pools {
   _id: ID
   body: String
   media: [Media]
+  tags: [Tags]
   createdBy: User
   updatedBy: ID
   createdAt: AWSDateTime
@@ -219,7 +247,6 @@ type ListType {
   slug: String
   description: String
   media: [Media]
-  # fields: [TypeField]
   active: Boolean
   inUse: Boolean
 }
@@ -233,8 +260,27 @@ type Field {
   _id: ID
   label: String
   multipleValues: Boolean
+  oneUserMultipleValues: Boolean
   fieldType: String
   typeId: ListType
+  createdBy: User
+  updatedBy: ID
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+type FieldValues {
+  data: [FieldValue]
+  count: Int
+}
+
+type FieldValue {
+  _id: ID
+  parentId: ID
+  field: ID
+  value: String
+  media: [Media]
+  itemId: ListItem
   createdBy: User
   updatedBy: ID
   createdAt: AWSDateTime
