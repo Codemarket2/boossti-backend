@@ -4,21 +4,27 @@ import { AppSyncEvent } from "../utils/cutomTypes";
 import { User } from "../user/utils/userModel";
 import { Post } from "../post/utils/postModel";
 import { Comment } from "./utils/commentModel";
+import { LookoutMetrics } from "aws-sdk";
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
     await DB();
     const { fieldName } = event.info;
     const { identity } = event;
-    const user = await getCurretnUser(identity);
+    let args = { ...event.arguments };
+    let data: any = [];
+    const count = 0;
     let tempComment: any;
-    const userSelect = "name picture";
+    const tempFilter: any = {};
+    const user = await getCurretnUser(identity);
+
+    const { page = 1, limit = 10 } = args;
+
+    const userSelect = "name picture _id";
     const userPopulate = {
       path: "createdBy",
       select: userSelect,
     };
-    let data: any = [];
-    let args = { ...event.arguments };
     if (fieldName.toLocaleLowerCase().includes("create") && user && user._id) {
       args = { ...args, createdBy: user._id };
     } else if (
@@ -46,10 +52,26 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       }
 
       case "getCommentsByParentID": {
-        data = await Comment.find({ parentId: args.parentId }).populate(
-          userPopulate
-        );
-        return { data };
+        // data = await Comment.find({ parentId: args.parentId }).populate(
+        //   userPopulate
+        // );
+        // return { data };
+
+        await User.findById(args.userId);
+        data = await Comment.find({
+          parentId: args.parentId,
+        })
+          .populate(userPopulate)
+          .limit(limit * 1)
+          .skip((page - 1) * limit);
+
+        const count = await Comment.countDocuments({
+          parentId: args.parentId,
+        });
+        return {
+          data,
+          count,
+        };
       }
       case "updateComment": {
         tempComment = await Comment.findOneAndUpdate(
