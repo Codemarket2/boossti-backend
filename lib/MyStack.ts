@@ -6,8 +6,6 @@ import { Expiration, Duration } from '@aws-cdk/core';
 import dataSources from './dataSources';
 import resolvers from './resolvers';
 
-const projectName = 'vijaa'; //camelCase if two letters
-
 export default class MyStack extends sst.Stack {
   constructor(scope: sst.App, id: string, props?: sst.StackProps) {
     super(scope, id, props);
@@ -48,7 +46,7 @@ export default class MyStack extends sst.Stack {
         timeout: 20,
         environment: {
           SENDER_EMAIL: SENDER_EMAIL,
-          DATABASE: `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@codemarket-staging.k16z7.mongodb.net/${projectName}-${scope.stage}?retryWrites=true&w=majority`,
+          DATABASE: `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@codemarket-staging.k16z7.mongodb.net/${scope.stage}?retryWrites=true&w=majority`,
           USER_POOL_ID: USER_POOL_ID,
         },
       },
