@@ -63,6 +63,9 @@ type Query {
     limit: Int
     onlyShowByUser: Boolean
   ): FieldValues
+
+  getComment(_id: ID!): Comment
+  getCommentsByParentID(parentId: ID!, page: Int, limit: Int): Comments
 }
 
 type Mutation {
@@ -150,6 +153,10 @@ type Mutation {
     itemId: ID
   ): FieldValue
   deleteFieldValue(_id: ID!): Boolean
+
+  createComment(parentId: ID!, body: String!): Comment
+  updateComment(_id: ID!, body: String): Comment
+  deleteComment(_id: ID!): Boolean
 }
 
 type Bookmarks {
@@ -165,6 +172,20 @@ type Bookmark {
   updatedBy: ID
   createdAt: AWSDateTime
   updatedAt: AWSDateTime
+}
+
+type Comment {
+  _id: ID
+  body: String
+  parentId: ID
+  createdBy: User
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+type Comments {
+  count: Int
+  data: [Comment]
 }
 
 type Posts @aws_api_key @aws_cognito_user_pools {
