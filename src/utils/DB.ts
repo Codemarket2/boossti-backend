@@ -1,5 +1,4 @@
 import * as mongoose from 'mongoose';
-(<any>mongoose).Promise = global.Promise;
 
 let isConnected;
 
