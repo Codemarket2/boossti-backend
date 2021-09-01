@@ -2,6 +2,8 @@ import slugify from 'slugify';
 import { DB } from '../utils/DB';
 import ListType from './utils/listTypeModel';
 import ListItem from './utils/listItemModel';
+import Field from '../field/utils/fieldModel';
+import FieldValue from '../field/utils/fieldValueModel';
 import { getCurretnUser } from '../utils/authentication';
 import { AppSyncEvent } from '../utils/cutomTypes';
 
@@ -125,19 +127,35 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         });
       }
       case 'deleteListItem': {
+        const count = await FieldValue.countDocuments({
+          itemId: args._id,
+        });
+        if (count > 0) {
+          throw new Error(
+            'This type is being used in dynamic field, first delete that field'
+          );
+        }
         await ListItem.findByIdAndDelete(args._id);
         return true;
       }
       case 'deleteListType': {
-        const count = await ListItem.countDocuments({
+        let count = await ListItem.countDocuments({
           types: { $elemMatch: { $in: [args._id] } },
         });
-        if (count === 0) {
-          await ListType.findByIdAndDelete(args._id);
-          return true;
-        } else {
-          throw new Error('This type is being used in a item');
+        if (count > 0) {
+          throw new Error('First delete the items under this type');
         }
+        count = 0;
+        count = await Field.countDocuments({
+          typeId: args._id,
+        });
+        if (count > 0) {
+          throw new Error(
+            'This type is being used in dynamic field, first delete that field'
+          );
+        }
+        await ListType.findByIdAndDelete(args._id);
+        return true;
       }
       default:
         throw new Error(
