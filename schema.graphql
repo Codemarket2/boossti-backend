@@ -193,7 +193,7 @@ type Posts @aws_api_key @aws_cognito_user_pools {
   count: Int
 }
 
-type Tags {
+type Tags @aws_api_key @aws_cognito_user_pools {
   tag: ListItem
 }
 
@@ -242,7 +242,7 @@ type ListTypes {
   count: Int
 }
 
-type ListType {
+type ListType @aws_api_key @aws_cognito_user_pools {
   _id: ID
   title: String
   slug: String
@@ -293,7 +293,7 @@ type ListItems {
   count: Int
 }
 
-type ListItem {
+type ListItem @aws_api_key @aws_cognito_user_pools {
   _id: ID
   title: String
   slug: String
