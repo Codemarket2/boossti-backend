@@ -7,10 +7,12 @@ interface IField extends ISchema {
   oneUserMultipleValues: boolean;
   fieldType: string;
   typeId: string;
+  position: number;
 }
 
 const FieldSchema = new Schema(
   {
+    position: { type: Number, required: true },
     parentId: {
       type: Schema.Types.ObjectId,
       ref: 'ListType',

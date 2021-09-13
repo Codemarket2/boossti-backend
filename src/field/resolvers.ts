@@ -6,5 +6,6 @@ export const fieldResolvers = {
   'Query getFieldValuesByItem': 'fieldLambda',
   'Mutation createFieldValue': 'fieldLambda',
   'Mutation updateFieldValue': 'fieldLambda',
+  'Mutation updateFieldPosition': 'fieldLambda',
   'Mutation deleteFieldValue': 'fieldLambda',
 };

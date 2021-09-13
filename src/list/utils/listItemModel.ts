@@ -27,7 +27,7 @@ const ListItemSchema: Schema = new Schema(
       type: Boolean,
       default: true,
     },
-    extra: [{ key: String, value: String }],
+    // extra: [{ key: String, value: String }],
     createdBy: {
       type: Schema.Types.ObjectId,
       ref: 'User',
@@ -41,7 +41,6 @@ const ListItemSchema: Schema = new Schema(
 );
 
 ListItemSchema.index({ slug: 1 });
-// ListItemSchema.plugin(slug);
 
 const ListItem: Model<IListItem> = model('ListItem', ListItemSchema);
 

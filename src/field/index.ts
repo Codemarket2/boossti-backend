@@ -44,12 +44,19 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
 
     switch (fieldName) {
       case 'getFieldsByType': {
-        const { page = 1, limit = 20, search = '', parentId } = args;
+        const {
+          page = 1,
+          limit = 20,
+          sortBy = 'position',
+          search = '',
+          parentId,
+        } = args;
         const data = await Field.find({
           parentId,
           label: { $regex: search, $options: 'i' },
         })
           .populate(fieldPopulate)
+          .sort(sortBy)
           .limit(limit * 1)
           .skip((page - 1) * limit);
 
@@ -63,7 +70,12 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         };
       }
       case 'createField': {
-        const field = await Field.create(args);
+        let position = 1;
+        const tempFields = await Field.find().sort({ position: -1 }).limit(1);
+        if (tempFields && tempFields.length > 0) {
+          position = parseInt(tempFields[0].position.toString()) + 1;
+        }
+        const field = await Field.create({ ...args, position });
         return await field.populate(fieldPopulate).execPopulate();
       }
       case 'updateField': {
@@ -71,6 +83,17 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           new: true,
           runValidators: true,
         });
+        return await field.populate(fieldPopulate).execPopulate();
+      }
+      case 'updateFieldPosition': {
+        const field: any = await Field.findByIdAndUpdate(
+          args._id,
+          { position: args.position },
+          {
+            new: true,
+            runValidators: true,
+          }
+        );
         return await field.populate(fieldPopulate).execPopulate();
       }
       case 'deleteField': {

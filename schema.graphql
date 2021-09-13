@@ -55,7 +55,13 @@ type Query {
     search: String
   ): Bookmarks
   getBookmark(_id: ID!): Bookmark
-  getFieldsByType(parentId: ID!, page: Int, limit: Int, search: String): Fields
+  getFieldsByType(
+    parentId: ID!
+    page: Int
+    sortBy: String
+    limit: Int
+    search: String
+  ): Fields
   getFieldValuesByItem(
     parentId: ID!
     field: ID!
@@ -95,7 +101,6 @@ type Mutation {
     title: String!
     description: String
     media: [MediaInput]
-    extra: [ExtraInput]
     active: Boolean
   ): ListItem
   updateListType(
@@ -111,7 +116,6 @@ type Mutation {
     title: String
     description: String
     media: [MediaInput]
-    extra: [ExtraInput]
     active: Boolean
   ): ListItem
   deleteListItem(_id: ID!): Boolean
@@ -138,6 +142,7 @@ type Mutation {
     multipleValues: Boolean
     oneUserMultipleValues: Boolean
   ): Field
+  updateFieldPosition(_id: ID!, position: Float!): Field
   deleteField(_id: ID!): Boolean
   createFieldValue(
     parentId: ID!
@@ -259,6 +264,7 @@ type Fields {
 
 type Field {
   _id: ID
+  position: Float
   label: String
   multipleValues: Boolean
   oneUserMultipleValues: Boolean
@@ -299,17 +305,6 @@ type ListItem @aws_api_key @aws_cognito_user_pools {
   slug: String
   description: String
   active: Boolean
-  extra: [Extra]
   media: [Media]
   types: [ListType]
-}
-
-type Extra {
-  key: String
-  value: String
-}
-
-input ExtraInput {
-  key: String
-  value: String
 }
