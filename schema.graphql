@@ -66,6 +66,11 @@ type Query {
 
   getComment(_id: ID!): Comment
   getCommentsByParentID(parentId: ID!, page: Int, limit: Int): Comments
+  getCommentCount(parentId: ID!): commentCount
+
+  getLike(_id: ID!): Like
+  getLikeCount(parentId: ID!): likeCount
+  getLikesByParentId(parentId: ID!, page: Int, limit: Int): Likes
 }
 
 type Mutation {
@@ -157,6 +162,10 @@ type Mutation {
   createComment(parentId: ID!, body: String!): Comment
   updateComment(_id: ID!, body: String): Comment
   deleteComment(_id: ID!): Boolean
+
+  createLike(parentId: ID!): Like
+  updateLike(_id: ID!): Like
+  deleteLike(_id: ID!): Boolean
 }
 
 type Bookmarks {
@@ -182,10 +191,29 @@ type Comment {
   createdAt: AWSDateTime
   updatedAt: AWSDateTime
 }
+type Like {
+  _id: ID
+  like: Boolean
+  parentId: ID
+  createdBy: User
+  createdAt: AWSDateTime
+}
 
 type Comments {
   count: Int
   data: [Comment]
+}
+type Likes {
+  count: Int
+  data: [Like]
+}
+
+type commentCount {
+  count: Int
+}
+
+type likeCount {
+  count: Int
 }
 
 type Posts @aws_api_key @aws_cognito_user_pools {
@@ -193,7 +221,7 @@ type Posts @aws_api_key @aws_cognito_user_pools {
   count: Int
 }
 
-type Tags {
+type Tags @aws_api_key @aws_cognito_user_pools {
   tag: ListItem
 }
 
@@ -242,7 +270,7 @@ type ListTypes {
   count: Int
 }
 
-type ListType {
+type ListType @aws_api_key @aws_cognito_user_pools {
   _id: ID
   title: String
   slug: String
@@ -293,7 +321,7 @@ type ListItems {
   count: Int
 }
 
-type ListItem {
+type ListItem @aws_api_key @aws_cognito_user_pools {
   _id: ID
   title: String
   slug: String
