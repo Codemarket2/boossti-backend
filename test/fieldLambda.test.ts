@@ -132,10 +132,10 @@ describe('Field Lambda Tests', () => {
     );
     expect(field.position).toBe(9.5);
     expect(field._id).toBeDefined();
-    expect(field.label).toBe(updatedMockField.label);
-    expect(field.fieldType).toBe(updatedMockField.fieldType);
-    expect(field.typeId).toBe(updatedMockField.typeId);
-    expect(field.multipleValues).toBe(updatedMockField.multipleValues);
+    expect(field.label).toBe(mockField.label);
+    expect(field.fieldType).toBe(mockField.fieldType);
+    expect(field.typeId).toBe(mockField.typeId);
+    expect(field.multipleValues).toBe(mockField.multipleValues);
     expect(field.createdBy._id).toBeDefined();
     expect(field.createdBy.name).toBe(mockUser.name);
     expect(field.createdBy.picture).toBe(mockUser.picture);

@@ -27,6 +27,7 @@ const fieldValuePopulate = [
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
     await DB();
+    await Field.updateMany({}, { position: 1 });
     const { fieldName } = event.info;
     const { identity } = event;
     const user = await getCurretnUser(identity);
@@ -71,7 +72,9 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       }
       case 'createField': {
         let position = 1;
-        const tempFields = await Field.find().sort({ position: -1 }).limit(1);
+        const tempFields = await Field.find({ parentId: args.parentId })
+          .sort({ position: -1 })
+          .limit(1);
         if (tempFields && tempFields.length > 0) {
           position = parseInt(tempFields[0].position.toString()) + 1;
         }
