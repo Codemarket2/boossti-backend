@@ -30,6 +30,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     await DB();
     const { fieldName } = event.info;
     const { identity } = event;
+    // updatAllFieldPosition();
     const user = await getCurretnUser(identity);
     let args = { ...event.arguments };
 
