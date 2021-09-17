@@ -54,13 +54,6 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
 
         return await getLike;
       }
-      case "getLikeCount": {
-        const count = await Like.countDocuments({
-          parentId: args.parentId,
-        });
-        return { count };
-      }
-
       case "getLikesByParentId": {
         await User.findById(args.userId);
         data = await Like.find({
