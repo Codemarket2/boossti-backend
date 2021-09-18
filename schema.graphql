@@ -75,7 +75,6 @@ type Query {
   getCommentCount(parentId: ID!): commentCount
 
   getLike(_id: ID!): Like
-  getLikeCount(parentId: ID!): likeCount
   getLikesByParentId(parentId: ID!, page: Int, limit: Int): Likes
 }
 
@@ -214,10 +213,6 @@ type Likes {
 }
 
 type commentCount {
-  count: Int
-}
-
-type likeCount {
   count: Int
 }
 
