@@ -76,6 +76,7 @@ type Query {
 
   getLike(_id: ID!): Like
   getLikesByParentId(parentId: ID!, page: Int, limit: Int): Likes
+  getActionCounts(parentId: ID!): actionCounts
 }
 
 type Mutation {
@@ -215,7 +216,11 @@ type Likes {
 type commentCount {
   count: Int
 }
-
+type actionCounts {
+  commentCount: Int
+  likeCount: Int
+  likedByUser: Like
+}
 type Posts @aws_api_key @aws_cognito_user_pools {
   data: [Post]
   count: Int

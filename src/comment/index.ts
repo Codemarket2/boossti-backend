@@ -4,6 +4,7 @@ import { AppSyncEvent } from "../utils/cutomTypes";
 import { User } from "../user/utils/userModel";
 import { Post } from "../post/utils/postModel";
 import { Comment } from "./utils/commentModel";
+import { Like } from "../like/utils/likeModel";
 import { LookoutMetrics } from "aws-sdk";
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
@@ -55,6 +56,19 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           parentId: args.parentId,
         });
         return { count };
+      }
+      case "getActionCounts": {
+        const commentCount = await Comment.countDocuments({
+          parentId: args.parentId,
+        });
+        const likeCount = await Like.countDocuments({
+          parentId: args.parentId,
+        });
+        const likedByUser = await Like.findOne({
+          parentId: args.parentId,
+          createdBy: user._id || "",
+        });
+        return { commentCount, likeCount, likedByUser };
       }
       case "getCommentsByParentID": {
         await User.findById(args.userId);
