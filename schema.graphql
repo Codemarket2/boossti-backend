@@ -7,6 +7,8 @@ schema {
 type Subscription {
   addedPost: Post @aws_subscribe(mutations: ["createPost"])
   updatedPost: Post @aws_subscribe(mutations: ["updatePost"])
+  addedComment(parentId: ID!): Comment
+    @aws_subscribe(mutations: ["createComment"])
 }
 
 type Query {
