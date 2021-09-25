@@ -8,7 +8,7 @@ type Subscription {
   addedPost: Post @aws_subscribe(mutations: ["createPost"])
   updatedPost: Post @aws_subscribe(mutations: ["updatePost"])
   addedComment(parentId: ID!): Comment
-    @aws_subscribe(mutations: ["createComment"])
+    @aws_subscribe(mutations: ["createComment", "updateComment"])
 }
 
 type Query {
@@ -74,7 +74,6 @@ type Query {
 
   getComment(_id: ID!): Comment
   getCommentsByParentID(parentId: ID!, page: Int, limit: Int): Comments
-
   getLike(_id: ID!): Like
   getLikesByParentId(parentId: ID!, page: Int, limit: Int): Likes
   getActionCounts(parentId: ID!): actionCounts
@@ -164,9 +163,8 @@ type Mutation {
     itemId: ID
   ): FieldValue
   deleteFieldValue(_id: ID!): Boolean
-
   createComment(parentId: ID!, body: String!): Comment
-  updateComment(_id: ID!, body: String): Comment
+  updateComment(parentId: ID!, _id: ID!, body: String): Comment
   deleteComment(_id: ID!): Boolean
 
   createLike(parentId: ID!): Like
