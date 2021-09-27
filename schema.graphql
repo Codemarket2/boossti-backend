@@ -9,6 +9,8 @@ type Subscription {
   updatedPost: Post @aws_subscribe(mutations: ["updatePost"])
   addedComment(parentId: ID!): Comment
     @aws_subscribe(mutations: ["createComment", "updateComment"])
+  addedListType: ListType @aws_subscribe(mutations: ["createListType"])
+  updateListType: ListType @aws_subscribe(mutations: ["updateListType"])
 }
 
 type Query {
