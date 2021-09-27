@@ -11,6 +11,14 @@ type Subscription {
     @aws_subscribe(mutations: ["createComment", "updateComment"])
   addedListType: ListType @aws_subscribe(mutations: ["createListType"])
   updateListType: ListType @aws_subscribe(mutations: ["updateListType"])
+  AddedListItem: ListItem @aws_subscribe(mutations: ["createListItem"])
+  updatedListItem: ListItem @aws_subscribe(mutations: ["updateListItem"])
+  addedField(parentId: ID!): Field @aws_subscribe(mutations: ["createField"])
+  updatedField: Field @aws_subscribe(mutations: ["updateField"])
+  addedFieldValue(parentId: ID!): FieldValue
+    @aws_subscribe(mutations: ["createFieldValue"])
+  updatedFieldValue(parentId: ID!): FieldValue
+    @aws_subscribe(mutations: ["updateFieldValue"])
 }
 
 type Query {
