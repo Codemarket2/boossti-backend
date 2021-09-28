@@ -298,6 +298,7 @@ type Fields {
 
 type Field {
   _id: ID
+  parentId: ID
   position: Float
   label: String
   multipleValues: Boolean
