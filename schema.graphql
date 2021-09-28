@@ -17,8 +17,7 @@ type Subscription {
   updatedField: Field @aws_subscribe(mutations: ["updateField"])
   addedFieldValue(parentId: ID!): FieldValue
     @aws_subscribe(mutations: ["createFieldValue"])
-  updatedFieldValue(parentId: ID!): FieldValue
-    @aws_subscribe(mutations: ["updateFieldValue"])
+  updatedFieldValue: FieldValue @aws_subscribe(mutations: ["updateFieldValue"])
 }
 
 type Query {
