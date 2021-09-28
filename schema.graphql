@@ -169,7 +169,7 @@ type Mutation {
 
   createLike(parentId: ID!): Like
   updateLike(_id: ID!): Like
-  deleteLike(_id: ID!): Boolean
+  deleteLike(parentId: ID!): Boolean
 }
 
 type Bookmarks {
@@ -215,7 +215,7 @@ type Likes {
 type actionCounts {
   commentCount: Int
   likeCount: Int
-  likedByUser: Like
+  likedByUser: Boolean
 }
 type Posts @aws_api_key @aws_cognito_user_pools {
   data: [Post]

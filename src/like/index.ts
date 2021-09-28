@@ -1,9 +1,9 @@
-import { DB } from "../utils/DB";
-import { getCurretnUser } from "../utils/authentication";
-import { AppSyncEvent } from "../utils/cutomTypes";
-import { User } from "../user/utils/userModel";
-import { LookoutMetrics } from "aws-sdk";
-import { Like } from "./utils/likeModel";
+import { DB } from '../utils/DB';
+import { getCurretnUser } from '../utils/authentication';
+import { AppSyncEvent } from '../utils/cutomTypes';
+import { User } from '../user/utils/userModel';
+import { LookoutMetrics } from 'aws-sdk';
+import { Like } from './utils/likeModel';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -12,18 +12,18 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     const { identity } = event;
     let args = { ...event.arguments };
     const user = await getCurretnUser(identity);
-    const userSelect = "name picture _id";
+    const userSelect = 'name picture _id';
     let data: any = [];
     const { page = 1, limit = 10 } = args;
     let tempLikes: any;
     const userPopulate = {
-      path: "createdBy",
+      path: 'createdBy',
       select: userSelect,
     };
-    if (fieldName.toLocaleLowerCase().includes("create") && user && user._id) {
+    if (fieldName.toLocaleLowerCase().includes('create') && user && user._id) {
       args = { ...args, createdBy: user._id };
     } else if (
-      fieldName.toLocaleLowerCase().includes("update") &&
+      fieldName.toLocaleLowerCase().includes('update') &&
       user &&
       user._id
     ) {
@@ -31,14 +31,14 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     }
 
     switch (fieldName) {
-      case "createLike": {
+      case 'createLike': {
         const like = await Like.create({
           ...args,
           like: true,
         });
         return await like.populate(userPopulate).execPopulate();
       }
-      case "updateLike": {
+      case 'updateLike': {
         tempLikes = await Like.findOneAndUpdate(
           { _id: args._id, createdBy: user._id },
           { like: false, updatedAt: new Date(), updatedBy: user._id },
@@ -49,12 +49,12 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         );
         return await tempLikes.populate(userPopulate).execPopulate();
       }
-      case "getLike": {
+      case 'getLike': {
         const getLike = await Like.findById(args._id).populate(userPopulate);
 
         return await getLike;
       }
-      case "getLikesByParentId": {
+      case 'getLikesByParentId': {
         await User.findById(args.userId);
         data = await Like.find({
           parentId: args.parentId,
@@ -70,15 +70,18 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           count,
         };
       }
-      case "deleteLike": {
-        await Like.findOneAndDelete({ _id: args._id, createdBy: user._id });
+      case 'deleteLike': {
+        await Like.findOneAndDelete({
+          parentId: args.parentId,
+          createdBy: user._id,
+        });
         return true;
       }
       default:
         await Like.findOne();
         await User.findOne();
         throw new Error(
-          "Something went wrong! Please check your Query or Mutation"
+          'Something went wrong! Please check your Query or Mutation'
         );
     }
   } catch (error) {
