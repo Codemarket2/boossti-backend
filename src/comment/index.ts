@@ -1,11 +1,11 @@
-import { DB } from "../utils/DB";
-import { getCurretnUser } from "../utils/authentication";
-import { AppSyncEvent } from "../utils/cutomTypes";
-import { User } from "../user/utils/userModel";
-import { Post } from "../post/utils/postModel";
-import { Comment } from "./utils/commentModel";
-import { Like } from "../like/utils/likeModel";
-import { LookoutMetrics } from "aws-sdk";
+import { DB } from '../utils/DB';
+import { getCurretnUser } from '../utils/authentication';
+import { AppSyncEvent } from '../utils/cutomTypes';
+import { User } from '../user/utils/userModel';
+import { Post } from '../post/utils/postModel';
+import { Comment } from './utils/commentModel';
+import { Like } from '../like/utils/likeModel';
+import { LookoutMetrics } from 'aws-sdk';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -20,15 +20,15 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     const user = await getCurretnUser(identity);
     const { page = 1, limit = 10 } = args;
 
-    const userSelect = "name picture _id";
+    const userSelect = 'name picture _id';
     const userPopulate = {
-      path: "createdBy",
+      path: 'createdBy',
       select: userSelect,
     };
-    if (fieldName.toLocaleLowerCase().includes("create") && user && user._id) {
+    if (fieldName.toLocaleLowerCase().includes('create') && user && user._id) {
       args = { ...args, createdBy: user._id };
     } else if (
-      fieldName.toLocaleLowerCase().includes("update") &&
+      fieldName.toLocaleLowerCase().includes('update') &&
       user &&
       user._id
     ) {
@@ -36,14 +36,14 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     }
 
     switch (fieldName) {
-      case "createComment": {
+      case 'createComment': {
         const comment = await Comment.create({
           ...args,
           createdBy: user._id,
         });
         return await comment.populate(userPopulate).execPopulate();
       }
-      case "getComment": {
+      case 'getComment': {
         const getComment = await Comment.findById(args._id).populate(
           userPopulate
         );
@@ -51,20 +51,26 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         return await getComment;
       }
 
-      case "getActionCounts": {
+      case 'getActionCounts': {
         const commentCount = await Comment.countDocuments({
           parentId: args.parentId,
         });
         const likeCount = await Like.countDocuments({
           parentId: args.parentId,
         });
-        const likedByUser = await Like.findOne({
-          parentId: args.parentId,
-          createdBy: user._id || "",
-        });
+        let likedByUser = false;
+        if (user && user._id) {
+          const tempLike = await Like.findOne({
+            parentId: args.parentId,
+            createdBy: user._id,
+          });
+          if (tempLike) {
+            likedByUser = true;
+          }
+        }
         return { commentCount, likeCount, likedByUser };
       }
-      case "getCommentsByParentID": {
+      case 'getCommentsByParentID': {
         await User.findById(args.userId);
         data = await Comment.find({
           parentId: args.parentId,
@@ -81,7 +87,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           count,
         };
       }
-      case "updateComment": {
+      case 'updateComment': {
         tempComment = await Comment.findOneAndUpdate(
           { _id: args._id, createdBy: user._id },
           { ...args, updatedAt: new Date(), updatedBy: user._id },
@@ -92,7 +98,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         );
         return await tempComment.populate(userPopulate).execPopulate();
       }
-      case "deleteComment": {
+      case 'deleteComment': {
         await Comment.findOneAndDelete({ _id: args._id, createdBy: user._id });
         return true;
       }
@@ -100,7 +106,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         await Post.findOne();
         await User.findOne();
         throw new Error(
-          "Something went wrong! Please check your Query or Mutation"
+          'Something went wrong! Please check your Query or Mutation'
         );
     }
   } catch (error) {

@@ -1,19 +1,19 @@
-import "../jest/jestSetup";
-import { handler } from "../src/like";
-import { mockUser, createMockEvent } from "../jest/defaultArguments";
+import '../jest/jestSetup';
+import { handler } from '../src/like';
+import { mockUser, createMockEvent } from '../jest/defaultArguments';
 
 const mockLike = {
-  _id: "60fc4d29f11b170008d92222",
-  parentId: "60fc4d29f11b170008d9ec48",
+  _id: '60fc4d29f11b170008d92222',
+  parentId: '60fc4d29f11b170008d9ec48',
 };
 
-const createLikeEvent = createMockEvent("createLike", mockLike);
+const createLikeEvent = createMockEvent('createLike', mockLike);
 
-describe("Like Lambda Tests", () => {
-  it("getLike test", async () => {
+describe('Like Lambda Tests', () => {
+  it('getLike test', async () => {
     await handler(createLikeEvent);
     const like = await handler(
-      createMockEvent("getLike", { _id: mockLike._id })
+      createMockEvent('getLike', { _id: mockLike._id })
     );
     expect(like._id).toBeDefined();
     expect(like.parentId).toBeDefined();
@@ -24,10 +24,10 @@ describe("Like Lambda Tests", () => {
     expect(like.createdBy.name).toBe(mockUser.name);
   });
 
-  it("getLikesByParentId test", async () => {
+  it('getLikesByParentId test', async () => {
     await handler(createLikeEvent);
     const like = await handler(
-      createMockEvent("getLikesByParentId", {
+      createMockEvent('getLikesByParentId', {
         parentId: mockLike.parentId,
       })
     );
@@ -39,7 +39,7 @@ describe("Like Lambda Tests", () => {
     expect(like.data[0].createdBy._id).toStrictEqual(mockUser._id);
     expect(like.data[0].createdBy.name).toBe(mockUser.name);
   });
-  it("createLike test", async () => {
+  it('createLike test', async () => {
     const like = await handler(createLikeEvent);
     expect(like._id).toBeDefined();
     expect(like.parentId).toBeDefined();
@@ -49,10 +49,10 @@ describe("Like Lambda Tests", () => {
     expect(like.createdAt).toBeDefined();
   });
 
-  it("updateLike test", async () => {
+  it('updateLike test', async () => {
     await handler(createLikeEvent);
     const like = await handler(
-      createMockEvent("updateLike", { _id: mockLike._id })
+      createMockEvent('updateLike', { _id: mockLike._id })
     );
     expect(like._id).toBeDefined();
     expect(like.parentId).toBeDefined();
@@ -62,10 +62,10 @@ describe("Like Lambda Tests", () => {
     expect(like.createdAt).toBeDefined();
   });
 
-  it("deleteLike test", async () => {
+  it('deleteLike test', async () => {
     await handler(createLikeEvent);
     const res = await handler(
-      createMockEvent("deleteLike", { _id: mockLike._id })
+      createMockEvent('deleteLike', { parentId: mockLike.parentId })
     );
     expect(res).toBe(true);
   });
