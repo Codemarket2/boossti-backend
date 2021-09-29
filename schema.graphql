@@ -5,21 +5,22 @@ schema {
 }
 
 type Subscription {
-  addedPost: Post @aws_subscribe(mutations: ["createPost"])
-  updatedPost: Post @aws_subscribe(mutations: ["updatePost"])
+  addedPost: Post @aws_subscribe(mutations: ["createPost", "updatePost"])
   addedComment(parentId: ID!): Comment
     @aws_subscribe(mutations: ["createComment", "updateComment"])
-  addedListType: ListType @aws_subscribe(mutations: ["createListType"])
-  updateListType: ListType @aws_subscribe(mutations: ["updateListType"])
-  AddedListItem: ListItem @aws_subscribe(mutations: ["createListItem"])
-  updatedListItem: ListItem @aws_subscribe(mutations: ["updateListItem"])
-  addedField(parentId: ID!): Field @aws_subscribe(mutations: ["createField"])
-  updatedField: Field @aws_subscribe(mutations: ["updateField"])
+  addedListType: ListType
+    @aws_subscribe(mutations: ["createListType", "updateListType"])
+  updatedListType(_id: ID!): ListType
+    @aws_subscribe(mutations: ["updateListType"])
+  addedListItem: ListItem
+    @aws_subscribe(mutations: ["createListItem", "updateListItem"])
+  updatedListItem(_id: ID!): ListItem
+    @aws_subscribe(mutations: ["updateListItem"])
+  addedField(parentId: ID!): Field
+    @aws_subscribe(mutations: ["createField", "updateField"])
   addedFieldValue(parentId: ID!): FieldValue
-    @aws_subscribe(mutations: ["createFieldValue"])
-  updatedFieldValue: FieldValue @aws_subscribe(mutations: ["updateFieldValue"])
-  addedLike(parentId: ID!): Like @aws_subscribe(mutations: ["createLike"])
-  # deletedLike:Boolean @aws_subscribe(mutations:["deleteLike"])
+    @aws_subscribe(mutations: ["createFieldValue", "updateFieldValue"])
+  addedLike: Like @aws_subscribe(mutations: ["createLike"])
 }
 
 type Query {
