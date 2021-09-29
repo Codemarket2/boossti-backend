@@ -18,6 +18,8 @@ type Subscription {
   addedFieldValue(parentId: ID!): FieldValue
     @aws_subscribe(mutations: ["createFieldValue"])
   updatedFieldValue: FieldValue @aws_subscribe(mutations: ["updateFieldValue"])
+  addedLike(parentId: ID!): Like @aws_subscribe(mutations: ["createLike"])
+  # deletedLike:Boolean @aws_subscribe(mutations:["deleteLike"])
 }
 
 type Query {
