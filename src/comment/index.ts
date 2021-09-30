@@ -5,7 +5,6 @@ import { User } from '../user/utils/userModel';
 import { Post } from '../post/utils/postModel';
 import { Comment } from './utils/commentModel';
 import { Like } from '../like/utils/likeModel';
-import { LookoutMetrics } from 'aws-sdk';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -44,17 +43,17 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         return await comment.populate(userPopulate).execPopulate();
       }
       case 'getComment': {
-        const getComment = await Comment.findById(args._id).populate(
-          userPopulate
-        );
-
-        return await getComment;
+        return await Comment.findById(args._id).populate(userPopulate);
       }
-
       case 'getActionCounts': {
-        const commentCount = await Comment.countDocuments({
-          parentId: args.parentId,
+        let commentCount = await Comment.countDocuments({
+          threadId: args.parentId,
         });
+        if (commentCount === 0) {
+          commentCount = await Comment.countDocuments({
+            parentId: args.parentId,
+          });
+        }
         const likeCount = await Like.countDocuments({
           parentId: args.parentId,
         });

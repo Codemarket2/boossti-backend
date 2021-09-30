@@ -5,6 +5,7 @@ import { mockUser, createMockEvent } from '../jest/defaultArguments';
 const mockComment = {
   _id: '60fc4d29f11b170008d92222',
   parentId: '60fc4d29f11b170008d9ec48',
+  threadId: '60fc4d29f11b170008d9ec48',
   body: 'Hello comment',
 };
 const updatedMockComment = {

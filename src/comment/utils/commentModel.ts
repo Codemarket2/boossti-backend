@@ -1,14 +1,15 @@
-import * as mongoose from "mongoose";
+import * as mongoose from 'mongoose';
 
 const commentSchema = new mongoose.Schema({
   body: String,
+  threadId: { type: mongoose.Schema.Types.ObjectId, required: true },
   parentId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
   },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: 'User',
     required: true,
   },
   createdAt: {
@@ -20,4 +21,4 @@ const commentSchema = new mongoose.Schema({
   },
 });
 
-export const Comment = mongoose.model("Comment", commentSchema);
+export const Comment = mongoose.model('Comment', commentSchema);
