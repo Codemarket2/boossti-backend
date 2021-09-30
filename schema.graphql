@@ -163,7 +163,7 @@ type Mutation {
   ): FieldValue
   deleteFieldValue(_id: ID!): Boolean
 
-  createComment(parentId: ID!, body: String!): Comment
+  createComment(threadId: ID!, parentId: ID!, body: String!): Comment
   updateComment(_id: ID!, body: String): Comment
   deleteComment(_id: ID!): Boolean
 
@@ -190,6 +190,7 @@ type Bookmark {
 type Comment {
   _id: ID
   body: String
+  threadId: ID
   parentId: ID
   createdBy: User
   createdAt: AWSDateTime

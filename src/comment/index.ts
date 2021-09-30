@@ -50,10 +50,9 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
 
         return await getComment;
       }
-
       case 'getActionCounts': {
         const commentCount = await Comment.countDocuments({
-          parentId: args.parentId,
+          threadId: args.parentId,
         });
         const likeCount = await Like.countDocuments({
           parentId: args.parentId,
