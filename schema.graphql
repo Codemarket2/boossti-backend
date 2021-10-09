@@ -51,7 +51,11 @@ type Query {
   getListType(_id: ID!): ListType
   getListItem(_id: ID!): ListItem
   getListTypeBySlug(slug: String!): ListType
+    @aws_api_key
+    @aws_cognito_user_pools
   getListItemBySlug(slug: String!): ListItem
+    @aws_api_key
+    @aws_cognito_user_pools
   getPosts(page: Int, limit: Int, sortBy: String, search: String): Posts
   getMyPosts(page: Int, limit: Int, sortBy: String, search: String): Posts
   getPostsByUserId(
