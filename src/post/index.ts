@@ -1,11 +1,11 @@
-import { DB } from "../utils/DB";
-import ListType from "../list/utils/listTypeModel";
-import ListItem from "../list/utils/listItemModel";
-import { getCurretnUser } from "../utils/authentication";
-import { Post } from "./utils/postModel";
-import { getTags } from "./utils/getTags";
-import { User } from "../user/utils/userModel";
-import { AppSyncEvent } from "../utils/cutomTypes";
+import { DB } from '../utils/DB';
+import ListType from '../list/utils/listTypeModel';
+import ListItem from '../list/utils/listItemModel';
+import { getCurretnUser } from '../utils/authentication';
+import { Post } from './utils/postModel';
+import { getTags } from './utils/getTags';
+import { User } from '../user/utils/userModel';
+import { AppSyncEvent } from '../utils/cutomTypes';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -20,38 +20,38 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     const {
       page = 1,
       limit = 50,
-      search = "",
+      search = '',
       active = null,
-      sortBy = "-createdAt",
+      sortBy = '-createdAt',
     } = args;
 
-    const userSelect = "_id userId name picture";
+    const userSelect = '_id userId name picture';
     const userPopulate = {
-      path: "createdBy",
+      path: 'createdBy',
       select: userSelect,
     };
 
     const postPopulate = [
       userPopulate,
       {
-        path: "tags.tag",
-        select: "title description media slug types",
+        path: 'tags.tag',
+        select: 'title description media slug types',
         populate: {
-          path: "types",
-          model: "ListType",
-          select: "slug",
+          path: 'types',
+          model: 'ListType',
+          select: 'slug',
         },
       },
     ];
 
     switch (fieldName) {
-      case "getPosts": {
+      case 'getPosts': {
         if (active !== null) {
           tempFilter.active = active;
         }
         data = await Post.find({
           ...tempFilter,
-          body: { $regex: search, $options: "i" },
+          body: { $regex: search, $options: 'i' },
         })
           .populate(postPopulate)
           .limit(limit * 1)
@@ -59,7 +59,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           .sort(sortBy);
         count = await Post.countDocuments({
           ...tempFilter,
-          body: { $regex: search, $options: "i" },
+          body: { $regex: search, $options: 'i' },
         });
         // console.log('data', data[0].tags);
         return {
@@ -67,14 +67,14 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           count,
         };
       }
-      case "getPost": {
+      case 'getPost': {
         return await Post.findById(args._id).populate(postPopulate);
       }
-      case "getMyPosts": {
+      case 'getMyPosts': {
         await User.findById(user._id);
         data = await Post.find({
           createdBy: user._id,
-          body: { $regex: search, $options: "i" },
+          body: { $regex: search, $options: 'i' },
         })
           .populate(postPopulate)
           .limit(limit * 1)
@@ -82,18 +82,18 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           .sort(sortBy);
         count = await Post.countDocuments({
           createdBy: user._id,
-          body: { $regex: search, $options: "i" },
+          body: { $regex: search, $options: 'i' },
         });
         return {
           data,
           count,
         };
       }
-      case "getPostsByUserId": {
+      case 'getPostsByUserId': {
         await User.findById(args.userId);
         data = await Post.find({
           createdBy: args.userId,
-          body: { $regex: search, $options: "i" },
+          body: { $regex: search, $options: 'i' },
         })
           .populate(postPopulate)
           .limit(limit * 1)
@@ -101,14 +101,14 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           .sort(sortBy);
         count = await Post.countDocuments({
           createdBy: args.userId,
-          body: { $regex: search, $options: "i" },
+          body: { $regex: search, $options: 'i' },
         });
         return {
           data,
           count,
         };
       }
-      case "createPost": {
+      case 'createPost': {
         const tags = await getTags(args.body);
         const post = await Post.create({
           ...args,
@@ -117,7 +117,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         });
         return await post.populate(postPopulate).execPopulate();
       }
-      case "updatePost": {
+      case 'updatePost': {
         const tags = await getTags(args.body);
         const post: any = await Post.findOneAndUpdate(
           { _id: args._id, createdBy: user._id },
@@ -129,7 +129,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         );
         return await post.populate(postPopulate).execPopulate();
       }
-      case "deletePost": {
+      case 'deletePost': {
         await Post.findOneAndDelete({ _id: args._id, createdBy: user._id });
         return true;
       }
@@ -139,7 +139,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           await ListItem.findOne();
         }
         throw new Error(
-          "Something went wrong! Please check your Query or Mutation"
+          'Something went wrong! Please check your Query or Mutation'
         );
     }
   } catch (error) {
