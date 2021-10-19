@@ -139,6 +139,7 @@ type Mutation {
     media: [MediaInput]
     active: Boolean
   ): ListItem
+  updatePublish(_id: ID!, publish: Boolean): ListItem
   deleteListItem(_id: ID!): Boolean
   deleteListType(_id: ID!): Boolean
   createPost(body: String!, media: [MediaInput]): Post
