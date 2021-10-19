@@ -45,6 +45,9 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     }
 
     switch (fieldName) {
+      case 'getFieldValue': {
+        return await FieldValue.findById(args._id).populate(fieldPopulate);
+      }
       case 'getFieldsByType': {
         const {
           page = 1,
