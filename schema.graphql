@@ -87,6 +87,7 @@ type Query {
     limit: Int
     onlyShowByUser: Boolean
   ): FieldValues
+  getFieldValue(_id: ID!): FieldValue
 
   getComment(_id: ID!): Comment
   getCommentsByParentID(parentId: ID!, page: Int, limit: Int): Comments
