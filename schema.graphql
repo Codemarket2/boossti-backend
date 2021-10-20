@@ -306,7 +306,7 @@ type Fields @aws_api_key @aws_cognito_user_pools {
   count: Int
 }
 
-type Field {
+type Field @aws_api_key @aws_cognito_user_pools {
   _id: ID
   parentId: ID
   position: Float
@@ -326,7 +326,7 @@ type FieldValues @aws_api_key @aws_cognito_user_pools {
   count: Int
 }
 
-type FieldValue {
+type FieldValue @aws_api_key @aws_cognito_user_pools {
   _id: ID
   parentId: ID
   field: ID
