@@ -79,14 +79,14 @@ type Query {
     sortBy: String
     limit: Int
     search: String
-  ): Fields
+  ): Fields @aws_api_key @aws_cognito_user_pools
   getFieldValuesByItem(
     parentId: ID!
     field: ID!
     page: Int
     limit: Int
     onlyShowByUser: Boolean
-  ): FieldValues
+  ): FieldValues @aws_api_key @aws_cognito_user_pools
   getFieldValue(_id: ID!): FieldValue
 
   getComment(_id: ID!): Comment
@@ -140,6 +140,7 @@ type Mutation {
     media: [MediaInput]
     active: Boolean
   ): ListItem
+  updatePublish(_id: ID!, publish: Boolean): ListItem
   deleteListItem(_id: ID!): Boolean
   deleteListType(_id: ID!): Boolean
   createPost(body: String!, media: [MediaInput]): Post
@@ -300,12 +301,12 @@ type ListType @aws_api_key @aws_cognito_user_pools {
   inUse: Boolean
 }
 
-type Fields {
+type Fields @aws_api_key @aws_cognito_user_pools {
   data: [Field]
   count: Int
 }
 
-type Field {
+type Field @aws_api_key @aws_cognito_user_pools {
   _id: ID
   parentId: ID
   position: Float
@@ -320,12 +321,12 @@ type Field {
   updatedAt: AWSDateTime
 }
 
-type FieldValues {
+type FieldValues @aws_api_key @aws_cognito_user_pools {
   data: [FieldValue]
   count: Int
 }
 
-type FieldValue {
+type FieldValue @aws_api_key @aws_cognito_user_pools {
   _id: ID
   parentId: ID
   field: ID
