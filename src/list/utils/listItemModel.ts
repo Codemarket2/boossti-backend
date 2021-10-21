@@ -1,4 +1,4 @@
-import { Schema, model, Model, Document } from 'mongoose';
+import { Schema, model, Model, Document } from "mongoose";
 
 export interface IListItem extends Document {
   title: string;
@@ -15,7 +15,7 @@ export interface IListItem extends Document {
 
 const ListItemSchema: Schema = new Schema(
   {
-    types: [{ type: Schema.Types.ObjectId, ref: 'ListType' }],
+    types: [{ type: Schema.Types.ObjectId, ref: "ListType" }],
     title: { type: String, unique: true },
     slug: String,
     description: String,
@@ -25,16 +25,20 @@ const ListItemSchema: Schema = new Schema(
     },
     active: {
       type: Boolean,
-      default: true,
+      default: false,
+    },
+    authenticateUser: {
+      type: Boolean,
+      default: false,
     },
     // extra: [{ key: String, value: String }],
     createdBy: {
       type: Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
     },
     updatedBy: {
       type: Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
     },
   },
   { timestamps: true }
@@ -42,6 +46,6 @@ const ListItemSchema: Schema = new Schema(
 
 ListItemSchema.index({ slug: 1 });
 
-const ListItem: Model<IListItem> = model('ListItem', ListItemSchema);
+const ListItem: Model<IListItem> = model("ListItem", ListItemSchema);
 
 export default ListItem;

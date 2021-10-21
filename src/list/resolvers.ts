@@ -9,6 +9,7 @@ export const listResolvers = {
   "Mutation createListItem": "listLambda",
   "Mutation updateListItem": "listLambda",
   "Mutation updatePublish": "listLambda",
+  "Mutation updateAuthentication": "listLambda",
   "Mutation updateListType": "listLambda",
   "Mutation deleteListItem": "listLambda",
   "Mutation deleteListType": "listLambda",
