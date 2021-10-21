@@ -141,6 +141,7 @@ type Mutation {
     active: Boolean
   ): ListItem
   updatePublish(_id: ID!, publish: Boolean): ListItem
+  updateAuthentication(_id: ID!, authenticateUser: Boolean): ListItem
   deleteListItem(_id: ID!): Boolean
   deleteListType(_id: ID!): Boolean
   createPost(body: String!, media: [MediaInput]): Post
@@ -348,6 +349,7 @@ type ListItem @aws_api_key @aws_cognito_user_pools {
   _id: ID
   title: String
   slug: String
+  authenticateUser: Boolean
   description: String
   active: Boolean
   media: [Media]

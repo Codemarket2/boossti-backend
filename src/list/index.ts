@@ -128,6 +128,14 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         );
         return await listItem.populate(itemTypePopulate).execPopulate();
       }
+      case "updateAuthentication": {
+        const listItem: any = await ListItem.findByIdAndUpdate(
+          { _id: args._id },
+          { authenticateUser: args.authenticateUser },
+          { new: true, runValidators: true }
+        );
+        return await listItem.populate(itemTypePopulate).execPopulate();
+      }
       case "updateListType": {
         return await ListType.findByIdAndUpdate(args._id, args, {
           new: true,
