@@ -239,6 +239,7 @@ type Likes {
 }
 
 type Logo{
+   _id: ID
   logo: String;
   description:String;
 }
