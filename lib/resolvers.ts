@@ -5,6 +5,7 @@ import { bookmarkResolvers } from "../src/bookmark/resolvers";
 import { fieldResolvers } from "../src/field/resolvers";
 import { commentResolvers } from "../src/comment/resolvers";
 import { likeResolvers } from "../src/like/resolvers";
+import { logoResolvers } from "../src/logo/resolvers";
 
 export default {
   ...userResolvers,
@@ -14,4 +15,5 @@ export default {
   ...bookmarkResolvers,
   ...fieldResolvers,
   ...commentResolvers,
+  ...logoResolvers,
 };
