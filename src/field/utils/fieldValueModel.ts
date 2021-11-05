@@ -20,6 +20,9 @@ const FieldValueSchema = new Schema(
       required: true,
     },
     value: { type: String },
+    valueDate: Date,
+    valueNumber: Number,
+    valueBoolean: Boolean,
     media: {
       type: [{ url: String, caption: String }],
       default: [],

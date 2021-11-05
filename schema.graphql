@@ -172,12 +172,18 @@ type Mutation {
     parentId: ID!
     field: ID!
     value: String
+    valueDate: AWSDateTime
+    valueNumber: Int
+    valueBoolean: Boolean
     media: [MediaInput]
     itemId: ID
   ): FieldValue
   updateFieldValue(
     _id: ID!
     value: String
+    valueDate: AWSDateTime
+    valueNumber: Int
+    valueBoolean: Boolean
     media: [MediaInput]
     itemId: ID
   ): FieldValue
@@ -216,6 +222,7 @@ type Comment {
   createdAt: AWSDateTime
   updatedAt: AWSDateTime
 }
+
 type Like {
   _id: ID
   like: Boolean
@@ -228,6 +235,7 @@ type Comments {
   count: Int
   data: [Comment]
 }
+
 type Likes {
   count: Int
   data: [Like]
@@ -332,6 +340,9 @@ type FieldValue @aws_api_key @aws_cognito_user_pools {
   parentId: ID
   field: ID
   value: String
+  valueDate: AWSDateTime
+  valueNumber: Int
+  valueBoolean: Boolean
   media: [Media]
   itemId: ListItem
   createdBy: User

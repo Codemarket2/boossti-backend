@@ -7,7 +7,6 @@ import FieldValue from './utils/fieldValueModel';
 import { getCurretnUser } from '../utils/authentication';
 import { AppSyncEvent } from '../utils/cutomTypes';
 import { userPopulate } from '../utils/populate';
-// import { updatAllFieldPosition } from '../../data-migration/fields';
 
 const fieldPopulate = [
   userPopulate,
@@ -30,7 +29,6 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     await DB();
     const { fieldName } = event.info;
     const { identity } = event;
-    // updatAllFieldPosition();
     const user = await getCurretnUser(identity);
     let args = { ...event.arguments };
 
