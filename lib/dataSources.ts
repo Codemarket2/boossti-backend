@@ -7,5 +7,4 @@ export default {
   postLambda: "src/post/index.handler",
   bookmarkLambda: "src/bookmark/index.handler",
   fieldLambda: "src/field/index.handler",
-  logoLambda: "src/logo/index.handler",
 };
