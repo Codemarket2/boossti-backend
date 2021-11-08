@@ -1,6 +1,6 @@
 import ListType from '../src/list/utils/listTypeModel';
 import Field from '../src/field/utils/fieldModel';
-import { DB } from '../src/utils/DB';
+import { DB } from './db';
 
 // await Field.updateMany({}, { position: 1 });
 
@@ -25,12 +25,7 @@ const updatePosition = async (parentId: string) => {
 
 const runScript = async () => {
   try {
-    let dbString =
-      'mongodb+srv://<username>:<password>@codemarket-staging.k16z7.mongodb.net/PROJECT_NAME?retryWrites=true&w=majority';
-    dbString = dbString.replace('PROJECT_NAME', process.argv[2]);
-    dbString = dbString.replace('<username>', process.argv[3]);
-    dbString = dbString.replace('<password>', process.argv[4]);
-    await DB(dbString);
+    await DB();
     await updatAllFieldPosition();
     process.exit();
   } catch (error) {
