@@ -94,7 +94,6 @@ type Query {
   getLike(_id: ID!): Like
   getLikesByParentId(parentId: ID!, page: Int, limit: Int): Likes
   getActionCounts(parentId: ID!): actionCounts
-  getLogoOrDescription(_id:ID!):Logo
 }
 
 type Mutation {
@@ -197,9 +196,6 @@ type Mutation {
   createLike(parentId: ID!): Like
   updateLike(_id: ID!): Like
   deleteLike(parentId: ID!): Boolean
-  createLogoOrDescription(logo:String,description:String): Logo
-  updateLogoOrDescription(_id:ID!,logo:String,description:String):Logo
-  deleteLogoOrDescription(_id:ID!):Boolean
 }
  
 
