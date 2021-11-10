@@ -1,4 +1,4 @@
-import { Schema, model, Model } from 'mongoose';
+import { Schema, model } from 'mongoose';
 import { ISchema } from '../../utils/cutomTypes';
 
 interface IField extends ISchema {
@@ -10,7 +10,7 @@ interface IField extends ISchema {
   position: number;
 }
 
-const FieldSchema = new Schema(
+const fieldSchema = new Schema<IField>(
   {
     position: { type: Number, required: true },
     parentId: {
@@ -49,8 +49,8 @@ const FieldSchema = new Schema(
   { timestamps: true }
 );
 
-FieldSchema.index({ parentId: 1, label: 1 }, { unique: true });
+fieldSchema.index({ parentId: 1, label: 1 }, { unique: true });
 
-const Field: Model<IField> = model('Field', FieldSchema);
+const Field = model<IField>('Field', fieldSchema);
 
 export default Field;

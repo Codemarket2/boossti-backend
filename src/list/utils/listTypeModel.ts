@@ -1,7 +1,7 @@
-import { Schema, model, Model } from 'mongoose';
+import { Schema, model } from 'mongoose';
 import { ISchema, IMedia } from '../../utils/cutomTypes';
 
-export interface IListtype extends ISchema {
+export interface IListType extends ISchema {
   title: string;
   description: string;
   media: [IMedia];
@@ -9,7 +9,7 @@ export interface IListtype extends ISchema {
   inUse: boolean;
 }
 
-const ListTypeSchema = new Schema(
+const listTypeSchema = new Schema<IListType>(
   {
     title: { type: String, unique: true },
     slug: String,
@@ -38,8 +38,8 @@ const ListTypeSchema = new Schema(
   { timestamps: true }
 );
 
-ListTypeSchema.index({ slug: 1 });
+listTypeSchema.index({ slug: 1 });
 
-const ListType: Model<IListtype> = model('ListType', ListTypeSchema);
+const ListType = model<IListType>('ListType', listTypeSchema);
 
 export default ListType;

@@ -1,21 +1,18 @@
-import { Schema, model, Model, Document } from "mongoose";
+import { Schema, model } from 'mongoose';
+import { ISchema, IMedia } from '../../utils/cutomTypes';
 
-export interface IListItem extends Document {
+export interface IListItem extends ISchema {
   title: string;
   slug: string;
   description: string;
-  media: [{ url: string; caption: string }];
+  media: [IMedia];
   active: boolean;
-  extra?: [{ key: string; value: string }];
-  createdBy: Schema.Types.ObjectId;
-  updatedBy?: Schema.Types.ObjectId;
-  createdAt: Date;
-  updatedAt: Date;
+  // extra?: [{ key: string; value: string }];
 }
 
-const ListItemSchema: Schema = new Schema(
+const listItemSchema = new Schema<IListItem>(
   {
-    types: [{ type: Schema.Types.ObjectId, ref: "ListType" }],
+    types: [{ type: Schema.Types.ObjectId, ref: 'ListType' }],
     title: { type: String, unique: true },
     slug: String,
     description: String,
@@ -34,18 +31,18 @@ const ListItemSchema: Schema = new Schema(
     // extra: [{ key: String, value: String }],
     createdBy: {
       type: Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
     },
     updatedBy: {
       type: Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-ListItemSchema.index({ slug: 1 });
+listItemSchema.index({ slug: 1 });
 
-const ListItem: Model<IListItem> = model("ListItem", ListItemSchema);
+const ListItem = model<IListItem>('ListItem', listItemSchema);
 
 export default ListItem;

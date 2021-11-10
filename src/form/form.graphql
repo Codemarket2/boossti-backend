@@ -1,0 +1,27 @@
+type Form {
+  _id: ID!
+  parentId: String
+  name: String
+  fields: [AWSJSON]
+  published: Boolean
+  createdBy: ID
+  updatedBy: ID
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+type Forms {
+  count: Int
+  data: [Form]
+}
+
+type Query {
+  getForm: Form
+  getForms: Forms
+}
+
+type Mutation {
+  createForm(parentId: String!, name: String!, fields: [AWSJSON], published: Boolean): Form
+  updateForm(_id: ID!, name: String, fields: [AWSJSON], published: Boolean): Form
+  deleteForm(_id: ID!): Boolean
+}

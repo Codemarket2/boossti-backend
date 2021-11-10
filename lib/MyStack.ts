@@ -5,6 +5,7 @@ import { UserPool } from '@aws-cdk/aws-cognito';
 import { Expiration, Duration } from '@aws-cdk/core';
 import dataSources from './dataSources';
 import resolvers from './resolvers';
+import schemas from './schemas';
 
 export default class MyStack extends sst.Stack {
   constructor(scope: sst.App, id: string, props?: sst.StackProps) {
@@ -12,18 +13,17 @@ export default class MyStack extends sst.Stack {
 
     const SENDER_EMAIL = StringParameter.valueForStringParameter(
       this,
-      '/codemarket/default/senderEmail'
+      '/codemarket/default/senderEmail',
     );
-    const USER_POOL_ID = StringParameter.valueForStringParameter(
-      this,
-      '/vijaa/userpoolId'
-    );
+    const USER_POOL_ID = StringParameter.valueForStringParameter(this, '/vijaa/userpoolId');
     const userPol = UserPool.fromUserPoolId(this, 'UserPool', USER_POOL_ID);
 
     // Create the AppSync GraphQL API
     const api = new sst.AppSyncApi(this, 'graphql', {
       graphqlApi: {
-        schema: 'schema.graphql',
+        // schema: ['src/schema.graphql', 'src/schema2.graphql'],
+        // schema: ['schema.graphql', 'src/form/form.graphql'],
+        schema: schemas,
         authorizationConfig: {
           defaultAuthorization: {
             authorizationType: AuthorizationType.USER_POOL,

@@ -6,18 +6,12 @@ schema {
 
 type Subscription {
   addedPost: Post @aws_subscribe(mutations: ["createPost", "updatePost"])
-  addedComment(parentId: ID!): Comment
-    @aws_subscribe(mutations: ["createComment", "updateComment"])
-  addedListType: ListType
-    @aws_subscribe(mutations: ["createListType", "updateListType"])
-  updatedListType(_id: ID!): ListType
-    @aws_subscribe(mutations: ["updateListType"])
-  addedListItem: ListItem
-    @aws_subscribe(mutations: ["createListItem", "updateListItem"])
-  updatedListItem(_id: ID!): ListItem
-    @aws_subscribe(mutations: ["updateListItem"])
-  addedField(parentId: ID!): Field
-    @aws_subscribe(mutations: ["createField", "updateField"])
+  addedComment(parentId: ID!): Comment @aws_subscribe(mutations: ["createComment", "updateComment"])
+  addedListType: ListType @aws_subscribe(mutations: ["createListType", "updateListType"])
+  updatedListType(_id: ID!): ListType @aws_subscribe(mutations: ["updateListType"])
+  addedListItem: ListItem @aws_subscribe(mutations: ["createListItem", "updateListItem"])
+  updatedListItem(_id: ID!): ListItem @aws_subscribe(mutations: ["updateListItem"])
+  addedField(parentId: ID!): Field @aws_subscribe(mutations: ["createField", "updateField"])
   addedFieldValue(parentId: ID!): FieldValue
     @aws_subscribe(mutations: ["createFieldValue", "updateFieldValue"])
   addedLike: Like @aws_subscribe(mutations: ["createLike"])
@@ -35,51 +29,23 @@ type Query {
   ): UserSearch @aws_cognito_user_pools(cognito_groups: ["superadmin"])
   getUser(_id: ID!): User @aws_api_key @aws_cognito_user_pools
   getUserByCognitoUserId(userId: String!): User
-  getListTypes(
-    page: Int
-    limit: Int
-    active: Boolean
-    search: String
-  ): ListTypes
-  getListItems(
-    page: Int
-    limit: Int
-    active: Boolean
-    search: String
-    types: [ID]
-  ): ListItems
+  getListTypes(page: Int, limit: Int, active: Boolean, search: String): ListTypes
+  getListItems(page: Int, limit: Int, active: Boolean, search: String, types: [ID]): ListItems
   getListType(_id: ID!): ListType
   getListItem(_id: ID!): ListItem
-  getListTypeBySlug(slug: String!): ListType
-    @aws_api_key
-    @aws_cognito_user_pools
-  getListItemBySlug(slug: String!): ListItem
-    @aws_api_key
-    @aws_cognito_user_pools
+  getListTypeBySlug(slug: String!): ListType @aws_api_key @aws_cognito_user_pools
+  getListItemBySlug(slug: String!): ListItem @aws_api_key @aws_cognito_user_pools
   getPosts(page: Int, limit: Int, sortBy: String, search: String): Posts
   getMyPosts(page: Int, limit: Int, sortBy: String, search: String): Posts
-  getPostsByUserId(
-    userId: ID!
-    page: Int
-    limit: Int
-    sortBy: String
-    search: String
-  ): Posts @aws_api_key @aws_cognito_user_pools
+  getPostsByUserId(userId: ID!, page: Int, limit: Int, sortBy: String, search: String): Posts
+    @aws_api_key
+    @aws_cognito_user_pools
   getPost(_id: ID!): Post
-  getMyBookmarks(
-    page: Int
-    limit: Int
-    sortBy: String
-    search: String
-  ): Bookmarks
+  getMyBookmarks(page: Int, limit: Int, sortBy: String, search: String): Bookmarks
   getBookmark(_id: ID!): Bookmark
-  getFieldsByType(
-    parentId: ID!
-    page: Int
-    sortBy: String
-    limit: Int
-    search: String
-  ): Fields @aws_api_key @aws_cognito_user_pools
+  getFieldsByType(parentId: ID!, page: Int, sortBy: String, limit: Int, search: String): Fields
+    @aws_api_key
+    @aws_cognito_user_pools
   getFieldValuesByItem(
     parentId: ID!
     field: ID!
@@ -97,12 +63,8 @@ type Query {
 }
 
 type Mutation {
-  createUser(
-    userId: String!
-    name: String!
-    email: String!
-    picture: String
-  ): User @aws_cognito_user_pools(cognito_groups: ["superadmin"])
+  createUser(userId: String!, name: String!, email: String!, picture: String): User
+    @aws_cognito_user_pools(cognito_groups: ["superadmin"])
   updateUser(
     userId: String!
     updatedBy: String!
@@ -197,7 +159,6 @@ type Mutation {
   updateLike(_id: ID!): Like
   deleteLike(parentId: ID!): Boolean
 }
- 
 
 type Bookmarks {
   data: [Bookmark]
@@ -242,10 +203,10 @@ type Likes {
   data: [Like]
 }
 
-type Logo{
-   _id: ID
-  logo: String;
-  description:String;
+type Logo {
+  _id: ID
+  logo: String
+  description: String
 }
 
 type actionCounts {

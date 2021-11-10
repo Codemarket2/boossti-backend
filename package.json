@@ -7,23 +7,28 @@
     "sst:test": "sst test",
     "prepare": "husky install"
   },
+  "eslintConfig": {
+    "extends": [
+      "serverless-stack"
+    ]
+  },
   "devDependencies": {
-    "@aws-cdk/assert": "1.111.0",
+    "@aws-cdk/assert": "1.126.0",
     "@shelf/jest-mongodb": "^2.0.1",
     "@types/aws-lambda": "^8.10.70",
-    "@types/mongoose": "^5.11.97",
     "husky": "^7.0.1",
     "jest": "^27.0.6",
+    "prettier": "2.4.1",
     "ts-jest": "^27.0.3"
   },
   "dependencies": {
-    "@aws-cdk/aws-appsync": "1.111.0",
-    "@aws-cdk/aws-cognito": "1.111.0",
-    "@aws-cdk/aws-ssm": "1.111.0",
-    "@aws-cdk/core": "1.111.0",
-    "@serverless-stack/cli": "0.32.0",
-    "@serverless-stack/resources": "0.32.0",
-    "aws-sdk": "^2.943.0",
+    "@aws-cdk/aws-appsync": "1.126.0",
+    "@aws-cdk/aws-cognito": "1.126.0",
+    "@aws-cdk/aws-ssm": "1.126.0",
+    "@aws-cdk/core": "1.126.0",
+    "@serverless-stack/cli": "0.50.3",
+    "@serverless-stack/resources": "0.50.3",
+    "aws-sdk": "^2.863.0",
     "mongodb-client-encryption": "^1.2.6",
     "mongoose": "^5.13.2",
     "slugify": "^1.6.0"
