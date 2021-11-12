@@ -4,6 +4,9 @@ import { ISchema } from '../../utils/cutomTypes';
 interface IFieldValue extends ISchema {
   field: string;
   value: string;
+  valueNumber: number;
+  valueBoolean: boolean;
+  valueDate: Date;
   itemId: string;
 }
 
@@ -45,7 +48,7 @@ const fieldValueSchema = new Schema<IFieldValue>(
       ref: 'User',
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const FieldValue = model<IFieldValue>('FieldValue', fieldValueSchema);

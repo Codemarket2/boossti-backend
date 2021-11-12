@@ -1,10 +1,26 @@
+type Field2 {
+  _id: ID
+  label: String
+  fieldType: String
+  options: AWSJSON
+  typeId: ListType
+}
+
+input Field2 {
+  label: String!
+  fieldType: String!
+  options: AWSJSON
+  typeId: ID
+}
+
 type Form {
   _id: ID!
-  parentId: String
+  parentId: ID
   name: String
-  fields: [AWSJSON]
+  fields: [Field2]
+  settings: AWSJSON
   published: Boolean
-  createdBy: ID
+  createdBy: User
   updatedBy: ID
   createdAt: AWSDateTime
   updatedAt: AWSDateTime
@@ -15,13 +31,68 @@ type Forms {
   data: [Form]
 }
 
+type FieldValue2 {
+  _id: ID
+  field: String
+  value: String
+  valueNumber: Float
+  valueBoolean: Boolean
+  valueDate: AWSDateTime
+  itemId: ListItem
+}
+
+input FieldValue2 {
+  field: String
+  value: String
+  valueNumber: Float
+  valueBoolean: Boolean
+  valueDate: AWSDateTime
+  itemId: ID
+}
+
+type Response {
+  _id: ID!
+  formId: ID
+  values: [FieldValue2]
+  createdBy: User
+  updatedBy: ID
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+type Responses {
+  count: Int
+  data: [Response]
+}
+
 type Query {
-  getForm: Form
+  getForm(_id: ID!): Form
   getForms: Forms
+  getResponse(_id: ID!): Response
+  getResponses: Responses
 }
 
 type Mutation {
-  createForm(parentId: String!, name: String!, fields: [AWSJSON], published: Boolean): Form
-  updateForm(_id: ID!, name: String, fields: [AWSJSON], published: Boolean): Form
-  deleteForm(_id: ID!): Boolean
+  createForm(parentId: ID, name: String!, fields: [Field2], settings: AWSJSON): Form
+  updateForm(
+    _id: ID!
+    parentId: ID
+    name: String
+    fields: [Field2]
+    settings: AWSJSON
+    published: Boolean
+  ): Form
+  deleteForm(_id: ID!): ID!
+  createResponse(formId: ID!, values: [FieldValue2]): Response
+  updateResponse(_id: ID!, values: [FieldValue2]): Response
+  deleteResponse(_id: ID!): ID!
+}
+
+type Subscription {
+  formSub: Form @aws_subscribe(mutations: ["createForm", "updateForm"])
+  updatedForm(_id: ID!): Form @aws_subscribe(mutations: ["updateForm"])
+  deletedForm: Form @aws_subscribe(mutations: ["deleteForm"])
+  responseSub: Response @aws_subscribe(mutations: ["createResponse", "updateResponse"])
+  updatedResponse(_id: ID!): Response @aws_subscribe(mutations: ["updateResponse"])
+  deletedResponse: Response @aws_subscribe(mutations: ["deleteResponse"])
 }

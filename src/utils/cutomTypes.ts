@@ -26,6 +26,7 @@ export type AppSyncEvent = {
 };
 
 export interface ISchema {
+  _id: string;
   createdBy: Schema.Types.ObjectId;
   updatedBy?: Schema.Types.ObjectId;
   createdAt: Date;

@@ -4,4 +4,9 @@ export const formResolvers = {
   'Mutation createForm': 'formLambda',
   'Mutation updateForm': 'formLambda',
   'Mutation deleteForm': 'formLambda',
+  'Query getResponse': 'responseLambda',
+  'Query getResponses': 'responseLambda',
+  'Mutation createResponse': 'responseLambda',
+  'Mutation updateResponse': 'responseLambda',
+  'Mutation deleteResponse': 'responseLambda',
 };

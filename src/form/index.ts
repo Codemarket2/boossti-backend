@@ -1,7 +1,27 @@
 import { DB } from '../utils/DB';
 import { FormModel } from './utils/formModel';
+import { ResponseModel } from './utils/responseModel';
+import ListType from '../list/utils/listTypeModel';
+import ListItem from '../list/utils/listItemModel';
 import { getCurretnUser } from '../utils/authentication';
 import { AppSyncEvent } from '../utils/cutomTypes';
+import { userPopulate } from '../utils/populate';
+
+const formPopulate = [
+  userPopulate,
+  {
+    path: 'fields.typeId',
+    select: 'title description media slug',
+  },
+];
+
+const responsePopulate = [
+  userPopulate,
+  {
+    path: 'values.itemId',
+    select: 'types title description media slug',
+  },
+];
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -21,11 +41,12 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
 
     switch (fieldName) {
       case 'getForm': {
-        return await FormModel.findById(args._id);
+        return await FormModel.findById(args._id).populate(formPopulate);
       }
       case 'getForms': {
         const { page = 1, limit = 20 } = args;
         const data = await FormModel.find()
+          .populate(formPopulate)
           .limit(limit * 1)
           .skip((page - 1) * limit);
         const count = await FormModel.countDocuments();
@@ -35,22 +56,58 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         };
       }
       case 'createForm': {
-        return await FormModel.create(args);
+        const form = await FormModel.create(args);
+        return await form.populate(formPopulate).execPopulate();
       }
       case 'updateForm': {
-        return await FormModel.findByIdAndUpdate(args._id, args, {
+        const form: any = await FormModel.findByIdAndUpdate(args._id, args, {
           new: true,
           runValidators: true,
         });
+        return await form.populate(formPopulate).execPopulate();
       }
       case 'deleteForm': {
         await FormModel.findByIdAndDelete(args._id);
-        return true;
+        return args._id;
+      }
+      case 'getResponse': {
+        return await ResponseModel.findById(args._id).populate(responsePopulate);
+      }
+      case 'getResponses': {
+        const { page = 1, limit = 20 } = args;
+        const data = await ResponseModel.find()
+          .populate(responsePopulate)
+          .limit(limit * 1)
+          .skip((page - 1) * limit);
+        const count = await ResponseModel.countDocuments();
+        return {
+          data,
+          count,
+        };
+      }
+      case 'createResponse': {
+        const form = await ResponseModel.create(args);
+        return await form.populate(responsePopulate).execPopulate();
+      }
+      case 'updateResponse': {
+        const form: any = await ResponseModel.findByIdAndUpdate(args._id, args, {
+          new: true,
+          runValidators: true,
+        });
+        return await form.populate(responsePopulate).execPopulate();
+      }
+      case 'deleteResponse': {
+        await ResponseModel.findByIdAndDelete(args._id);
+        return args._id;
       }
       default:
         throw new Error('Something went wrong! Please check your Query or Mutation');
     }
   } catch (error) {
+    if (error.runThis) {
+      await ListType.findOne();
+      await ListItem.findOne();
+    }
     const error2 = error;
     throw error2;
   }

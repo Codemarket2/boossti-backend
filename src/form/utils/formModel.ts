@@ -4,19 +4,36 @@ import { ISchema } from '../../utils/cutomTypes';
 export interface IForm extends ISchema {
   parentId: string;
   name: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  fields: [any];
+  fields: [IField];
+  settings: any;
   published: boolean;
 }
+
+interface IField {
+  label: string;
+  fieldType: string;
+  typeId: any;
+  options: any;
+}
+
+const fieldSchema = new Schema({
+  label: { type: String, required: true },
+  fieldType: { type: String, required: true },
+  typeId: {
+    type: Schema.Types.ObjectId,
+    ref: 'ListType',
+  },
+  options: Schema.Types.Mixed,
+});
 
 const formSchema = new Schema<IForm>(
   {
     parentId: {
       type: Schema.Types.ObjectId,
-      required: true,
     },
     name: { type: String, required: true },
-    fields: [{}],
+    fields: [fieldSchema],
+    settings: Schema.Types.Mixed,
     published: {
       type: Boolean,
       default: false,
