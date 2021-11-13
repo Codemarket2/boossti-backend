@@ -44,12 +44,12 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         return await FormModel.findById(args._id).populate(formPopulate);
       }
       case 'getForms': {
-        const { page = 1, limit = 20 } = args;
-        const data = await FormModel.find()
+        const { page = 1, limit = 20, search = '' } = args;
+        const data = await FormModel.find({ name: { $regex: search, $options: 'i' } })
           .populate(formPopulate)
           .limit(limit * 1)
           .skip((page - 1) * limit);
-        const count = await FormModel.countDocuments();
+        const count = await FormModel.countDocuments({ name: { $regex: search, $options: 'i' } });
         return {
           data,
           count,
