@@ -23,7 +23,10 @@ const fieldSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'ListType',
   },
-  options: Schema.Types.Mixed,
+  options: {
+    type: Schema.Types.Mixed,
+    default: { mutipleValues: false },
+  },
 });
 
 const formSchema = new Schema<IForm>(
@@ -33,7 +36,10 @@ const formSchema = new Schema<IForm>(
     },
     name: { type: String, required: true },
     fields: [fieldSchema],
-    settings: Schema.Types.Mixed,
+    settings: {
+      type: Schema.Types.Mixed,
+      default: { mutipleResponses: false },
+    },
     published: {
       type: Boolean,
       default: false,

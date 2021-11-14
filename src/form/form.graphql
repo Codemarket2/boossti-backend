@@ -6,7 +6,8 @@ type Field2 {
   typeId: ListType
 }
 
-input Field2 {
+input Field2Input {
+  _id: ID
   label: String!
   fieldType: String!
   options: AWSJSON
@@ -41,7 +42,7 @@ type FieldValue2 {
   itemId: ListItem
 }
 
-input FieldValue2 {
+input FieldValue2Input {
   field: String
   value: String
   valueNumber: Float
@@ -73,26 +74,26 @@ type Query {
 }
 
 type Mutation {
-  createForm(parentId: ID, name: String!, fields: [Field2], settings: AWSJSON): Form
+  createForm(parentId: ID, name: String!, fields: [Field2Input], settings: AWSJSON): Form
   updateForm(
     _id: ID!
     parentId: ID
     name: String
-    fields: [Field2]
+    fields: [Field2Input]
     settings: AWSJSON
     published: Boolean
   ): Form
   deleteForm(_id: ID!): ID!
-  createResponse(formId: ID!, values: [FieldValue2]): Response
-  updateResponse(_id: ID!, values: [FieldValue2]): Response
+  createResponse(formId: ID!, values: [FieldValue2Input]): Response
+  updateResponse(_id: ID!, values: [FieldValue2Input]): Response
   deleteResponse(_id: ID!): ID!
 }
 
-type Subscription {
-  formSub: Form @aws_subscribe(mutations: ["createForm", "updateForm"])
-  updatedForm(_id: ID!): Form @aws_subscribe(mutations: ["updateForm"])
-  deletedForm: Form @aws_subscribe(mutations: ["deleteForm"])
-  responseSub: Response @aws_subscribe(mutations: ["createResponse", "updateResponse"])
-  updatedResponse(_id: ID!): Response @aws_subscribe(mutations: ["updateResponse"])
-  deletedResponse: Response @aws_subscribe(mutations: ["deleteResponse"])
-}
+# type Subscription {
+#   formSub: Form @aws_subscribe(mutations: ["createForm", "updateForm"])
+#   updatedForm(_id: ID!): Form @aws_subscribe(mutations: ["updateForm"])
+#   deletedForm: Form @aws_subscribe(mutations: ["deleteForm"])
+#   responseSub: Response @aws_subscribe(mutations: ["createResponse", "updateResponse"])
+#   updatedResponse(_id: ID!): Response @aws_subscribe(mutations: ["updateResponse"])
+#   deletedResponse: Response @aws_subscribe(mutations: ["deleteResponse"])
+# }

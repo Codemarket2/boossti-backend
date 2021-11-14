@@ -3,6 +3,8 @@ import { handler } from '../src/form';
 import { handler as listHandler } from '../src/list';
 import { mockUser, createMockEvent } from '../jest/defaultArguments';
 
+// yarn test test/formLambda.test.ts
+
 export const mockListType = {
   _id: '60fc4d29f11b170008d9ec48',
   title: 'Doctors',
@@ -11,21 +13,20 @@ export const mockListType = {
 
 const mockListItem = {
   _id: '60fc4d29f11b170008d9ec46',
-  types: ['60fc4d29f11b170008d9ec48'],
+  types: [mockListType._id],
   title: 'Dr John',
   description: 'NYC',
   media: [],
 };
 
 const mockFields = [
-  { label: 'Doctor', fieldType: 'type', options: {}, typeId: '60fc4d29f11b170008d9ec48' },
+  { label: 'Doctor', fieldType: 'type', options: {}, typeId: mockListType._id },
   { label: 'Email', fieldType: 'email', options: {}, typeId: null },
   { label: 'Message', fieldType: 'textarea', options: {}, typeId: null },
 ];
 
 const mockForm = {
   _id: '60fc4d29f11b170008d9ec55',
-  title: 'Doctors',
   //   parentId: 'String',
   name: 'Contact Form',
   fields: mockFields,
