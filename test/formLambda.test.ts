@@ -62,6 +62,7 @@ const mockValues = [
 
 const mockResponse = {
   _id: '60fc4d29f11b170008d9ec99',
+  parentId: mockListItem._id,
   formId: mockForm._id,
   values: mockValues,
 };
@@ -167,6 +168,7 @@ describe('List Lambda Tests', () => {
     const response = await handler(createResponseEvent);
     expect(response._id).toBeDefined();
     expect(response.formId.toString()).toBe(mockResponse.formId);
+    expect(response.parentId._id.toString()).toBe(mockResponse.parentId);
     expect(response.values.length).toBe(mockResponse.values.length);
     expect(response.values[0].field).toBe(mockResponse.values[0].field);
     expect(response.values[0].itemId._id.toString()).toBe(mockResponse.values[0].itemId);
@@ -183,6 +185,7 @@ describe('List Lambda Tests', () => {
     const response = await handler(createMockEvent('updateResponse', updatedMockResponse));
     expect(response._id).toBeDefined();
     expect(response.formId.toString()).toBe(updatedMockResponse.formId);
+    expect(response.parentId._id.toString()).toBe(updatedMockResponse.parentId);
     expect(response.values.length).toBe(updatedMockResponse.values.length);
     expect(response.values[0].field).toBe(updatedMockResponse.values[0].field);
     expect(response.values[0].itemId._id.toString()).toBe(updatedMockResponse.values[0].itemId);
@@ -199,6 +202,7 @@ describe('List Lambda Tests', () => {
     const response = await handler(createMockEvent('getResponse', { _id: mockResponse._id }));
     expect(response._id).toBeDefined();
     expect(response.formId.toString()).toBe(mockResponse.formId);
+    expect(response.parentId._id.toString()).toBe(mockResponse.parentId);
     expect(response.values.length).toBe(mockResponse.values.length);
     expect(response.values[0].field).toBe(mockResponse.values[0].field);
     expect(response.values[0].itemId._id.toString()).toBe(mockResponse.values[0].itemId);
@@ -212,12 +216,16 @@ describe('List Lambda Tests', () => {
     await listHandler(createListItemEvent);
     await handler(createFormEvent);
     await handler(createResponseEvent);
-    const responses = await handler(createMockEvent('getResponses'));
+    const responses = await handler(
+      createMockEvent('getResponses', { formId: mockResponse.formId }),
+    );
+    console.log('responses', responses);
     expect(responses.data.length).toBe(1);
     expect(responses.count).toBe(1);
     const response = responses.data[0];
     expect(response._id).toBeDefined();
     expect(response.formId.toString()).toBe(mockResponse.formId);
+    expect(response.parentId._id.toString()).toBe(mockResponse.parentId);
     expect(response.values.length).toBe(mockResponse.values.length);
     expect(response.values[0].field).toBe(mockResponse.values[0].field);
     expect(response.values[0].itemId._id.toString()).toBe(mockResponse.values[0].itemId);

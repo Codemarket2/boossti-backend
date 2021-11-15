@@ -15,11 +15,17 @@ const formPopulate = [
   },
 ];
 
+const itemSelect = 'types title media slug';
+
 const responsePopulate = [
   userPopulate,
   {
+    path: 'parentId',
+    select: itemSelect,
+  },
+  {
     path: 'values.itemId',
-    select: 'types title description media slug',
+    select: itemSelect,
   },
 ];
 
@@ -74,12 +80,12 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         return await ResponseModel.findById(args._id).populate(responsePopulate);
       }
       case 'getResponses': {
-        const { page = 1, limit = 20 } = args;
-        const data = await ResponseModel.find()
+        const { page = 1, limit = 20, formId } = args;
+        const data = await ResponseModel.find({ formId })
           .populate(responsePopulate)
           .limit(limit * 1)
           .skip((page - 1) * limit);
-        const count = await ResponseModel.countDocuments();
+        const count = await ResponseModel.countDocuments({ formId });
         return {
           data,
           count,

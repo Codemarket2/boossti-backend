@@ -40,6 +40,10 @@ const responseSchema = new Schema<IResponse>(
       type: Schema.Types.ObjectId,
       required: true,
     },
+    parentId: {
+      type: Schema.Types.ObjectId,
+      ref: 'ListItem',
+    },
     values: [valueSchema],
     createdBy: {
       type: Schema.Types.ObjectId,
