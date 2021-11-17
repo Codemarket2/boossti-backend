@@ -90,7 +90,7 @@ type Mutation {
   createResponse(formId: ID!, parentId: ID, values: [FieldValue2Input]): Response
     @aws_api_key
     @aws_cognito_user_pools
-  updateResponse(_id: ID!, values: [FieldValue2Input]): Response
+  updateResponse(_id: ID!, formId: ID, values: [FieldValue2Input]): Response
   deleteResponse(_id: ID!): ID!
 }
 
@@ -98,7 +98,7 @@ type Subscription {
   formSub: Form @aws_subscribe(mutations: ["createForm", "updateForm"])
   updatedForm(_id: ID!): Form @aws_subscribe(mutations: ["updateForm"])
   deletedForm: ID @aws_subscribe(mutations: ["deleteForm"])
-  responseSub: Response @aws_subscribe(mutations: ["createResponse", "updateResponse"])
+  responseSub(formId: ID!): Response @aws_subscribe(mutations: ["createResponse", "updateResponse"])
   updatedResponse(_id: ID!): Response @aws_subscribe(mutations: ["updateResponse"])
   deletedResponse: ID @aws_subscribe(mutations: ["deleteResponse"])
 }
