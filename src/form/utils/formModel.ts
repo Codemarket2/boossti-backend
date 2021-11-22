@@ -34,7 +34,7 @@ const formSchema = new Schema<IForm>(
     parentId: {
       type: Schema.Types.ObjectId,
     },
-    name: { type: String, required: true },
+    name: { type: String },
     fields: [fieldSchema],
     settings: {
       type: Schema.Types.Mixed,

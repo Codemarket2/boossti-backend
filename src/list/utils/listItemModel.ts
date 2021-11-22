@@ -28,6 +28,10 @@ const listItemSchema = new Schema<IListItem>(
       type: Boolean,
       default: false,
     },
+    layouts: {
+      type: Schema.Types.Mixed,
+      default: {},
+    },
     // extra: [{ key: String, value: String }],
     createdBy: {
       type: Schema.Types.ObjectId,
