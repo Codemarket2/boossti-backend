@@ -9,4 +9,5 @@ export const formResolvers = {
   'Mutation createResponse': 'formLambda',
   'Mutation updateResponse': 'formLambda',
   'Mutation deleteResponse': 'formLambda',
+  'Query getMyResponse': 'formLambda',
 };

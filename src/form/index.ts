@@ -166,6 +166,18 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         await ResponseModel.findByIdAndDelete(args._id);
         return args._id;
       }
+      case 'getMyResponse': {
+        const { page = 1, limit = 20 } = args;
+        const data = await ResponseModel.find({ createdBy: user._id })
+          .populate(responsePopulate)
+          .limit(limit * 1)
+          .skip((page - 1) * limit);
+        const count = await ResponseModel.countDocuments({ createdBy: user._id });
+        return {
+          data,
+          count,
+        };
+      }
       default:
         throw new Error('Something went wrong! Please check your Query or Mutation');
     }
