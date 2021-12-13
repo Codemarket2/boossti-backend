@@ -1,6 +1,6 @@
 {
   "name": "backend",
-  "stage": "dev",
+  "stage": "default",
   "region": "us-east-1",
   "lint": true,
   "typeCheck": false

@@ -1,3 +1,2 @@
-STAGE=<stage>-<your-branch-name>
 MONGO_USERNAME=<your-mongodb-username>
 MONGO_PASSWORD=<your-mongodb-password>
