@@ -166,7 +166,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         await ResponseModel.findByIdAndDelete(args._id);
         return args._id;
       }
-      case 'getMyResponse': {
+      case 'getMyResponses': {
         const { page = 1, limit = 20 } = args;
         const data = await ResponseModel.find({ createdBy: user._id })
           .populate(responsePopulate)

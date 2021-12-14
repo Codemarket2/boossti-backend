@@ -74,7 +74,7 @@ type Query {
   getForms(page: Int, limit: Int, search: String): Forms
   getResponse(_id: ID!): Response
   getResponses(formId: ID!, page: Int, limit: Int): Responses
-  getMyResponse(page: Int, limit: Int): Response
+  getMyResponses(page: Int, limit: Int): Responses
 }
 
 type Mutation {

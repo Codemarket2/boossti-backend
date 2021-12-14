@@ -236,12 +236,12 @@ describe('List Lambda Tests', () => {
 
   // sonu
 
-  it('getMyResponse test', async () => {
+  it('getMyResponses test', async () => {
     await listHandler(createListTypeEvent);
     await listHandler(createListItemEvent);
     await handler(createFormEvent);
     await handler(createResponseEvent);
-    const responses = await handler(createMockEvent('getMyResponse'));
+    const responses = await handler(createMockEvent('getMyResponses'));
     console.log('responses', responses);
     expect(responses.data.length).toBe(1);
     expect(responses.count).toBe(1);
