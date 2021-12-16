@@ -13,7 +13,6 @@
     ]
   },
   "devDependencies": {
-    "@aws-cdk/assert": "1.126.0",
     "@shelf/jest-mongodb": "^2.0.1",
     "@types/aws-lambda": "^8.10.70",
     "husky": "^7.0.1",
