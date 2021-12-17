@@ -21,8 +21,6 @@ export default class MyStack extends sst.Stack {
     // Create the AppSync GraphQL API
     const api = new sst.AppSyncApi(this, 'graphql', {
       graphqlApi: {
-        // schema: ['src/schema.graphql', 'src/schema2.graphql'],
-        // schema: ['schema.graphql', 'src/form/form.graphql'],
         schema: schemas,
         authorizationConfig: {
           defaultAuthorization: {

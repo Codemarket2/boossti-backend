@@ -12,7 +12,15 @@ const userTypeId = '6119695c580ba8000904f06b';
 const importUserFromFile = async () => {
   let users: any = fs.readFileSync('data-migration/users.text');
   users = JSON.parse(users);
-  const res = await ListItem.create(users);
+  console.log('user');
+  const newUsers = await User.create(users);
+  console.log({ newUsers });
+};
+
+const saveUsertoFile = async () => {
+  const users = await User.find();
+  fs.writeFileSync('data-migration/users.text', JSON.stringify(users));
+  console.log(users);
 };
 
 const addUserToType = async () => {
@@ -31,14 +39,12 @@ const addUserToType = async () => {
   const res = await ListItem.create(users);
 };
 
-const runScript = async () => {
+(async () => {
   try {
     await DB();
-    await addUserToType();
+    // Run your function here
     process.exit();
   } catch (error) {
     console.log('Error', error);
   }
-};
-
-// runScript();
+})();

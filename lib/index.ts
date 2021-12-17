@@ -7,5 +7,5 @@ export default function main(app: sst.App): void {
     runtime: 'nodejs12.x',
   });
 
-  new MyStack(app, `stack`);
+  new MyStack(app, 'stack');
 }
