@@ -29,6 +29,21 @@ const responsePopulate = [
     select: itemSelect,
   },
 ];
+const myResponsePopulate = [
+  userPopulate,
+  {
+    path: 'parentId',
+    select: itemSelect,
+  },
+  {
+    path: 'values.itemId',
+    select: itemSelect,
+  },
+  {
+    path: 'formId',
+    select: 'name',
+  },
+];
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -169,7 +184,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       case 'getMyResponses': {
         const { page = 1, limit = 20 } = args;
         const data = await ResponseModel.find({ createdBy: user._id })
-          .populate(responsePopulate)
+          .populate(myResponsePopulate)
           .limit(limit * 1)
           .skip((page - 1) * limit);
         const count = await ResponseModel.countDocuments({ createdBy: user._id });

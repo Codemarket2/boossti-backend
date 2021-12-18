@@ -247,7 +247,6 @@ describe('List Lambda Tests', () => {
     expect(responses.count).toBe(1);
     const response = responses.data[0];
     expect(response._id).toBeDefined();
-    expect(response.formId.toString()).toBe(mockResponse.formId);
     expect(response.parentId._id.toString()).toBe(mockResponse.parentId);
     expect(response.values.length).toBe(mockResponse.values.length);
     expect(response.values[0].field).toBe(mockResponse.values[0].field);

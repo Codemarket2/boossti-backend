@@ -55,7 +55,7 @@ input FieldValue2Input {
 
 type Response @aws_api_key @aws_cognito_user_pools {
   _id: ID
-  formId: ID
+  formId: Form
   parentId: ID
   values: [FieldValue2]
   createdBy: User
