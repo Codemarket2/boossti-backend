@@ -55,6 +55,16 @@ input FieldValue2Input {
 
 type Response @aws_api_key @aws_cognito_user_pools {
   _id: ID
+  formId: ID
+  parentId: ID
+  values: [FieldValue2]
+  createdBy: User
+  updatedBy: ID
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+type Response2 @aws_api_key @aws_cognito_user_pools {
+  _id: ID
   formId: Form
   parentId: ID
   values: [FieldValue2]
@@ -68,13 +78,17 @@ type Responses {
   count: Int
   data: [Response]
 }
+type Responses2 {
+  count: Int
+  data: [Response2]
+}
 
 type Query {
   getForm(_id: ID!): Form @aws_api_key @aws_cognito_user_pools
   getForms(page: Int, limit: Int, search: String): Forms
   getResponse(_id: ID!): Response
   getResponses(formId: ID!, page: Int, limit: Int): Responses
-  getMyResponses(page: Int, limit: Int): Responses
+  getMyResponses(page: Int, limit: Int): Responses2
 }
 
 type Mutation {

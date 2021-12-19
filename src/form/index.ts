@@ -30,15 +30,7 @@ const responsePopulate = [
   },
 ];
 const myResponsePopulate = [
-  userPopulate,
-  {
-    path: 'parentId',
-    select: itemSelect,
-  },
-  {
-    path: 'values.itemId',
-    select: itemSelect,
-  },
+  ...responsePopulate,
   {
     path: 'formId',
     select: 'name',
