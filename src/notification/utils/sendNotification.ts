@@ -19,11 +19,11 @@ const { GRAPHQL_API_URL = '', GRAPHQL_API_KEY = '' } = process.env;
 type payload = {
   userId: string;
   title: string;
-  description: string;
-  link: string;
+  description?: string;
+  link?: string;
 };
 
-export const notifyUser = async (payload: payload) => {
+export const sendNotification = async (payload: payload) => {
   await axios({
     url: GRAPHQL_API_URL,
     method: 'post',

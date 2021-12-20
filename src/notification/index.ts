@@ -1,5 +1,5 @@
 import { AppSyncEvent } from '../utils/cutomTypes';
-import { notifyUser } from './utils/notify';
+import { sendNotification } from './utils/sendNotification';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   const {
@@ -12,7 +12,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       return await args;
     }
     case 'callNotification': {
-      await notifyUser(args);
+      await sendNotification(args);
       return args;
     }
     default:

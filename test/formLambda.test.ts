@@ -219,7 +219,6 @@ describe('List Lambda Tests', () => {
     const responses = await handler(
       createMockEvent('getResponses', { formId: mockResponse.formId }),
     );
-    console.log('responses', responses);
     expect(responses.data.length).toBe(1);
     expect(responses.count).toBe(1);
     const response = responses.data[0];
@@ -242,7 +241,6 @@ describe('List Lambda Tests', () => {
     await handler(createFormEvent);
     await handler(createResponseEvent);
     const responses = await handler(createMockEvent('getMyResponses'));
-    console.log('responses', responses);
     expect(responses.data.length).toBe(1);
     expect(responses.count).toBe(1);
     const response = responses.data[0];

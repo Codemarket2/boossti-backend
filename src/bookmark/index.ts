@@ -2,7 +2,7 @@ import { DB } from '../utils/DB';
 import { Bookmark } from './utils/bookmarkModel';
 // import { User } from '../user/utils/userModel';
 import { AppSyncEvent } from '../utils/cutomTypes';
-import { getCurretnUser } from '../utils/authentication';
+import { getCurrentUser } from '../utils/authentication';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -15,19 +15,13 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     // let createdBy;
     // let tempUser: any = null;
 
-    const user = await getCurretnUser(identity);
+    const user = await getCurrentUser(identity);
 
     // if (identity && identity.claims && identity.claims.sub) {
     //   createdBy = identity.claims.sub;
     // }
 
-    const {
-      page = 1,
-      limit = 50,
-      search = '',
-      active = null,
-      sortBy = '-createdAt',
-    } = args;
+    const { page = 1, limit = 50, search = '', active = null, sortBy = '-createdAt' } = args;
 
     switch (fieldName) {
       case 'getBookmark': {
@@ -72,7 +66,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           {
             new: true,
             runValidators: true,
-          }
+          },
         );
       }
       case 'deleteBookmark': {
@@ -80,9 +74,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         return true;
       }
       default:
-        throw new Error(
-          'Something went wrong! Please check your Query or Mutation'
-        );
+        throw new Error('Something went wrong! Please check your Query or Mutation');
     }
   } catch (error) {
     const error2 = error;

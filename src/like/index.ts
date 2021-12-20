@@ -1,5 +1,5 @@
 import { DB } from '../utils/DB';
-import { getCurretnUser } from '../utils/authentication';
+import { getCurrentUser } from '../utils/authentication';
 import { AppSyncEvent } from '../utils/cutomTypes';
 import { User } from '../user/utils/userModel';
 import { LookoutMetrics } from 'aws-sdk';
@@ -11,7 +11,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     const { fieldName } = event.info;
     const { identity } = event;
     let args = { ...event.arguments };
-    const user = await getCurretnUser(identity);
+    const user = await getCurrentUser(identity);
     const userSelect = 'name picture _id';
     let data: any = [];
     const { page = 1, limit = 10 } = args;
@@ -22,11 +22,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     };
     if (fieldName.toLocaleLowerCase().includes('create') && user && user._id) {
       args = { ...args, createdBy: user._id };
-    } else if (
-      fieldName.toLocaleLowerCase().includes('update') &&
-      user &&
-      user._id
-    ) {
+    } else if (fieldName.toLocaleLowerCase().includes('update') && user && user._id) {
       args = { ...args, updatedBy: user._id };
     }
 
@@ -45,7 +41,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           {
             new: true,
             runValidators: true,
-          }
+          },
         );
         return await tempLikes.populate(userPopulate).execPopulate();
       }
@@ -80,9 +76,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       default:
         await Like.findOne();
         await User.findOne();
-        throw new Error(
-          'Something went wrong! Please check your Query or Mutation'
-        );
+        throw new Error('Something went wrong! Please check your Query or Mutation');
     }
   } catch (error) {
     const error2 = error;

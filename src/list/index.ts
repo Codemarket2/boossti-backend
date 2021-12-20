@@ -4,7 +4,7 @@ import ListType from './utils/listTypeModel';
 import ListItem from './utils/listItemModel';
 import Field from '../field/utils/fieldModel';
 import FieldValue from '../field/utils/fieldValueModel';
-import { getCurretnUser } from '../utils/authentication';
+import { getCurrentUser } from '../utils/authentication';
 import { AppSyncEvent } from '../utils/cutomTypes';
 import getAdminFilter from '../utils/adminFilter';
 
@@ -13,7 +13,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     await DB();
     const { fieldName } = event.info;
     const { identity } = event;
-    const user = await getCurretnUser(identity);
+    const user = await getCurrentUser(identity);
     let args = { ...event.arguments };
     if (fieldName.toLocaleLowerCase().includes('create') && user && user._id) {
       args = { ...args, createdBy: user._id };
