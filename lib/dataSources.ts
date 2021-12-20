@@ -8,4 +8,5 @@ export default {
   bookmarkLambda: 'src/bookmark/index.handler',
   fieldLambda: 'src/field/index.handler',
   formLambda: 'src/form/index.handler',
+  notificationLambda: 'src/notification/index.handler',
 };
