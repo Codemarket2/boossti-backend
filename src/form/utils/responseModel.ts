@@ -39,6 +39,7 @@ const responseSchema = new Schema<IResponse>(
     formId: {
       type: Schema.Types.ObjectId,
       required: true,
+      ref: 'Form',
     },
     parentId: {
       type: Schema.Types.ObjectId,
