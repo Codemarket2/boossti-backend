@@ -36,7 +36,9 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           createdBy: user._id,
         });
         comment = await comment.populate(userPopulate).execPopulate();
-        await sendCommentNotification(comment);
+        if (!(process.env.NODE_ENV === 'test')) {
+          await sendCommentNotification(comment);
+        }
         return comment;
       }
       case 'getComment': {

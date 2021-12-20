@@ -1,7 +1,6 @@
 import axios from 'axios';
 import gql from 'graphql-tag';
 import graphql from 'graphql';
-const { print } = graphql;
 
 const notificationMuattion = gql`
   mutation MyMutation($userId: ID!, $title: String!, $description: String, $link: String) {
@@ -31,7 +30,7 @@ export const sendNotification = async (payload: payload) => {
       'x-api-key': GRAPHQL_API_KEY,
     },
     data: {
-      query: print(notificationMuattion),
+      query: graphql.print(notificationMuattion),
       variables: payload,
     },
   });

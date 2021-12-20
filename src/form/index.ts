@@ -114,7 +114,9 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         // Run Actions
         const form = await FormModel.findById(response.formId);
         await runFormActions(response, form);
-        await sendResponseNotification(form?.createdBy, response._id);
+        if (!(process.env.NODE_ENV === 'test')) {
+          await sendResponseNotification(form?.createdBy, response._id);
+        }
         return response;
       }
       case 'updateResponse': {
