@@ -6,6 +6,7 @@ import Field from '../field/utils/fieldModel';
 import FieldValue from '../field/utils/fieldValueModel';
 import { getCurretnUser } from '../utils/authentication';
 import { AppSyncEvent } from '../utils/cutomTypes';
+import getAdminFilter from '../utils/adminFilter';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -29,15 +30,6 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       path: 'types',
       select: itemTypeSelect,
     };
-
-    const filter: any = {};
-
-    if (
-      user &&
-      !(identity?.groups?.includes('superadmin') || identity?.groups?.includes('admin'))
-    ) {
-      filter.createdBy = user._id;
-    }
 
     switch (fieldName) {
       case 'getListTypes': {
@@ -71,9 +63,11 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           tempFilter.types = { $elemMatch: { $in: types } };
         }
 
+        const adminFilter = getAdminFilter(identity, user);
+
         const data = await ListItem.find({
           ...tempFilter,
-          ...filter,
+          ...adminFilter,
           $or: [
             { title: { $regex: search, $options: 'i' } },
             { description: { $regex: search, $options: 'i' } },
@@ -84,7 +78,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           .skip((page - 1) * limit);
         const count = await ListItem.countDocuments({
           ...tempFilter,
-          ...filter,
+          ...adminFilter,
           $or: [
             { title: { $regex: search, $options: 'i' } },
             { description: { $regex: search, $options: 'i' } },
