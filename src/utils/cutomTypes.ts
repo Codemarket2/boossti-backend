@@ -14,7 +14,7 @@ interface AppSyncIdentityCognito {
 }
 
 export interface IIdentity {
-  groups: any;
+  groups?: any;
   claims: AppSyncIdentityCognito;
 }
 

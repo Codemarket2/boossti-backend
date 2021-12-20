@@ -7,6 +7,7 @@ import { getCurretnUser } from '../utils/authentication';
 import { AppSyncEvent } from '../utils/cutomTypes';
 import { userPopulate } from '../utils/populate';
 import { sendEmail } from '../utils/email';
+import getAdminFilter from '../utils/adminFilter';
 
 const formPopulate = [
   userPopulate,
@@ -39,13 +40,6 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     } = event;
     const user = await getCurretnUser(identity);
     let args = { ...event.arguments };
-    const filter: any = {};
-    if (
-      user &&
-      !(identity?.groups?.includes('superadmin') || identity?.groups?.includes('admin'))
-    ) {
-      filter.createdBy = user._id;
-    }
 
     if (fieldName.toLocaleLowerCase().includes('create') && user && user._id) {
       args = { ...args, createdBy: user._id };
@@ -59,12 +53,16 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       }
       case 'getForms': {
         const { page = 1, limit = 20, search = '' } = args;
-        const data = await FormModel.find({ ...filter, name: { $regex: search, $options: 'i' } })
+        const adminFilter = getAdminFilter(identity, user);
+        const data = await FormModel.find({
+          ...adminFilter,
+          name: { $regex: search, $options: 'i' },
+        })
           .populate(formPopulate)
           .limit(limit * 1)
           .skip((page - 1) * limit);
         const count = await FormModel.countDocuments({
-          ...filter,
+          ...adminFilter,
           name: { $regex: search, $options: 'i' },
         });
         return {
