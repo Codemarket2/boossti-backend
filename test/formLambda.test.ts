@@ -234,6 +234,28 @@ describe('List Lambda Tests', () => {
     expect(response.updatedAt).toBeDefined();
   });
 
+  // sonu
+
+  it('getMyResponses test', async () => {
+    await listHandler(createListTypeEvent);
+    await listHandler(createListItemEvent);
+    await handler(createFormEvent);
+    await handler(createResponseEvent);
+    const responses = await handler(createMockEvent('getMyResponses'));
+    console.log('responses', responses);
+    expect(responses.data.length).toBe(1);
+    expect(responses.count).toBe(1);
+    const response = responses.data[0];
+    expect(response._id).toBeDefined();
+    expect(response.parentId._id.toString()).toBe(mockResponse.parentId);
+    expect(response.values.length).toBe(mockResponse.values.length);
+    expect(response.values[0].field).toBe(mockResponse.values[0].field);
+    expect(response.values[0].itemId._id.toString()).toBe(mockResponse.values[0].itemId);
+    expect(response.createdBy._id).toMatchObject(mockUser._id);
+    expect(response.createdAt).toBeDefined();
+    expect(response.updatedAt).toBeDefined();
+  });
+
   it('deleteResponse test', async () => {
     await listHandler(createListTypeEvent);
     await listHandler(createListItemEvent);
