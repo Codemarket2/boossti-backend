@@ -39,6 +39,13 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     } = event;
     const user = await getCurretnUser(identity);
     let args = { ...event.arguments };
+    const filter: any = {};
+    if (
+      user &&
+      !(identity?.groups?.includes('superadmin') || identity?.groups?.includes('admin'))
+    ) {
+      filter.createdBy = user._id;
+    }
 
     if (fieldName.toLocaleLowerCase().includes('create') && user && user._id) {
       args = { ...args, createdBy: user._id };
@@ -52,11 +59,14 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       }
       case 'getForms': {
         const { page = 1, limit = 20, search = '' } = args;
-        const data = await FormModel.find({ name: { $regex: search, $options: 'i' } })
+        const data = await FormModel.find({ ...filter, name: { $regex: search, $options: 'i' } })
           .populate(formPopulate)
           .limit(limit * 1)
           .skip((page - 1) * limit);
-        const count = await FormModel.countDocuments({ name: { $regex: search, $options: 'i' } });
+        const count = await FormModel.countDocuments({
+          ...filter,
+          name: { $regex: search, $options: 'i' },
+        });
         return {
           data,
           count,
