@@ -46,6 +46,8 @@ export default class MyStack extends sst.Stack {
           SENDER_EMAIL: SENDER_EMAIL,
           DATABASE: `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@codemarket-staging.k16z7.mongodb.net/${scope.stage}?retryWrites=true&w=majority`,
           USER_POOL_ID: USER_POOL_ID,
+          GRAPHQL_API_URL: process.env.GRAPHQL_API_URL || 'old',
+          GRAPHQL_API_KEY: process.env.GRAPHQL_API_KEY || '',
         },
       },
       dataSources: dataSources,

@@ -1,0 +1,17 @@
+type Notification @aws_api_key @aws_cognito_user_pools {
+  userId: ID!
+  title: String!
+  description: String
+  link: String
+}
+
+type Mutation {
+  sendNotification(userId: ID!, title: String!, description: String, link: String): Notification
+    @aws_api_key
+    @aws_cognito_user_pools
+  callNotification(userId: ID!, title: String!, description: String, link: String): Notification
+}
+
+type Subscription {
+  notificationSub(userId: ID!): Notification @aws_subscribe(mutations: ["sendNotification"])
+}

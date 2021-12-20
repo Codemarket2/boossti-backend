@@ -1,2 +1,4 @@
 MONGO_USERNAME=<your-mongodb-username>
 MONGO_PASSWORD=<your-mongodb-password>
+GRAPHQL_API_URL=<your-graphql-api-url>
+GRAPHQL_API_KEY=<your-graphql-api-key>
