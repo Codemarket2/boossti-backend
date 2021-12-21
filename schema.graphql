@@ -336,4 +336,5 @@ type ListItem @aws_api_key @aws_cognito_user_pools {
   media: [Media]
   types: [ListType]
   layouts: AWSJSON
+  createdBy: ID
 }
