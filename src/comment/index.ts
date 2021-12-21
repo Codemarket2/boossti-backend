@@ -1,10 +1,11 @@
 import { DB } from '../utils/DB';
-import { getCurretnUser } from '../utils/authentication';
+import { getCurrentUser } from '../utils/authentication';
 import { AppSyncEvent } from '../utils/cutomTypes';
 import { User } from '../user/utils/userModel';
 import { Post } from '../post/utils/postModel';
 import { Comment } from './utils/commentModel';
 import { Like } from '../like/utils/likeModel';
+import { sendCommentNotification } from './utils/commentNotification';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -13,10 +14,8 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     const { identity } = event;
     let args = { ...event.arguments };
     let data: any = [];
-    const count = 0;
     let tempComment: any;
-    const tempFilter: any = {};
-    const user = await getCurretnUser(identity);
+    const user = await getCurrentUser(identity);
     const { page = 1, limit = 10 } = args;
 
     const userSelect = 'name picture _id';
@@ -26,21 +25,21 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     };
     if (fieldName.toLocaleLowerCase().includes('create') && user && user._id) {
       args = { ...args, createdBy: user._id };
-    } else if (
-      fieldName.toLocaleLowerCase().includes('update') &&
-      user &&
-      user._id
-    ) {
+    } else if (fieldName.toLocaleLowerCase().includes('update') && user && user._id) {
       args = { ...args, updatedBy: user._id };
     }
 
     switch (fieldName) {
       case 'createComment': {
-        const comment = await Comment.create({
+        let comment = await Comment.create({
           ...args,
           createdBy: user._id,
         });
-        return await comment.populate(userPopulate).execPopulate();
+        comment = await comment.populate(userPopulate).execPopulate();
+        if (!(process.env.NODE_ENV === 'test')) {
+          await sendCommentNotification(comment);
+        }
+        return comment;
       }
       case 'getComment': {
         return await Comment.findById(args._id).populate(userPopulate);
@@ -77,7 +76,6 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           .populate(userPopulate)
           .limit(limit * 1)
           .skip((page - 1) * limit);
-
         const count = await Comment.countDocuments({
           parentId: args.parentId,
         });
@@ -93,7 +91,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           {
             new: true,
             runValidators: true,
-          }
+          },
         );
         return await tempComment.populate(userPopulate).execPopulate();
       }
@@ -104,9 +102,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       default:
         await Post.findOne();
         await User.findOne();
-        throw new Error(
-          'Something went wrong! Please check your Query or Mutation'
-        );
+        throw new Error('Something went wrong! Please check your Query or Mutation');
     }
   } catch (error) {
     const error2 = error;

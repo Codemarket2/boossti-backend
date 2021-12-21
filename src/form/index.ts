@@ -3,10 +3,11 @@ import { FormModel } from './utils/formModel';
 import { ResponseModel } from './utils/responseModel';
 import ListType from '../list/utils/listTypeModel';
 import ListItem from '../list/utils/listItemModel';
-import { getCurretnUser } from '../utils/authentication';
+import { getCurrentUser } from '../utils/authentication';
 import { AppSyncEvent } from '../utils/cutomTypes';
 import { userPopulate } from '../utils/populate';
-import { sendEmail } from '../utils/email';
+import { runFormActions } from './utils/actions';
+import { sendResponseNotification } from './utils/responseNotification';
 import getAdminFilter from '../utils/adminFilter';
 
 const formPopulate = [
@@ -45,7 +46,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       info: { fieldName },
       identity,
     } = event;
-    const user = await getCurretnUser(identity);
+    const user = await getCurrentUser(identity);
     let args = { ...event.arguments };
 
     if (fieldName.toLocaleLowerCase().includes('create') && user && user._id) {
@@ -112,61 +113,9 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         response = await response.populate(responsePopulate).execPopulate();
         // Run Actions
         const form = await FormModel.findById(response.formId);
-        if (form && form?.settings?.actions && form?.settings?.actions?.length > 0) {
-          form?.settings?.actions?.forEach(async (action) => {
-            if (
-              action?.active &&
-              action?.actionType === 'sendEmail' &&
-              action?.senderEmail &&
-              action?.subject &&
-              action?.body &&
-              (action?.receiverEmail || (action?.useEmailField && action?.emailFieldId))
-            ) {
-              const payload: any = {
-                from: action?.senderEmail,
-                body: action?.body,
-                subject: action?.subject,
-              };
-
-              if (action?.variables && action?.variables?.length > 0) {
-                const variables = action?.variables?.map((v) => {
-                  v = { ...v, value: '' };
-                  const variableValue = response?.values?.filter(
-                    (value) => value.field === v?.field,
-                  )[0];
-                  if (variableValue) {
-                    v.value =
-                      variableValue.value ||
-                      variableValue.valueNumber ||
-                      variableValue.valueBoolean ||
-                      variableValue.valueDate;
-                  }
-                  return v;
-                });
-                variables.forEach((variable) => {
-                  payload.subject = payload.subject
-                    .split(`{{${variable.name}}}`)
-                    .join(variable.value || '');
-                  payload.body = payload.body
-                    .split(`{{${variable.name}}}`)
-                    .join(variable.value || '');
-                });
-              }
-
-              if (action?.useEmailField && action?.emailFieldId) {
-                const emailField = response?.values?.filter(
-                  (value) => value.field === action?.emailFieldId,
-                )[0];
-                if (emailField) {
-                  payload.to = [emailField?.value];
-                  await sendEmail(payload);
-                }
-              } else {
-                payload.to = [action?.receiverEmail];
-                await sendEmail(payload);
-              }
-            }
-          });
+        await runFormActions(response, form);
+        if (!(process.env.NODE_ENV === 'test')) {
+          await sendResponseNotification(form?.createdBy, response._id);
         }
         return response;
       }

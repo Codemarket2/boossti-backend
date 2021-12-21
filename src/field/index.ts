@@ -4,7 +4,7 @@ import ListItem from '../list/utils/listItemModel';
 import { User } from '../user/utils/userModel';
 import Field from './utils/fieldModel';
 import FieldValue from './utils/fieldValueModel';
-import { getCurretnUser } from '../utils/authentication';
+import { getCurrentUser } from '../utils/authentication';
 import { AppSyncEvent } from '../utils/cutomTypes';
 import { userPopulate } from '../utils/populate';
 
@@ -29,16 +29,12 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     await DB();
     const { fieldName } = event.info;
     const { identity } = event;
-    const user = await getCurretnUser(identity);
+    const user = await getCurrentUser(identity);
     let args = { ...event.arguments };
 
     if (fieldName.toLocaleLowerCase().includes('create') && user && user._id) {
       args = { ...args, createdBy: user._id };
-    } else if (
-      fieldName.toLocaleLowerCase().includes('update') &&
-      user &&
-      user._id
-    ) {
+    } else if (fieldName.toLocaleLowerCase().includes('update') && user && user._id) {
       args = { ...args, updatedBy: user._id };
     }
 
@@ -47,13 +43,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         return await FieldValue.findById(args._id).populate(fieldPopulate);
       }
       case 'getFieldsByType': {
-        const {
-          page = 1,
-          limit = 20,
-          sortBy = 'position',
-          search = '',
-          parentId,
-        } = args;
+        const { page = 1, limit = 20, sortBy = 'position', search = '', parentId } = args;
         const data = await Field.find({
           parentId,
           label: { $regex: search, $options: 'i' },
@@ -97,7 +87,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           {
             new: true,
             runValidators: true,
-          }
+          },
         );
         return await field.populate(fieldPopulate).execPopulate();
       }
@@ -106,13 +96,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         return true;
       }
       case 'getFieldValuesByItem': {
-        const {
-          page = 1,
-          limit = 20,
-          parentId,
-          field,
-          onlyShowByUser = null,
-        } = args;
+        const { page = 1, limit = 20, parentId, field, onlyShowByUser = null } = args;
         const tempFilter: any = {};
 
         if (onlyShowByUser) {
@@ -140,14 +124,10 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         return await fieldValue.populate(fieldValuePopulate).execPopulate();
       }
       case 'updateFieldValue': {
-        const fieldValue: any = await FieldValue.findByIdAndUpdate(
-          args._id,
-          args,
-          {
-            new: true,
-            runValidators: true,
-          }
-        );
+        const fieldValue: any = await FieldValue.findByIdAndUpdate(args._id, args, {
+          new: true,
+          runValidators: true,
+        });
         return await fieldValue.populate(fieldValuePopulate).execPopulate();
       }
       case 'deleteFieldValue': {
@@ -160,9 +140,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           await User.findOne();
           await ListItem.findOne();
         }
-        throw new Error(
-          'Something went wrong! Please check your Query or Mutation'
-        );
+        throw new Error('Something went wrong! Please check your Query or Mutation');
     }
   } catch (error) {
     const error2 = error;

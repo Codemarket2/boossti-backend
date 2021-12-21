@@ -3,7 +3,7 @@ import { DB } from '../utils/DB';
 import { User } from './utils/userModel';
 import { adminToggleUserStatus } from './utils/helper';
 import { AppSyncEvent } from '../utils/cutomTypes';
-import { getCurretnUser } from '../utils/authentication';
+import { getCurrentUser } from '../utils/authentication';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -15,7 +15,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     let users: any = [];
     let count = 0;
 
-    const authUser = await getCurretnUser(identity);
+    const authUser = await getCurrentUser(identity);
 
     switch (fieldName) {
       case 'getUsers':
@@ -97,7 +97,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           {
             new: true,
             runValidators: true,
-          }
+          },
         );
       case 'cancelUserSubscription':
         tempSubscription = {
@@ -120,7 +120,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           {
             new: true,
             runValidators: false,
-          }
+          },
         );
       case 'updateUser':
         return await User.findOneAndUpdate(
@@ -131,12 +131,10 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           {
             new: true,
             runValidators: true,
-          }
+          },
         );
       default:
-        throw new Error(
-          'Something went wrong! Please check your resolver mapping template'
-        );
+        throw new Error('Something went wrong! Please check your resolver mapping template');
     }
   } catch (error) {
     // console.log('error', error);

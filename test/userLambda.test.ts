@@ -5,8 +5,7 @@ import { mockUserId, mock_id, createMockEvent } from '../jest/defaultArguments';
 export const newMockUser = {
   name: 'Mr Robot',
   email: 'mrrobot@domain.com',
-  picture:
-    'https://codemarket-common-bucket.s3.amazonaws.com/public/defaults/pictures/default.jpg',
+  picture: 'https://codemarket-common-bucket.s3.amazonaws.com/public/defaults/pictures/default.jpg',
   userId: mockUserId + 'z',
 };
 
@@ -28,7 +27,7 @@ const updateUserStatusEvent = createMockEvent('updateUserStatus', {
 });
 
 jest.mock('../src/user/utils/helper', () => {
-  const adminToggleUserStatus = () => console.log('adminToggleUserStatus mock');
+  const adminToggleUserStatus = () => {};
   return { adminToggleUserStatus };
 });
 

@@ -1,7 +1,7 @@
 import { DB } from '../utils/DB';
 import ListType from '../list/utils/listTypeModel';
 import ListItem from '../list/utils/listItemModel';
-import { getCurretnUser } from '../utils/authentication';
+import { getCurrentUser } from '../utils/authentication';
 import { Post } from './utils/postModel';
 import { getTags } from './utils/getTags';
 import { User } from '../user/utils/userModel';
@@ -15,15 +15,9 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     let data: any = [];
     let count = 0;
     const tempFilter: any = {};
-    const user = await getCurretnUser(identity);
+    const user = await getCurrentUser(identity);
 
-    const {
-      page = 1,
-      limit = 50,
-      search = '',
-      active = null,
-      sortBy = '-createdAt',
-    } = args;
+    const { page = 1, limit = 50, search = '', active = null, sortBy = '-createdAt' } = args;
 
     const userSelect = '_id userId name picture';
     const userPopulate = {
@@ -125,7 +119,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           {
             new: true,
             runValidators: true,
-          }
+          },
         );
         return await post.populate(postPopulate).execPopulate();
       }
@@ -138,9 +132,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           await ListType.findOne();
           await ListItem.findOne();
         }
-        throw new Error(
-          'Something went wrong! Please check your Query or Mutation'
-        );
+        throw new Error('Something went wrong! Please check your Query or Mutation');
     }
   } catch (error) {
     const error2 = error;
