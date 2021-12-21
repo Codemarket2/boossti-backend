@@ -10,7 +10,7 @@ phases:
     commands:
       - yarn test
       - echo "Creating .env file"
-      - echo "STAGE=$STAGE\nMONGO_USERNAME=$MONGO_USERNAME\nMONGO_PASSWORD=$MONGO_PASSWORD" > .env
+      - echo "MONGO_USERNAME=$MONGO_USERNAME\nMONGO_PASSWORD=$MONGO_PASSWORD\nGRAPHQL_API_URL=$GRAPHQL_API_URL\nGRAPHQL_API_KEY=$GRAPHQL_API_KEY" > .env
   build:
     commands:
       - echo Starting Deployment

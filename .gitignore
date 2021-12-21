@@ -31,7 +31,10 @@ yarn-error.log*
 
 
 
-.env
+# typescript
+*.env
+!sample.env
+
 
 
 sample.txt
