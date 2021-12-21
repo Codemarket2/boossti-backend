@@ -23,15 +23,17 @@ type payload = {
 };
 
 export const sendNotification = async (payload: payload) => {
-  await axios({
-    url: GRAPHQL_API_URL,
-    method: 'post',
-    headers: {
-      'x-api-key': GRAPHQL_API_KEY,
-    },
-    data: {
-      query: graphql.print(notificationMuattion),
-      variables: payload,
-    },
-  });
+  if (GRAPHQL_API_URL && GRAPHQL_API_KEY) {
+    await axios({
+      url: GRAPHQL_API_URL,
+      method: 'post',
+      headers: {
+        'x-api-key': GRAPHQL_API_KEY,
+      },
+      data: {
+        query: graphql.print(notificationMuattion),
+        variables: payload,
+      },
+    });
+  }
 };
