@@ -44,6 +44,7 @@ type FieldValue2 @aws_api_key @aws_cognito_user_pools {
 }
 
 input FieldValue2Input {
+  _id: ID
   field: String
   value: String
   valueNumber: Float
