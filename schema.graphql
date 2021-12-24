@@ -7,10 +7,6 @@ schema {
 type Subscription {
   addedPost: Post @aws_subscribe(mutations: ["createPost", "updatePost"])
   addedComment(parentId: ID!): Comment @aws_subscribe(mutations: ["createComment", "updateComment"])
-  addedListType: ListType @aws_subscribe(mutations: ["createListType", "updateListType"])
-  updatedListType(_id: ID!): ListType @aws_subscribe(mutations: ["updateListType"])
-  addedListItem: ListItem @aws_subscribe(mutations: ["createListItem", "updateListItem"])
-  updatedListItem(_id: ID!): ListItem @aws_subscribe(mutations: ["updateListItem"])
   addedField(parentId: ID!): Field @aws_subscribe(mutations: ["createField", "updateField"])
   addedFieldValue(parentId: ID!): FieldValue
     @aws_subscribe(mutations: ["createFieldValue", "updateFieldValue"])
@@ -74,40 +70,6 @@ type Mutation {
   ): User
   updateUserStatus(userId: String!, updatedBy: String!, status: Boolean!): User
     @aws_cognito_user_pools(cognito_groups: ["superadmin"])
-  createListType(
-    title: String!
-    description: String
-    media: [MediaInput]
-    active: Boolean
-  ): ListType
-  createListItem(
-    types: [ID!]
-    title: String!
-    description: String
-    media: [MediaInput]
-    active: Boolean
-    layouts: AWSJSON
-  ): ListItem
-  updateListType(
-    _id: ID!
-    title: String
-    description: String
-    media: [MediaInput]
-    active: Boolean
-  ): ListType
-  updateListItem(
-    _id: ID!
-    types: [ID]
-    title: String
-    description: String
-    media: [MediaInput]
-    active: Boolean
-    layouts: AWSJSON
-  ): ListItem
-  updatePublish(_id: ID!, publish: Boolean): ListItem
-  updateAuthentication(_id: ID!, authenticateUser: Boolean): ListItem
-  deleteListItem(_id: ID!): Boolean
-  deleteListType(_id: ID!): Boolean
   createPost(body: String!, media: [MediaInput]): Post
   updatePost(_id: ID!, body: String, media: [MediaInput]): Post
   deletePost(_id: ID!): Boolean
@@ -265,21 +227,6 @@ type User @aws_api_key @aws_cognito_user_pools {
   updatedBy: String
 }
 
-type ListTypes {
-  data: [ListType]
-  count: Int
-}
-
-type ListType @aws_api_key @aws_cognito_user_pools {
-  _id: ID
-  title: String
-  slug: String
-  description: String
-  media: [Media]
-  active: Boolean
-  inUse: Boolean
-}
-
 type Fields @aws_api_key @aws_cognito_user_pools {
   data: [Field]
   count: Int
@@ -319,22 +266,4 @@ type FieldValue @aws_api_key @aws_cognito_user_pools {
   updatedBy: ID
   createdAt: AWSDateTime
   updatedAt: AWSDateTime
-}
-
-type ListItems {
-  data: [ListItem]
-  count: Int
-}
-
-type ListItem @aws_api_key @aws_cognito_user_pools {
-  _id: ID
-  title: String
-  slug: String
-  authenticateUser: Boolean
-  description: String
-  active: Boolean
-  media: [Media]
-  types: [ListType]
-  layouts: AWSJSON
-  createdBy: ID
 }
