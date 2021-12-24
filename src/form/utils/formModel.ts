@@ -16,7 +16,7 @@ interface IField {
   options: any;
 }
 
-const fieldSchema = new Schema({
+export const fieldSchema = new Schema({
   label: { type: String, required: true },
   fieldType: { type: String, required: true },
   typeId: {

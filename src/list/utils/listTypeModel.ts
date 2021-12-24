@@ -1,5 +1,6 @@
 import { Schema, model } from 'mongoose';
 import { ISchema, IMedia } from '../../utils/cutomTypes';
+import { fieldSchema } from '../../form/utils/formModel';
 
 export interface IListType extends ISchema {
   title: string;
@@ -18,6 +19,7 @@ const listTypeSchema = new Schema<IListType>(
       type: [{ url: String, caption: String }],
       default: [],
     },
+    fields: { type: [fieldSchema], default: [] },
     active: {
       type: Boolean,
       default: true,
@@ -35,7 +37,7 @@ const listTypeSchema = new Schema<IListType>(
       ref: 'User',
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 listTypeSchema.index({ slug: 1 });

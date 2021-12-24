@@ -1,0 +1,78 @@
+type Mutation {
+  createListType(
+    title: String!
+    description: String
+    media: [MediaInput]
+    active: Boolean
+  ): ListType
+  updateListType(
+    _id: ID!
+    title: String
+    description: String
+    media: [MediaInput]
+    fields: [Field2Input]
+    active: Boolean
+  ): ListType
+  deleteListType(_id: ID!): Boolean
+  createListItem(
+    types: [ID!]
+    title: String!
+    description: String
+    media: [MediaInput]
+    active: Boolean
+    layouts: AWSJSON
+  ): ListItem
+  updateListItem(
+    _id: ID!
+    types: [ID]
+    title: String
+    description: String
+    media: [MediaInput]
+    active: Boolean
+    layouts: AWSJSON
+  ): ListItem
+  updatePublish(_id: ID!, publish: Boolean): ListItem
+  updateAuthentication(_id: ID!, authenticateUser: Boolean): ListItem
+  deleteListItem(_id: ID!): Boolean
+}
+
+type Subscription {
+  addedListType: ListType @aws_subscribe(mutations: ["createListType", "updateListType"])
+  updatedListType(_id: ID!): ListType @aws_subscribe(mutations: ["updateListType"])
+  addedListItem: ListItem @aws_subscribe(mutations: ["createListItem", "updateListItem"])
+  updatedListItem(_id: ID!): ListItem @aws_subscribe(mutations: ["updateListItem"])
+}
+
+type ListTypes {
+  data: [ListType]
+  count: Int
+}
+
+type ListType @aws_api_key @aws_cognito_user_pools {
+  _id: ID
+  title: String
+  slug: String
+  description: String
+  media: [Media]
+  fields: [Field2]
+  active: Boolean
+  inUse: Boolean
+}
+
+type ListItems {
+  data: [ListItem]
+  count: Int
+}
+
+type ListItem @aws_api_key @aws_cognito_user_pools {
+  _id: ID
+  title: String
+  slug: String
+  authenticateUser: Boolean
+  description: String
+  active: Boolean
+  media: [Media]
+  types: [ListType]
+  layouts: AWSJSON
+  createdBy: ID
+}
