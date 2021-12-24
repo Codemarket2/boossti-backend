@@ -120,11 +120,11 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         return response;
       }
       case 'updateResponse': {
-        const form: any = await ResponseModel.findByIdAndUpdate(args._id, args, {
+        const response: any = await ResponseModel.findByIdAndUpdate(args._id, args, {
           new: true,
           runValidators: true,
         });
-        return await form.populate(responsePopulate).execPopulate();
+        return await response.populate(responsePopulate).execPopulate();
       }
       case 'deleteResponse': {
         await ResponseModel.findByIdAndDelete(args._id);
