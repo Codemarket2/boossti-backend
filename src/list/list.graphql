@@ -59,7 +59,7 @@ type ListType @aws_api_key @aws_cognito_user_pools {
   inUse: Boolean
 }
 
-type ListItems {
+type ListItems @aws_api_key @aws_cognito_user_pools {
   data: [ListItem]
   count: Int
 }
