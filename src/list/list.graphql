@@ -1,3 +1,14 @@
+type Query {
+  getListTypes(page: Int, limit: Int, active: Boolean, search: String): ListTypes
+  getListItems(page: Int, limit: Int, active: Boolean, search: String, types: [ID]): ListItems
+    @aws_api_key
+    @aws_cognito_user_pools
+  getListType(_id: ID!): ListType
+  getListItem(_id: ID!): ListItem
+  getListTypeBySlug(slug: String!): ListType @aws_api_key @aws_cognito_user_pools
+  getListItemBySlug(slug: String!): ListItem @aws_api_key @aws_cognito_user_pools
+}
+
 type Mutation {
   createListType(
     title: String!
@@ -28,6 +39,7 @@ type Mutation {
     title: String
     description: String
     media: [MediaInput]
+    fields: [Field2Input]
     active: Boolean
     layouts: AWSJSON
   ): ListItem
@@ -72,6 +84,7 @@ type ListItem @aws_api_key @aws_cognito_user_pools {
   description: String
   active: Boolean
   media: [Media]
+  fields: [Field2]
   types: [ListType]
   layouts: AWSJSON
   createdBy: ID

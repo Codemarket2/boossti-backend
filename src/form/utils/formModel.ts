@@ -9,7 +9,7 @@ export interface IForm extends ISchema {
   published: boolean;
 }
 
-interface IField {
+export interface IField {
   label: string;
   fieldType: string;
   typeId: any;

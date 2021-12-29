@@ -25,14 +25,6 @@ type Query {
   ): UserSearch @aws_cognito_user_pools(cognito_groups: ["superadmin"])
   getUser(_id: ID!): User @aws_api_key @aws_cognito_user_pools
   getUserByCognitoUserId(userId: String!): User
-  getListTypes(page: Int, limit: Int, active: Boolean, search: String): ListTypes
-  getListItems(page: Int, limit: Int, active: Boolean, search: String, types: [ID]): ListItems
-    @aws_api_key
-    @aws_cognito_user_pools
-  getListType(_id: ID!): ListType
-  getListItem(_id: ID!): ListItem
-  getListTypeBySlug(slug: String!): ListType @aws_api_key @aws_cognito_user_pools
-  getListItemBySlug(slug: String!): ListItem @aws_api_key @aws_cognito_user_pools
   getPosts(page: Int, limit: Int, sortBy: String, search: String): Posts
   getMyPosts(page: Int, limit: Int, sortBy: String, search: String): Posts
   getPostsByUserId(userId: ID!, page: Int, limit: Int, sortBy: String, search: String): Posts

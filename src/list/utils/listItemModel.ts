@@ -1,13 +1,14 @@
 import { Schema, model } from 'mongoose';
 import { ISchema, IMedia } from '../../utils/cutomTypes';
+import { fieldSchema, IField } from '../../form/utils/formModel';
 
 export interface IListItem extends ISchema {
   title: string;
   slug: string;
   description: string;
   media: [IMedia];
+  fields: [IField];
   active: boolean;
-  // extra?: [{ key: string; value: string }];
 }
 
 const listItemSchema = new Schema<IListItem>(
@@ -20,6 +21,7 @@ const listItemSchema = new Schema<IListItem>(
       type: [{ url: String, caption: String }],
       default: [],
     },
+    fields: { type: [fieldSchema], default: [] },
     active: {
       type: Boolean,
       default: false,
