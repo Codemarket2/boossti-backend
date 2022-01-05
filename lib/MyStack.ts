@@ -48,6 +48,8 @@ export default class MyStack extends sst.Stack {
           USER_POOL_ID: USER_POOL_ID,
           GRAPHQL_API_URL: process.env.GRAPHQL_API_URL || 'old',
           GRAPHQL_API_KEY: process.env.GRAPHQL_API_KEY || '',
+          ONESIGNAL_API_KEY: process.env.ONESIGNAL_API_KEY || '',
+          ONESIGNAL_APP_ID: process.env.ONESIGNAL_APP_ID || '',
         },
       },
       dataSources: dataSources,

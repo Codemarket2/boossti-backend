@@ -1,6 +1,8 @@
 import axios from 'axios';
 import gql from 'graphql-tag';
 import graphql from 'graphql';
+import { sendPushNotification } from '../../utils/onesignal';
+import { NotificationModel } from './notificationSchema';
 
 const notificationMuattion = gql`
   mutation MyMutation($userId: ID!, $title: String!, $description: String, $link: String) {
@@ -35,5 +37,20 @@ export const sendNotification = async (payload: payload) => {
         variables: payload,
       },
     });
+
+    const pushPayload = {
+      title: payload.title,
+      message: payload.description,
+      userIds: [`${payload.userId}`],
+    };
+    try {
+      const notification = await NotificationModel.create(payload);
+      console.log(notification);
+
+      await sendPushNotification(pushPayload);
+      console.log('Notification pushed to devices');
+    } catch (error) {
+      console.log(error.message);
+    }
   }
 };

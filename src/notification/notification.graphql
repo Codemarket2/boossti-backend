@@ -1,6 +1,6 @@
 type Notification @aws_api_key @aws_cognito_user_pools {
-  userId: ID!
-  title: String!
+  userId: ID
+  title: String
   description: String
   link: String
 }
@@ -14,4 +14,13 @@ type Mutation {
 
 type Subscription {
   notificationSub(userId: ID!): Notification @aws_subscribe(mutations: ["sendNotification"])
+}
+
+type Notifications {
+  data: [Notification]
+  count: Int
+}
+
+type Query {
+  getMyNotifications: Notifications
 }
