@@ -2,7 +2,9 @@ type Query {
   getForm(_id: ID!): Form @aws_api_key @aws_cognito_user_pools
   getForms(page: Int, limit: Int, search: String): Forms
   getResponse(_id: ID!): Response
-  getResponses(formId: ID!, page: Int, limit: Int): Responses @aws_api_key @aws_cognito_user_pools
+  getResponses(formId: ID!, parentId: ID, page: Int, limit: Int): Responses
+    @aws_api_key
+    @aws_cognito_user_pools
   getMyResponses(page: Int, limit: Int): Responses2
 }
 
@@ -92,7 +94,7 @@ input FieldValue2Input {
 type Response @aws_api_key @aws_cognito_user_pools {
   _id: ID
   formId: ID
-  parentId: ID
+  parentId: ListItem
   values: [FieldValue2]
   createdBy: User
   updatedBy: ID
@@ -102,7 +104,7 @@ type Response @aws_api_key @aws_cognito_user_pools {
 type Response2 @aws_api_key @aws_cognito_user_pools {
   _id: ID
   formId: Form
-  parentId: ID
+  parentId: ListItem
   values: [FieldValue2]
   createdBy: User
   updatedBy: ID
