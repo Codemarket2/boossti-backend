@@ -45,8 +45,12 @@ const fieldSchema = new Schema<IField>(
       type: Schema.Types.ObjectId,
       ref: 'User',
     },
+    options: {
+      type: Schema.Types.Mixed,
+      default: {},
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 fieldSchema.index({ parentId: 1, label: 1 }, { unique: true });
