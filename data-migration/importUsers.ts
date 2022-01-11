@@ -7,11 +7,15 @@ const importUsersFromFile = async () => {
   users = JSON.parse(users);
   await User.deleteMany();
   const newUsers = await User.create(users);
-  console.log('All users imported');
+  console.log(`All users imported ${process.argv[2]}`);
 };
 
 (async () => {
   try {
+    if (process.argv[2] === 'prod-vijaa-master') {
+      console.log("You can't do this");
+      process.exit();
+    }
     await DB();
     // Run your function here
     await importUsersFromFile();

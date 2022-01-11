@@ -32,6 +32,10 @@ const valueSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'ListItem',
   },
+  response: {
+    type: Schema.Types.ObjectId,
+    ref: 'Response',
+  },
 });
 
 const responseSchema = new Schema<IResponse>(

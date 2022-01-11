@@ -14,6 +14,7 @@ export interface IField {
   fieldType: string;
   typeId: any;
   options: any;
+  form: any;
 }
 
 export const fieldSchema = new Schema({
@@ -26,6 +27,10 @@ export const fieldSchema = new Schema({
   options: {
     type: Schema.Types.Mixed,
     default: { mutipleValues: false },
+  },
+  form: {
+    type: Schema.Types.ObjectId,
+    ref: 'Form',
   },
 });
 

@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { DB } from '../utils/DB';
 import { FormModel } from './utils/formModel';
 import { ResponseModel } from './utils/responseModel';
@@ -16,6 +17,10 @@ const formPopulate = [
     path: 'fields.typeId',
     select: 'title description media slug',
   },
+  {
+    path: 'fields.form',
+    select: 'name',
+  },
 ];
 
 const itemSelect = 'types title media slug';
@@ -29,6 +34,10 @@ const responsePopulate = [
   {
     path: 'values.itemId',
     select: itemSelect,
+  },
+  {
+    path: 'values.response',
+    select: 'values',
   },
 ];
 const myResponsePopulate = [
@@ -97,16 +106,29 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         return await ResponseModel.findById(args._id).populate(responsePopulate);
       }
       case 'getResponses': {
-        const { page = 1, limit = 20, formId, parentId } = args;
-        let filter = {};
+        const { page = 1, limit = 20, formId, parentId, search = '', formField } = args;
+        let filter: any = { formId };
         if (parentId) {
-          filter = { formId, parentId };
-        } else filter = { formId };
+          filter = { ...filter, parentId };
+        }
+
+        if (search && formField) {
+          console.warn('filter');
+          filter = {
+            ...filter,
+            $and: [
+              { 'values.value': { $regex: search, $options: 'i' } },
+              { 'values.field': formField },
+            ],
+          };
+        }
+
         const data = await ResponseModel.find(filter)
           .populate(responsePopulate)
           .limit(limit * 1)
           .skip((page - 1) * limit);
         const count = await ResponseModel.countDocuments(filter);
+        console.log(count);
         return {
           data,
           count,
