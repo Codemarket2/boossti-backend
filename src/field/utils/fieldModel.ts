@@ -18,6 +18,10 @@ const fieldSchema = new Schema<IField>(
       ref: 'ListType',
       required: true,
     },
+    relationId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Field',
+    },
     label: { type: String, required: true },
     fieldType: { type: String, required: true },
     typeId: {

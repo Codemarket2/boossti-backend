@@ -6,6 +6,7 @@ import { Post } from '../post/utils/postModel';
 import { Comment } from './utils/commentModel';
 import { Like } from '../like/utils/likeModel';
 import { sendCommentNotification } from './utils/commentNotification';
+import { userPopulate } from '../utils/populate';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -18,11 +19,6 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     const user = await getCurrentUser(identity);
     const { page = 1, limit = 10 } = args;
 
-    const userSelect = 'name picture _id';
-    const userPopulate = {
-      path: 'createdBy',
-      select: userSelect,
-    };
     if (fieldName.toLocaleLowerCase().includes('create') && user && user._id) {
       args = { ...args, createdBy: user._id };
     } else if (fieldName.toLocaleLowerCase().includes('update') && user && user._id) {

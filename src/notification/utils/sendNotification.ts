@@ -3,6 +3,9 @@ import gql from 'graphql-tag';
 import graphql from 'graphql';
 import { sendPushNotification } from '../../utils/onesignal';
 import { NotificationModel } from './notificationSchema';
+import { User } from '../../user/utils/userModel';
+import { sendEmail } from '../../utils/email';
+import { sendMessage } from '../../utils/message';
 
 const notificationMuattion = gql`
   mutation MyMutation($userId: ID!, $title: String!, $description: String, $link: String) {
@@ -15,7 +18,7 @@ const notificationMuattion = gql`
   }
 `;
 
-const { GRAPHQL_API_URL = '', GRAPHQL_API_KEY = '' } = process.env;
+const { GRAPHQL_API_URL = '', GRAPHQL_API_KEY = '', SENDER_EMAIL = '' } = process.env;
 
 type payload = {
   userId: string;
@@ -37,20 +40,65 @@ export const sendNotification = async (payload: payload) => {
         variables: payload,
       },
     });
-
-    const pushPayload = {
-      title: payload.title,
-      message: payload.description,
-      userIds: [`${payload.userId}`],
-    };
     try {
       const notification = await NotificationModel.create(payload);
-      console.log(notification);
-
-      await sendPushNotification(pushPayload);
-      console.log('Notification pushed to devices');
+      const user = await User.findById(payload.userId);
+      await emailNotification(payload, user);
+      // await mobileNotification(payload, user);
+      await pushNotification(payload);
     } catch (error) {
-      console.log(error.message);
+      console.error(error.message);
     }
   }
+};
+
+const mobileNotification = async (payload: payload, user: any) => {
+  const messageBody = `
+      Dear ${user.name},
+    
+      ${payload.description}.
+    `;
+  const mobilePayload = {
+    to: '+918294008226' || user.mobile,
+    from: '+16673032366',
+    body: messageBody,
+  };
+  try {
+    const messageLog = await sendMessage(mobilePayload);
+    console.log('messageLog', messageLog);
+    // we need to save the message log to our database
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+const pushNotification = async (payload: payload) => {
+  const pushPayload = {
+    title: payload.title,
+    message: payload.description,
+    userIds: [`${payload.userId}`],
+  };
+  try {
+    await sendPushNotification(pushPayload);
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+const emailNotification = async (payload: payload, user: any) => {
+  const emailBody = `
+      Dear ${user.name}, 
+    
+      ${payload.description}.
+    `;
+
+  const emailPayload = {
+    from: SENDER_EMAIL,
+    to: [user.email],
+    body: emailBody,
+    subject: `New Response on ${payload.title}`,
+  };
+
+  user.email &&
+    sendEmail(emailPayload)
+      .then(() => console.log('Email Send!'))
+      .catch((e) => console.log(e.message));
 };

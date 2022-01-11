@@ -43,13 +43,15 @@ export default class MyStack extends sst.Stack {
       defaultFunctionProps: {
         timeout: 20,
         environment: {
-          SENDER_EMAIL: SENDER_EMAIL,
+          SENDER_EMAIL: SENDER_EMAIL || '',
           DATABASE: `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@codemarket-staging.k16z7.mongodb.net/${scope.stage}?retryWrites=true&w=majority`,
           USER_POOL_ID: USER_POOL_ID,
           GRAPHQL_API_URL: process.env.GRAPHQL_API_URL || 'old',
           GRAPHQL_API_KEY: process.env.GRAPHQL_API_KEY || '',
           ONESIGNAL_API_KEY: process.env.ONESIGNAL_API_KEY || '',
           ONESIGNAL_APP_ID: process.env.ONESIGNAL_APP_ID || '',
+          TWILIO_ACCOUNT_SID: process.env.TWILIO_ACCOUNT_SID || '',
+          TWILIO_AUTH_TOKEN: process.env.TWILIO_AUTH_TOKEN || '',
         },
       },
       dataSources: dataSources,
