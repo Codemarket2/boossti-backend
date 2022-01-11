@@ -72,6 +72,7 @@ type Mutation {
   deleteBookmark(_id: ID!): Boolean
   createField(
     parentId: ID!
+    _id: ID!
     label: String!
     fieldType: String!
     typeId: ID

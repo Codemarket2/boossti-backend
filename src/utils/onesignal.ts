@@ -35,8 +35,6 @@ export const sendPushNotification = function (payload: IPayload) {
 
       const req = https.request(options, function (res) {
         res.on('data', function (data) {
-          console.log('Response:');
-          console.log(JSON.parse(data));
           resolve(true);
         });
       });
@@ -51,14 +49,3 @@ export const sendPushNotification = function (payload: IPayload) {
     } else reject('No App ID Provided');
   });
 };
-
-// sendPushNotification({
-//   title: 'Notification From Console',
-//   message:
-//     "This Notification is for testing purpose and it is triggred by Developer. you don't have to worry about this notification. Have a nice day.",
-//   userIds: ['61b2fc00b5a1100008288486', '61cb0b5fb2c3d30009278768', '61cc415c01e46b0008a10027'],
-//   appID: 'd7a822b5-a821-460f-a60a-86d08d19e8f0',
-//   apiKey: 'MmNkMGI5M2EtZTcwMC00YTcxLTlhZTUtZjZhNzA3NDI1Y2Qx',
-// })
-//   .then((data) => console.log({ data }))
-//   .catch((e) => console.log(e));
