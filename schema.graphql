@@ -7,8 +7,8 @@ schema {
 type Subscription {
   addedPost: Post @aws_subscribe(mutations: ["createPost", "updatePost"])
   addedComment(parentId: ID!): Comment @aws_subscribe(mutations: ["createComment", "updateComment"])
-  addedField(parentId: ID!): Field @aws_subscribe(mutations: ["createField", "updateField"])
-  addedFieldValue(parentId: ID!): FieldValue
+  addedField(parentId: ID): Field @aws_subscribe(mutations: ["createField", "updateField"])
+  addedFieldValue(parentId: ID): FieldValue
     @aws_subscribe(mutations: ["createFieldValue", "updateFieldValue"])
   addedLike: Like @aws_subscribe(mutations: ["createLike"])
 }
@@ -34,8 +34,7 @@ type Query {
   getMyBookmarks(page: Int, limit: Int, sortBy: String, search: String): Bookmarks
   getBookmark(_id: ID!): Bookmark
   getFieldsByType(parentId: ID!, page: Int, sortBy: String, limit: Int, search: String): Fields
-    @aws_api_key
-    @aws_cognito_user_pools
+  getFieldByRelationId(relationId: ID!): Field @aws_api_key @aws_cognito_user_pools
   getFieldValuesByItem(
     parentId: ID!
     field: ID!
@@ -72,7 +71,10 @@ type Mutation {
   deleteBookmark(_id: ID!): Boolean
   createField(
     parentId: ID!
+    relationId: ID
+    _id: ID
     label: String!
+    fieldLabel: String
     fieldType: String!
     typeId: ID
     multipleValues: Boolean
@@ -80,7 +82,10 @@ type Mutation {
   ): Field
   updateField(
     _id: ID!
+    relationId: ID
+    parentId: ID
     label: String
+    fieldLabel: String
     fieldType: String
     typeId: ID
     multipleValues: Boolean
@@ -90,7 +95,9 @@ type Mutation {
   updateFieldPosition(_id: ID!, position: Float!): Field
   deleteField(_id: ID!): Boolean
   createFieldValue(
+    _id: ID
     parentId: ID!
+    relationId: ID
     field: ID!
     value: String
     valueDate: AWSDateTime
@@ -102,6 +109,9 @@ type Mutation {
   updateFieldValue(
     _id: ID!
     value: String
+    parentId: ID
+    field: ID
+    relationId: ID
     valueDate: AWSDateTime
     valueNumber: Int
     valueBoolean: Boolean
@@ -232,6 +242,7 @@ type Field @aws_api_key @aws_cognito_user_pools {
   parentId: ID
   position: Float
   label: String
+  fieldLabel: String
   multipleValues: Boolean
   oneUserMultipleValues: Boolean
   fieldType: String
@@ -240,6 +251,7 @@ type Field @aws_api_key @aws_cognito_user_pools {
   updatedBy: ID
   createdAt: AWSDateTime
   updatedAt: AWSDateTime
+  relationId: ID
   options: AWSJSON
 }
 
@@ -251,6 +263,7 @@ type FieldValues @aws_api_key @aws_cognito_user_pools {
 type FieldValue @aws_api_key @aws_cognito_user_pools {
   _id: ID
   parentId: ID
+  relationId: ID
   field: ID
   value: String
   valueDate: AWSDateTime

@@ -3,11 +3,13 @@ import { ISchema } from '../../utils/cutomTypes';
 
 interface IFieldValue extends ISchema {
   field: string;
+  parentId: string;
   value: string;
   valueNumber: number;
   valueBoolean: boolean;
   valueDate: Date;
   itemId: string;
+  relationId: string;
 }
 
 const fieldValueSchema = new Schema<IFieldValue>(
@@ -17,6 +19,7 @@ const fieldValueSchema = new Schema<IFieldValue>(
       ref: 'ListItem',
       required: true,
     },
+    relationId: { type: Schema.Types.ObjectId },
     field: {
       type: Schema.Types.ObjectId,
       ref: 'Field',
