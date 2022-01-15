@@ -29,6 +29,13 @@ type Mutation {
     @aws_cognito_user_pools
   updateResponse(_id: ID!, formId: ID, values: [FieldValue2Input]): Response
   deleteResponse(_id: ID!): ID!
+  createBulkResponses(
+    formId: ID!
+    fileUrl: String!
+    map: AWSJSON!
+    parentId: ID
+    fileData: AWSJSON
+  ): Boolean
 }
 
 type Subscription {
