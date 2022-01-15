@@ -12,7 +12,7 @@ const importUsersFromFile = async () => {
 
 (async () => {
   try {
-    if (process.argv[2] === 'prod-vijaa-master') {
+    if (process.argv[2] === 'prod-master-vijaa') {
       console.log("You can't do this");
       process.exit();
     }
