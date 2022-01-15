@@ -10,6 +10,7 @@ import { userPopulate } from '../utils/populate';
 import { runFormActions } from './utils/actions';
 import { sendResponseNotification } from './utils/responseNotification';
 import getAdminFilter from '../utils/adminFilter';
+import { fileParser } from './utils/readCsvFile';
 
 const formPopulate = [
   userPopulate,
@@ -167,6 +168,52 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           data,
           count,
         };
+      }
+      case 'createBulkResponses': {
+        const { formId, fileUrl, map, parentId, createdBy } = args;
+        console.log(args);
+
+        const filter: any = Object.values(map);
+        const fields = Object.keys(map);
+        const fileData = await fileParser(fileUrl, filter);
+
+        const responses: any = [];
+
+        fileData.map((file) => {
+          const response = {
+            formId: formId,
+            parentId: parentId,
+            values: [{}],
+            createdBy: createdBy,
+          };
+          for (let i = 0; i < fields.length; i++) {
+            const value = {
+              field: fields[i],
+              value: file[filter[i]],
+              valueNumber: null,
+              valueBoolean: null,
+              valueDate: null,
+              itemId: null,
+              media: [],
+            };
+            response.values.push(value);
+            if (i === fields.length - 1) response.values.shift();
+          }
+          responses.push(response);
+        });
+
+        const responseCreated = await ResponseModel.create(responses);
+        // responseCreated = await responseCreated.populate(responsePopulate).execPopulate();
+        // Run Actions
+        // const form = await FormModel.findById(responseCreated.formId);
+        // await runFormActions(responseCreated, form);
+        // if (!(process.env.NODE_ENV === 'test')) {
+        //   await sendResponseNotification(form, responseCreated);
+        // }
+
+        console.log('responseCreated: ', responseCreated);
+
+        return true;
       }
       default:
         throw new Error('Something went wrong! Please check your Query or Mutation');
