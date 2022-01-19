@@ -21,7 +21,6 @@ const fieldSchema = new Schema<IField>(
       required: true,
     },
     label: { type: String, required: true },
-    fieldLabel: { type: String },
     fieldType: { type: String, required: true },
     typeId: {
       type: Schema.Types.ObjectId,

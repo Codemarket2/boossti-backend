@@ -3,4 +3,5 @@ export default [
   'src/form/form.graphql',
   'src/notification/notification.graphql',
   'src/list/list.graphql',
+  'src/field/field.graphql',
 ];

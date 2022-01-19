@@ -1,6 +1,7 @@
 import { Schema, model } from 'mongoose';
 import { ISchema, IMedia } from '../../utils/cutomTypes';
 import { fieldSchema, IField } from '../../form/utils/formModel';
+import { valueSchema, IValue } from '../../form/utils/responseModel';
 
 export interface IListItem extends ISchema {
   title: string;
@@ -9,6 +10,7 @@ export interface IListItem extends ISchema {
   media: [IMedia];
   fields: [IField];
   active: boolean;
+  values: [IValue];
 }
 
 const listItemSchema = new Schema<IListItem>(
@@ -22,6 +24,7 @@ const listItemSchema = new Schema<IListItem>(
       default: [],
     },
     fields: { type: [fieldSchema], default: [] },
+    values: { type: [valueSchema], default: [] },
     active: {
       type: Boolean,
       default: false,
@@ -34,7 +37,6 @@ const listItemSchema = new Schema<IListItem>(
       type: Schema.Types.Mixed,
       default: {},
     },
-    // extra: [{ key: String, value: String }],
     createdBy: {
       type: Schema.Types.ObjectId,
       ref: 'User',

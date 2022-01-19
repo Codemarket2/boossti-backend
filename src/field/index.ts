@@ -39,36 +39,18 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     }
 
     switch (fieldName) {
-      case 'getFieldValue': {
-        return await FieldValue.findById(args._id).populate(fieldPopulate);
+      case 'getField': {
+        return await Field.findById(args._id).populate(fieldPopulate);
       }
-      case 'getFieldsByType': {
-        const { page = 1, limit = 20, sortBy = 'position', search = '', parentId } = args;
-        const data = await Field.find({
+      case 'getFields': {
+        const { sortBy = 'position', search = '', parentId } = args;
+        return await Field.find({
           parentId,
           label: { $regex: search, $options: 'i' },
         })
           .populate(fieldPopulate)
-          .sort(sortBy)
-          .limit(limit * 1)
-          .skip((page - 1) * limit);
-
-        const count = await Field.countDocuments({
-          parentId,
-          label: { $regex: search, $options: 'i' },
-        });
-        return {
-          data,
-          count,
-        };
+          .sort(sortBy);
       }
-
-      case 'getFieldByRelationId': {
-        return await Field.findOne({
-          relationId: args.relationId,
-        }).populate(fieldPopulate);
-      }
-
       case 'createField': {
         let position = 1;
         const tempFields = await Field.find({ parentId: args.parentId })
@@ -100,28 +82,26 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       }
       case 'deleteField': {
         await Field.findByIdAndDelete(args._id);
-        return true;
+        return args._id;
       }
-
-      case 'getFieldValuesByItem': {
+      case 'getFieldValue': {
+        return await FieldValue.findById(args._id).populate(fieldValuePopulate);
+      }
+      case 'getFieldValues': {
         const { page = 1, limit = 20, parentId, field, onlyShowByUser = null } = args;
         const tempFilter: any = {};
-
         if (onlyShowByUser) {
           tempFilter.createdBy = user._id;
         }
-
         const data = await FieldValue.find({ ...tempFilter, parentId, field })
           .populate(fieldValuePopulate)
           .limit(limit * 1)
           .skip((page - 1) * limit);
-
         const count = await FieldValue.countDocuments({
           ...tempFilter,
           parentId,
           field,
         });
-
         return {
           data,
           count,
@@ -140,7 +120,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       }
       case 'deleteFieldValue': {
         await FieldValue.findByIdAndDelete(args._id);
-        return true;
+        return args._id;
       }
       default:
         if (args.registerModel) {

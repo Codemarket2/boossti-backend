@@ -15,7 +15,7 @@ export interface IValue {
   itemId: string;
 }
 
-const valueSchema = new Schema({
+export const valueSchema = new Schema({
   field: {
     type: String,
     required: true,

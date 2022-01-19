@@ -7,9 +7,6 @@ schema {
 type Subscription {
   addedPost: Post @aws_subscribe(mutations: ["createPost", "updatePost"])
   addedComment(parentId: ID!): Comment @aws_subscribe(mutations: ["createComment", "updateComment"])
-  addedField(parentId: ID): Field @aws_subscribe(mutations: ["createField", "updateField"])
-  addedFieldValue(parentId: ID): FieldValue
-    @aws_subscribe(mutations: ["createFieldValue", "updateFieldValue"])
   addedLike: Like @aws_subscribe(mutations: ["createLike"])
 }
 
@@ -33,17 +30,6 @@ type Query {
   getPost(_id: ID!): Post
   getMyBookmarks(page: Int, limit: Int, sortBy: String, search: String): Bookmarks
   getBookmark(_id: ID!): Bookmark
-  getFieldsByType(parentId: ID!, page: Int, sortBy: String, limit: Int, search: String): Fields
-  getFieldByRelationId(relationId: ID!): Field @aws_api_key @aws_cognito_user_pools
-  getFieldValuesByItem(
-    parentId: ID!
-    field: ID!
-    page: Int
-    limit: Int
-    onlyShowByUser: Boolean
-  ): FieldValues @aws_api_key @aws_cognito_user_pools
-  getFieldValue(_id: ID!): FieldValue
-
   getComment(_id: ID!): Comment
   getCommentsByParentID(parentId: ID!, page: Int, limit: Int): Comments
   getLike(_id: ID!): Like
@@ -69,57 +55,6 @@ type Mutation {
   createBookmark(parentId: String, bookmark: String!): Bookmark
   updateBookmark(_id: ID!, parentId: String, bookmark: String): Bookmark
   deleteBookmark(_id: ID!): Boolean
-  createField(
-    parentId: ID!
-    relationId: ID
-    _id: ID
-    label: String!
-    fieldLabel: String
-    fieldType: String!
-    typeId: ID
-    multipleValues: Boolean
-    oneUserMultipleValues: Boolean
-  ): Field
-  updateField(
-    _id: ID!
-    relationId: ID
-    parentId: ID
-    label: String
-    fieldLabel: String
-    fieldType: String
-    typeId: ID
-    multipleValues: Boolean
-    oneUserMultipleValues: Boolean
-    options: AWSJSON
-  ): Field
-  updateFieldPosition(_id: ID!, position: Float!): Field
-  deleteField(_id: ID!): Boolean
-  createFieldValue(
-    _id: ID
-    parentId: ID!
-    relationId: ID
-    field: ID!
-    value: String
-    valueDate: AWSDateTime
-    valueNumber: Int
-    valueBoolean: Boolean
-    media: [MediaInput]
-    itemId: ID
-  ): FieldValue
-  updateFieldValue(
-    _id: ID!
-    value: String
-    parentId: ID
-    field: ID
-    relationId: ID
-    valueDate: AWSDateTime
-    valueNumber: Int
-    valueBoolean: Boolean
-    media: [MediaInput]
-    itemId: ID
-  ): FieldValue
-  deleteFieldValue(_id: ID!): Boolean
-
   createComment(threadId: ID!, parentId: ID!, body: String!): Comment
   updateComment(_id: ID!, body: String): Comment
   deleteComment(_id: ID!): Boolean
@@ -230,49 +165,4 @@ type User @aws_api_key @aws_cognito_user_pools {
   createdBy: String
   updatedAt: String
   updatedBy: String
-}
-
-type Fields @aws_api_key @aws_cognito_user_pools {
-  data: [Field]
-  count: Int
-}
-
-type Field @aws_api_key @aws_cognito_user_pools {
-  _id: ID
-  parentId: ID
-  position: Float
-  label: String
-  fieldLabel: String
-  multipleValues: Boolean
-  oneUserMultipleValues: Boolean
-  fieldType: String
-  typeId: ListType
-  createdBy: User
-  updatedBy: ID
-  createdAt: AWSDateTime
-  updatedAt: AWSDateTime
-  relationId: ID
-  options: AWSJSON
-}
-
-type FieldValues @aws_api_key @aws_cognito_user_pools {
-  data: [FieldValue]
-  count: Int
-}
-
-type FieldValue @aws_api_key @aws_cognito_user_pools {
-  _id: ID
-  parentId: ID
-  relationId: ID
-  field: ID
-  value: String
-  valueDate: AWSDateTime
-  valueNumber: Int
-  valueBoolean: Boolean
-  media: [Media]
-  itemId: ListItem
-  createdBy: User
-  updatedBy: ID
-  createdAt: AWSDateTime
-  updatedAt: AWSDateTime
 }

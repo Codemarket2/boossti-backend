@@ -42,6 +42,7 @@ type Mutation {
     fields: [Field2Input]
     active: Boolean
     layouts: AWSJSON
+    values: [FieldValue2Input]
   ): ListItem
   updatePublish(_id: ID!, publish: Boolean): ListItem
   updateAuthentication(_id: ID!, authenticateUser: Boolean): ListItem
@@ -69,6 +70,7 @@ type ListType @aws_api_key @aws_cognito_user_pools {
   fields: [Field2]
   active: Boolean
   inUse: Boolean
+  createdAt: AWSDateTime
 }
 
 type ListItems @aws_api_key @aws_cognito_user_pools {
@@ -88,4 +90,6 @@ type ListItem @aws_api_key @aws_cognito_user_pools {
   types: [ListType]
   layouts: AWSJSON
   createdBy: ID
+  createdAt: AWSDateTime
+  values: [FieldValue2]
 }

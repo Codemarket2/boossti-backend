@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import { DB } from '../utils/DB';
 import { FormModel } from './utils/formModel';
 import { ResponseModel } from './utils/responseModel';

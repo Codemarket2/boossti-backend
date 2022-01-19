@@ -7,6 +7,7 @@ import FieldValue from '../field/utils/fieldValueModel';
 import { getCurrentUser } from '../utils/authentication';
 import { AppSyncEvent } from '../utils/cutomTypes';
 import getAdminFilter from '../utils/adminFilter';
+// import { userPopulate } from '../utils/populate';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -25,11 +26,13 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       args = { ...args, slug: slugify(args.title, { lower: true }) };
     }
 
-    const itemTypeSelect = '_id title slug';
-    const itemTypePopulate = {
-      path: 'types',
-      select: itemTypeSelect,
-    };
+    const listItemPopulate = [
+      // userPopulate,
+      {
+        path: 'created',
+        select: '_id title slug',
+      },
+    ];
 
     switch (fieldName) {
       case 'getListTypes': {
@@ -73,7 +76,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
             { description: { $regex: search, $options: 'i' } },
           ],
         })
-          .populate(itemTypePopulate)
+          .populate(listItemPopulate)
           .limit(limit * 1)
           .skip((page - 1) * limit);
         const count = await ListItem.countDocuments({
@@ -106,14 +109,14 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       }
       case 'createListItem': {
         const listItem = await ListItem.create(args);
-        return await listItem.populate(itemTypePopulate).execPopulate();
+        return await listItem.populate(listItemPopulate).execPopulate();
       }
       case 'updateListItem': {
         const listItem: any = await ListItem.findByIdAndUpdate(args._id, args, {
           new: true,
           runValidators: true,
         });
-        return await listItem.populate(itemTypePopulate).execPopulate();
+        return await listItem.populate(listItemPopulate).execPopulate();
       }
       case 'updatePublish': {
         const listItem: any = await ListItem.findByIdAndUpdate(
@@ -121,7 +124,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           { active: args.publish },
           { new: true, runValidators: true },
         );
-        return await listItem.populate(itemTypePopulate).execPopulate();
+        return await listItem.populate(listItemPopulate).execPopulate();
       }
       case 'updateAuthentication': {
         const listItem: any = await ListItem.findByIdAndUpdate(
@@ -129,7 +132,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           { authenticateUser: args.authenticateUser },
           { new: true, runValidators: true },
         );
-        return await listItem.populate(itemTypePopulate).execPopulate();
+        return await listItem.populate(listItemPopulate).execPopulate();
       }
       case 'updateListType': {
         return await ListType.findByIdAndUpdate(args._id, args, {

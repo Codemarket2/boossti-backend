@@ -59,10 +59,7 @@ const updatedMockFieldValue = {
 const createListTypeEvent = createMockEvent('createListType', mockListType);
 const createListItemEvent = createMockEvent('createListItem', mockListItem);
 const createFieldEvent = createMockEvent('createField', mockField);
-const createFieldValueEvent = createMockEvent(
-  'createFieldValue',
-  mockFieldValue
-);
+const createFieldValueEvent = createMockEvent('createFieldValue', mockFieldValue);
 
 const preFieldValue = async () => {
   await lisHandler(createListTypeEvent);
@@ -71,15 +68,12 @@ const preFieldValue = async () => {
 };
 
 describe('Field Lambda Tests', () => {
-  it('getFieldsByType test', async () => {
+  it('getFields test', async () => {
     await lisHandler(createListTypeEvent);
     await handler(createFieldEvent);
-    const res = await handler(
-      createMockEvent('getFieldsByType', { parentId: mockListType._id })
-    );
-    expect(res.count).toBe(1);
-    expect(res.data.length).toBe(1);
-    const field = res.data[0];
+    const res = await handler(createMockEvent('getFields', { parentId: mockListType._id }));
+    expect(res.length).toBe(1);
+    const field = res[0];
     expect(field._id).toBeDefined();
     expect(field.label).toBe(mockField.label);
     expect(field.fieldType).toBe(mockField.fieldType);
@@ -108,9 +102,7 @@ describe('Field Lambda Tests', () => {
   it('updateField test', async () => {
     await lisHandler(createListTypeEvent);
     await handler(createFieldEvent);
-    const field = await handler(
-      createMockEvent('updateField', updatedMockField)
-    );
+    const field = await handler(createMockEvent('updateField', updatedMockField));
     expect(field._id).toBeDefined();
     expect(field.label).toBe(updatedMockField.label);
     expect(field.fieldType).toBe(updatedMockField.fieldType);
@@ -128,7 +120,7 @@ describe('Field Lambda Tests', () => {
       createMockEvent('updateFieldPosition', {
         _id: updatedMockField._id,
         position: 9.5,
-      })
+      }),
     );
     expect(field.position).toBe(9.5);
     expect(field._id).toBeDefined();
@@ -144,19 +136,17 @@ describe('Field Lambda Tests', () => {
   it('deleteField test', async () => {
     await lisHandler(createListTypeEvent);
     await handler(createFieldEvent);
-    const res = await handler(
-      createMockEvent('deleteField', { _id: mockField._id })
-    );
-    expect(res).toBe(true);
+    const res = await handler(createMockEvent('deleteField', { _id: mockField._id }));
+    expect(res).toBe(mockField._id);
   });
 
-  it('getFieldValuesByItem test', async () => {
+  it('getFieldValues test', async () => {
     await preFieldValue();
     const res = await handler(
-      createMockEvent('getFieldValuesByItem', {
+      createMockEvent('getFieldValues', {
         parentId: mockField._id,
         field: mockField._id,
-      })
+      }),
     );
     expect(res.count).toBe(1);
     expect(res.data.length).toBe(1);
@@ -177,7 +167,7 @@ describe('Field Lambda Tests', () => {
         ...mockFieldValue,
         _id: mockFieldValue._id.replace('1', '8'),
         itemId: mockListItem._id,
-      })
+      }),
     );
     expect(field._id).toBeDefined();
     expect(field.parentId.toString()).toBe(mockFieldValue.parentId);
@@ -191,9 +181,7 @@ describe('Field Lambda Tests', () => {
 
   it('updateFieldValue test', async () => {
     await preFieldValue();
-    const field = await handler(
-      createMockEvent('updateFieldValue', updatedMockFieldValue)
-    );
+    const field = await handler(createMockEvent('updateFieldValue', updatedMockFieldValue));
     expect(field._id).toBeDefined();
     expect(field.parentId.toString()).toBe(updatedMockFieldValue.parentId);
     expect(field.value).toBe(updatedMockFieldValue.value);
@@ -204,9 +192,7 @@ describe('Field Lambda Tests', () => {
 
   it('deleteFieldValue test', async () => {
     await preFieldValue();
-    const res = await handler(
-      createMockEvent('deleteFieldValue', { _id: mockFieldValue._id })
-    );
-    expect(res).toBe(true);
+    const res = await handler(createMockEvent('deleteFieldValue', { _id: mockFieldValue._id }));
+    expect(res).toBe(mockFieldValue._id);
   });
 });
