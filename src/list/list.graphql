@@ -24,7 +24,7 @@ type Mutation {
     fields: [Field2Input]
     active: Boolean
   ): ListType
-  deleteListType(_id: ID!): Boolean
+  deleteListType(_id: ID!): String
   createListItem(
     types: [ID!]
     title: String!
@@ -46,7 +46,7 @@ type Mutation {
   ): ListItem
   updatePublish(_id: ID!, publish: Boolean): ListItem
   updateAuthentication(_id: ID!, authenticateUser: Boolean): ListItem
-  deleteListItem(_id: ID!): Boolean
+  deleteListItem(_id: ID!): String
 }
 
 type Subscription {
@@ -71,6 +71,7 @@ type ListType @aws_api_key @aws_cognito_user_pools {
   active: Boolean
   inUse: Boolean
   createdAt: AWSDateTime
+  createdBy: User
 }
 
 type ListItems @aws_api_key @aws_cognito_user_pools {
@@ -89,7 +90,7 @@ type ListItem @aws_api_key @aws_cognito_user_pools {
   fields: [Field2]
   types: [ListType]
   layouts: AWSJSON
-  createdBy: ID
+  createdBy: User
   createdAt: AWSDateTime
   values: [FieldValue2]
 }

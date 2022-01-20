@@ -48,7 +48,7 @@ describe('List Lambda Tests', () => {
     expect(item.title).toBe(mockListItem.title);
     expect(item.description).toBe(mockListItem.description);
     expect(item.types[0]._id.toString()).toBe(mockListType._id);
-    expect(item.createdBy).toMatchObject(mockUser._id);
+    expect(item.createdBy._id).toMatchObject(mockUser._id);
     expect(item.createdAt).toBeDefined();
     expect(item.updatedAt).toBeDefined();
   });
@@ -58,7 +58,7 @@ describe('List Lambda Tests', () => {
     const listType = await handler(createMockEvent('getListType', { _id: mockListType._id }));
     expect(listType._id).toBeDefined();
     expect(listType.title).toBe(mockListType.title);
-    expect(listType.createdBy).toMatchObject(mockUser._id);
+    expect(listType.createdBy._id).toMatchObject(mockUser._id);
     expect(listType.createdAt).toBeDefined();
     expect(listType.updatedAt).toBeDefined();
   });
@@ -71,7 +71,7 @@ describe('List Lambda Tests', () => {
     expect(listItem.title).toBe(mockListItem.title);
     expect(listItem.description).toBe(mockListItem.description);
     expect(listItem.types[0]._id.toString()).toBe(mockListType._id);
-    expect(listItem.createdBy).toMatchObject(mockUser._id);
+    expect(listItem.createdBy._id).toMatchObject(mockUser._id);
     expect(listItem.createdAt).toBeDefined();
     expect(listItem.updatedAt).toBeDefined();
   });
@@ -85,7 +85,7 @@ describe('List Lambda Tests', () => {
     );
     expect(listType._id).toBeDefined();
     expect(listType.title).toBe(mockListType.title);
-    expect(listType.createdBy).toMatchObject(mockUser._id);
+    expect(listType.createdBy._id).toMatchObject(mockUser._id);
     expect(listType.createdAt).toBeDefined();
     expect(listType.updatedAt).toBeDefined();
   });
@@ -103,7 +103,7 @@ describe('List Lambda Tests', () => {
     expect(listItem.title).toBe(mockListItem.title);
     expect(listItem.description).toBe(mockListItem.description);
     expect(listItem.types[0]._id.toString()).toBe(mockListType._id);
-    expect(listItem.createdBy).toMatchObject(mockUser._id);
+    expect(listItem.createdBy._id).toMatchObject(mockUser._id);
     expect(listItem.createdAt).toBeDefined();
     expect(listItem.updatedAt).toBeDefined();
   });
@@ -112,7 +112,7 @@ describe('List Lambda Tests', () => {
     const listType = await handler(createListTypeEvent);
     expect(listType._id).toBeDefined();
     expect(listType.title).toBe(mockListType.title);
-    expect(listType.createdBy).toMatchObject(mockUser._id);
+    expect(listType.createdBy._id).toMatchObject(mockUser._id);
     expect(listType.createdAt).toBeDefined();
     expect(listType.updatedAt).toBeDefined();
   });
@@ -125,7 +125,7 @@ describe('List Lambda Tests', () => {
     expect(listItem.title).toBe(mockListItem.title);
     expect(listItem.description).toBe(mockListItem.description);
     expect(listItem.types[0]._id.toString()).toBe(mockListType._id);
-    expect(listItem.createdBy).toMatchObject(mockUser._id);
+    expect(listItem.createdBy._id).toMatchObject(mockUser._id);
     expect(listItem.createdAt).toBeDefined();
     expect(listItem.updatedAt).toBeDefined();
   });
@@ -135,7 +135,7 @@ describe('List Lambda Tests', () => {
     const listType = await handler(createMockEvent('updateListType', updatedMockListType));
     expect(listType._id).toBeDefined();
     expect(listType.title).toBe(updatedMockListType.title);
-    expect(listType.createdBy).toMatchObject(mockUser._id);
+    expect(listType.createdBy._id).toMatchObject(mockUser._id);
     expect(listType.createdAt).toBeDefined();
     expect(listType.updatedAt).toBeDefined();
   });
@@ -148,7 +148,7 @@ describe('List Lambda Tests', () => {
     expect(listItem.title).toBe(updatedMockListItem.title);
     expect(listItem.description).toBe(updatedMockListItem.description);
     expect(listItem.types[0]._id.toString()).toBe(mockListType._id);
-    expect(listItem.createdBy).toMatchObject(mockUser._id);
+    expect(listItem.createdBy._id).toMatchObject(mockUser._id);
     expect(listItem.createdAt).toBeDefined();
     expect(listItem.updatedAt).toBeDefined();
   });
@@ -156,13 +156,13 @@ describe('List Lambda Tests', () => {
   it('deleteListType test', async () => {
     await handler(createListTypeEvent);
     const res = await handler(createMockEvent('deleteListType', { _id: mockListType._id }));
-    expect(res).toBe(true);
+    expect(res).toBe(mockListType._id);
   });
 
   it('deleteListItem test', async () => {
     await handler(createListTypeEvent);
     await handler(createListItemEvent);
     const res = await handler(createMockEvent('deleteListItem', { _id: mockListItem._id }));
-    expect(res).toBe(true);
+    expect(res).toBe(mockListItem._id);
   });
 });

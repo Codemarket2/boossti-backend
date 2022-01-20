@@ -7,6 +7,9 @@ import FieldValue from '../field/utils/fieldValueModel';
 import { getCurrentUser } from '../utils/authentication';
 import { AppSyncEvent } from '../utils/cutomTypes';
 import getAdminFilter from '../utils/adminFilter';
+import { userPopulate } from '../utils/populate';
+
+const listItemPopulate = [userPopulate, { path: 'types', select: 'title slug' }];
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -36,6 +39,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           ...tempFilter,
           title: { $regex: search, $options: 'i' },
         })
+          .populate(userPopulate)
           .limit(limit * 1)
           .skip((page - 1) * limit);
         const count = await ListType.countDocuments({
@@ -47,99 +51,22 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           count,
         };
       }
-      case 'getListItems': {
-        const { page = 1, limit = 20, search = '', active = null, types = [] } = args;
-        const tempFilter: any = {};
-        if (active !== null) {
-          tempFilter.active = active;
-        }
-        if (types.length > 0) {
-          tempFilter.types = { $elemMatch: { $in: types } };
-        }
-
-        const adminFilter = getAdminFilter(identity, user);
-
-        const data = await ListItem.find({
-          ...tempFilter,
-          ...adminFilter,
-          $or: [
-            { title: { $regex: search, $options: 'i' } },
-            { description: { $regex: search, $options: 'i' } },
-          ],
-        })
-          .populate('types')
-          .limit(limit * 1)
-          .skip((page - 1) * limit);
-        const count = await ListItem.countDocuments({
-          ...tempFilter,
-          ...adminFilter,
-          $or: [
-            { title: { $regex: search, $options: 'i' } },
-            { description: { $regex: search, $options: 'i' } },
-          ],
-        });
-        return {
-          data,
-          count,
-        };
-      }
       case 'getListTypeBySlug': {
-        return await ListType.findOne({ slug: args.slug });
-      }
-      case 'getListItemBySlug': {
-        return await ListItem.findOne({ slug: args.slug }).populate('types');
+        return await ListType.findOne({ slug: args.slug }).populate(userPopulate);
       }
       case 'getListType': {
-        return await ListType.findById(args._id);
-      }
-      case 'getListItem': {
-        return await ListItem.findById(args._id).populate('types');
+        return await ListType.findById(args._id).populate(userPopulate);
       }
       case 'createListType': {
-        return await ListType.create(args);
-      }
-      case 'createListItem': {
-        const listItem = await ListItem.create(args);
-        return await listItem.populate('types').execPopulate();
-      }
-      case 'updateListItem': {
-        const listItem: any = await ListItem.findByIdAndUpdate(args._id, args, {
-          new: true,
-          runValidators: true,
-        });
-        return await listItem.populate('types').execPopulate();
-      }
-      case 'updatePublish': {
-        const listItem: any = await ListItem.findByIdAndUpdate(
-          { _id: args._id },
-          { active: args.publish },
-          { new: true, runValidators: true },
-        );
-        return await listItem.populate('types').execPopulate();
-      }
-      case 'updateAuthentication': {
-        const listItem: any = await ListItem.findByIdAndUpdate(
-          { _id: args._id },
-          { authenticateUser: args.authenticateUser },
-          { new: true, runValidators: true },
-        );
-        return await listItem.populate('types').execPopulate();
+        const listType = await ListType.create(args);
+        return await listType.populate(userPopulate).execPopulate();
       }
       case 'updateListType': {
-        return await ListType.findByIdAndUpdate(args._id, args, {
+        const listType: any = await ListType.findByIdAndUpdate(args._id, args, {
           new: true,
           runValidators: true,
         });
-      }
-      case 'deleteListItem': {
-        const count = await FieldValue.countDocuments({
-          itemId: args._id,
-        });
-        if (count > 0) {
-          throw new Error('This type is being used in dynamic field, first delete that field');
-        }
-        await ListItem.findByIdAndDelete(args._id);
-        return true;
+        return await listType.populate(userPopulate).execPopulate();
       }
       case 'deleteListType': {
         let count = await ListItem.countDocuments({
@@ -156,7 +83,84 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           throw new Error('This type is being used in dynamic field, first delete that field');
         }
         await ListType.findByIdAndDelete(args._id);
-        return true;
+        return args._id;
+      }
+      case 'getListItems': {
+        const { page = 1, limit = 20, search = '', active = null, types = [] } = args;
+        const tempFilter: any = {};
+        if (active !== null) {
+          tempFilter.active = active;
+        }
+        if (types.length > 0) {
+          tempFilter.types = { $elemMatch: { $in: types } };
+        }
+        const adminFilter = getAdminFilter(identity, user);
+        const data = await ListItem.find({
+          ...tempFilter,
+          ...adminFilter,
+          $or: [
+            { title: { $regex: search, $options: 'i' } },
+            { description: { $regex: search, $options: 'i' } },
+          ],
+        })
+          .populate(listItemPopulate)
+          .limit(limit * 1)
+          .skip((page - 1) * limit);
+        const count = await ListItem.countDocuments({
+          ...tempFilter,
+          ...adminFilter,
+          $or: [
+            { title: { $regex: search, $options: 'i' } },
+            { description: { $regex: search, $options: 'i' } },
+          ],
+        });
+        return {
+          data,
+          count,
+        };
+      }
+      case 'getListItemBySlug': {
+        return await ListItem.findOne({ slug: args.slug }).populate(listItemPopulate);
+      }
+      case 'getListItem': {
+        return await ListItem.findById(args._id).populate(listItemPopulate);
+      }
+      case 'createListItem': {
+        const listItem = await ListItem.create(args);
+        return await listItem.populate(listItemPopulate).execPopulate();
+      }
+      case 'updateListItem': {
+        const listItem: any = await ListItem.findByIdAndUpdate(args._id, args, {
+          new: true,
+          runValidators: true,
+        });
+        return await listItem.populate(listItemPopulate).execPopulate();
+      }
+      case 'updatePublish': {
+        const listItem: any = await ListItem.findByIdAndUpdate(
+          { _id: args._id },
+          { active: args.publish },
+          { new: true, runValidators: true },
+        );
+        return await listItem.populate(listItemPopulate).execPopulate();
+      }
+      case 'updateAuthentication': {
+        const listItem: any = await ListItem.findByIdAndUpdate(
+          { _id: args._id },
+          { authenticateUser: args.authenticateUser },
+          { new: true, runValidators: true },
+        );
+        return await listItem.populate(listItemPopulate).execPopulate();
+      }
+      case 'deleteListItem': {
+        const count = await FieldValue.countDocuments({
+          itemId: args._id,
+        });
+        if (count > 0) {
+          throw new Error('This type is being used in dynamic field, first delete that field');
+        }
+        await ListItem.findByIdAndDelete(args._id);
+        return args._id;
       }
       default:
         throw new Error('Something went wrong! Please check your Query or Mutation');
