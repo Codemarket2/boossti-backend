@@ -136,22 +136,6 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         });
         return await listItem.populate(listItemPopulate).execPopulate();
       }
-      case 'updatePublish': {
-        const listItem: any = await ListItem.findByIdAndUpdate(
-          { _id: args._id },
-          { active: args.publish },
-          { new: true, runValidators: true },
-        );
-        return await listItem.populate(listItemPopulate).execPopulate();
-      }
-      case 'updateAuthentication': {
-        const listItem: any = await ListItem.findByIdAndUpdate(
-          { _id: args._id },
-          { authenticateUser: args.authenticateUser },
-          { new: true, runValidators: true },
-        );
-        return await listItem.populate(listItemPopulate).execPopulate();
-      }
       case 'deleteListItem': {
         const count = await FieldValue.countDocuments({
           itemId: args._id,

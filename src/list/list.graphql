@@ -41,11 +41,10 @@ type Mutation {
     media: [MediaInput]
     fields: [Field2Input]
     active: Boolean
+    authenticateUser: Boolean
     layouts: AWSJSON
     values: [FieldValue2Input]
   ): ListItem
-  updatePublish(_id: ID!, publish: Boolean): ListItem
-  updateAuthentication(_id: ID!, authenticateUser: Boolean): ListItem
   deleteListItem(_id: ID!): String
 }
 
