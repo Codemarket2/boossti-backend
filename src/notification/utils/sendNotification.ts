@@ -14,6 +14,9 @@ const notificationMuattion = gql`
       title
       description
       link
+      formId
+      parentId
+      isClicked
     }
   }
 `;
@@ -25,6 +28,8 @@ type payload = {
   title: string;
   description?: string;
   link?: string;
+  formId?: string;
+  parentId?: string;
 };
 
 export const sendNotification = async (payload: payload) => {
@@ -43,9 +48,9 @@ export const sendNotification = async (payload: payload) => {
     try {
       const notification = await NotificationModel.create(payload);
       const user = await User.findById(payload.userId);
-      await emailNotification(payload, user);
+      // await emailNotification(payload, user);
       // await mobileNotification(payload, user);
-      await pushNotification(payload);
+      // await pushNotification(payload);
     } catch (error) {
       console.error(error.message);
     }
@@ -59,7 +64,7 @@ const mobileNotification = async (payload: payload, user: any) => {
       ${payload.description}.
     `;
   const mobilePayload = {
-    to: '+918294008226' || user.mobile,
+    to: user.mobile,
     from: '+16673032366',
     body: messageBody,
   };
@@ -88,6 +93,7 @@ const emailNotification = async (payload: payload, user: any) => {
       Dear ${user.name}, 
     
       ${payload.description}.
+       <a href='https://boossti.com${payload.link}'><button> View </button></a> 
     `;
 
   const emailPayload = {
