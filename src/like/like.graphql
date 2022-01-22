@@ -1,0 +1,27 @@
+type Query {
+  getLike(_id: ID!): Like
+  getLikesByParentId(parentId: ID!, page: Int, limit: Int): Likes
+}
+
+type Mutation {
+  createLike(parentId: ID!): Like
+  updateLike(_id: ID!): Like
+  deleteLike(parentId: ID!): Boolean
+}
+
+type Subscription {
+  addedLike: Like @aws_subscribe(mutations: ["createLike"])
+}
+
+type Like {
+  _id: ID
+  like: Boolean
+  parentId: ID
+  createdBy: User
+  createdAt: AWSDateTime
+}
+
+type Likes {
+  count: Int
+  data: [Like]
+}

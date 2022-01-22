@@ -6,8 +6,6 @@ schema {
 
 type Subscription {
   addedPost: Post @aws_subscribe(mutations: ["createPost", "updatePost"])
-  addedComment(parentId: ID!): Comment @aws_subscribe(mutations: ["createComment", "updateComment"])
-  addedLike: Like @aws_subscribe(mutations: ["createLike"])
 }
 
 type Query {
@@ -30,11 +28,6 @@ type Query {
   getPost(_id: ID!): Post
   getMyBookmarks(page: Int, limit: Int, sortBy: String, search: String): Bookmarks
   getBookmark(_id: ID!): Bookmark
-  getComment(_id: ID!): Comment
-  getCommentsByParentID(parentId: ID!, page: Int, limit: Int): Comments
-  getLike(_id: ID!): Like
-  getLikesByParentId(parentId: ID!, page: Int, limit: Int): Likes
-  getActionCounts(parentId: ID!): actionCounts
 }
 
 type Mutation {
@@ -55,13 +48,6 @@ type Mutation {
   createBookmark(parentId: String, bookmark: String!): Bookmark
   updateBookmark(_id: ID!, parentId: String, bookmark: String): Bookmark
   deleteBookmark(_id: ID!): Boolean
-  createComment(threadId: ID!, parentId: ID!, body: String!): Comment
-  updateComment(_id: ID!, body: String): Comment
-  deleteComment(_id: ID!): Boolean
-
-  createLike(parentId: ID!): Like
-  updateLike(_id: ID!): Like
-  deleteLike(parentId: ID!): Boolean
 }
 
 type Bookmarks {
@@ -79,45 +65,12 @@ type Bookmark {
   updatedAt: AWSDateTime
 }
 
-type Comment {
-  _id: ID
-  body: String
-  threadId: ID
-  parentId: ID
-  createdBy: User
-  createdAt: AWSDateTime
-  updatedAt: AWSDateTime
-}
-
-type Like {
-  _id: ID
-  like: Boolean
-  parentId: ID
-  createdBy: User
-  createdAt: AWSDateTime
-}
-
-type Comments {
-  count: Int
-  data: [Comment]
-}
-
-type Likes {
-  count: Int
-  data: [Like]
-}
-
 type Logo {
   _id: ID
   logo: String
   description: String
 }
 
-type actionCounts {
-  commentCount: Int
-  likeCount: Int
-  likedByUser: Boolean
-}
 type Posts @aws_api_key @aws_cognito_user_pools {
   data: [Post]
   count: Int

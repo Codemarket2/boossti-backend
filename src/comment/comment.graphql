@@ -1,0 +1,38 @@
+type Query {
+  getComment(_id: ID!): Comment
+  getCommentsByParentID(parentId: ID!, page: Int, limit: Int): Comments
+    @aws_api_key
+    @aws_cognito_user_pools
+  getActionCounts(parentId: ID!): ActionCounts @aws_api_key @aws_cognito_user_pools
+}
+
+type Mutation {
+  createComment(threadId: ID!, parentId: ID!, body: String!): Comment
+  updateComment(_id: ID!, body: String): Comment
+  deleteComment(_id: ID!): Boolean
+}
+
+type Subscription {
+  addedComment(parentId: ID!): Comment @aws_subscribe(mutations: ["createComment", "updateComment"])
+}
+
+type Comment @aws_api_key @aws_cognito_user_pools {
+  _id: ID
+  body: String
+  threadId: ID
+  parentId: ID
+  createdBy: User
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+type Comments @aws_api_key @aws_cognito_user_pools {
+  count: Int
+  data: [Comment]
+}
+
+type ActionCounts @aws_api_key @aws_cognito_user_pools {
+  commentCount: Int
+  likeCount: Int
+  likedByUser: Boolean
+}
