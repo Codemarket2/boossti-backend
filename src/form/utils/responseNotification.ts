@@ -1,6 +1,4 @@
 import { sendNotification } from '../../notification/utils/sendNotification';
-import { sendEmail } from '../../utils/email';
-
 export const sendResponseNotification = async (form: any, response: any) => {
   const { createdBy } = form;
   let submitedBy = '';
@@ -16,6 +14,8 @@ export const sendResponseNotification = async (form: any, response: any) => {
     title: form.name,
     description: desc,
     link: `/response/${response?._id}`,
+    formId: form._id,
+    parentId: form.parentId,
   };
 
   await sendNotification(payload);

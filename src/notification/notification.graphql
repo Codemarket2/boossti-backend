@@ -1,15 +1,32 @@
 type Notification @aws_api_key @aws_cognito_user_pools {
+  _id: ID
   userId: ID
   title: String
   description: String
   link: String
+  formId: ID
+  parentId: ID
+  isClicked: Boolean
 }
 
 type Mutation {
-  sendNotification(userId: ID!, title: String!, description: String, link: String): Notification
-    @aws_api_key
-    @aws_cognito_user_pools
-  callNotification(userId: ID!, title: String!, description: String, link: String): Notification
+  sendNotification(
+    userId: ID!
+    title: String!
+    description: String
+    link: String
+    formId: ID!
+    parentId: ID
+  ): Notification @aws_api_key @aws_cognito_user_pools
+  callNotification(
+    userId: ID!
+    title: String!
+    description: String
+    link: String
+    formId: ID!
+    parentId: ID
+  ): Notification
+  setIsClicked(_id: ID!): Boolean
 }
 
 type Subscription {
@@ -21,6 +38,14 @@ type Notifications {
   count: Int
 }
 
+type NotificationListItem {
+  _id: ID
+  lastNotification: Notification
+  notificationCount: Int
+  formId: Form
+}
+
 type Query {
-  getMyNotifications: Notifications
+  getMyNotifications(formId: ID!): Notifications
+  getNotificationList: [NotificationListItem]
 }
