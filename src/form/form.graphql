@@ -93,6 +93,7 @@ type FieldValue2 @aws_api_key @aws_cognito_user_pools {
   itemId: ListItem
   media: [Media]
   response: Response
+  values: [String]
 }
 
 input FieldValue2Input {
@@ -105,6 +106,7 @@ input FieldValue2Input {
   itemId: ID
   media: [MediaInput]
   response: ID
+  values: [String]
 }
 
 type Response @aws_api_key @aws_cognito_user_pools {

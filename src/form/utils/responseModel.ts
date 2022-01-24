@@ -13,6 +13,7 @@ export interface IValue {
   valueBoolean: boolean;
   valueDate: Date;
   itemId: string;
+  values: [string];
 }
 
 export const valueSchema = new Schema({
@@ -35,6 +36,10 @@ export const valueSchema = new Schema({
   response: {
     type: Schema.Types.ObjectId,
     ref: 'Response',
+  },
+  values: {
+    type: [String],
+    default: [],
   },
 });
 
