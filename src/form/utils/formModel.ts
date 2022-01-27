@@ -39,7 +39,8 @@ const formSchema = new Schema<IForm>(
     parentId: {
       type: Schema.Types.ObjectId,
     },
-    name: { type: String },
+    name: { type: String, unique: true },
+    slug: { type: String },
     fields: [fieldSchema],
     settings: {
       type: Schema.Types.Mixed,

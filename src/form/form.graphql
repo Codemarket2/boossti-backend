@@ -1,5 +1,6 @@
 type Query {
   getForm(_id: ID!): Form @aws_api_key @aws_cognito_user_pools
+  getFormBySlug(slug: String!): Form @aws_api_key @aws_cognito_user_pools
   getForms(page: Int, limit: Int, search: String): Forms
   getResponse(_id: ID!): Response
   getResponses(
@@ -69,6 +70,7 @@ type Form @aws_api_key @aws_cognito_user_pools {
   _id: ID!
   parentId: ID
   name: String
+  slug: String
   fields: [Field2]
   settings: AWSJSON
   published: Boolean

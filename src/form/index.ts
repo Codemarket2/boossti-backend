@@ -1,3 +1,4 @@
+import slugify from 'slugify';
 import { DB } from '../utils/DB';
 import { FormModel } from './utils/formModel';
 import { ResponseModel } from './utils/responseModel';
@@ -57,7 +58,9 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     } = event;
     const user = await getCurrentUser(identity);
     let args = { ...event.arguments };
-
+    if (Object.prototype.hasOwnProperty.call(args, 'name')) {
+      args = { ...args, slug: slugify(args.name, { lower: true }) };
+    }
     if (fieldName.toLocaleLowerCase().includes('create') && user && user._id) {
       args = { ...args, createdBy: user._id };
     } else if (fieldName.toLocaleLowerCase().includes('update') && user && user._id) {
@@ -67,6 +70,9 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     switch (fieldName) {
       case 'getForm': {
         return await FormModel.findById(args._id).populate(formPopulate);
+      }
+      case 'getFormBySlug': {
+        return await FormModel.findOne({ slug: args.slug }).populate(formPopulate);
       }
       case 'getForms': {
         const { page = 1, limit = 20, search = '' } = args;

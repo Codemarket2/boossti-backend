@@ -1,5 +1,6 @@
 export const formResolvers = {
   'Query getForm': 'formLambda',
+  'Query getFormBySlug': 'formLambda',
   'Query getForms': 'formLambda',
   'Mutation createForm': 'formLambda',
   'Mutation updateForm': 'formLambda',
