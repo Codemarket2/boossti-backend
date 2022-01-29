@@ -111,6 +111,9 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       case 'getResponse': {
         return await ResponseModel.findById(args._id).populate(responsePopulate);
       }
+      case 'getResponseByCount': {
+        return await ResponseModel.findOne(args).populate(responsePopulate);
+      }
       case 'getResponses': {
         const { page = 1, limit = 20, formId, parentId, search = '', formField } = args;
         let filter: any = { formId };
@@ -141,12 +144,17 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         };
       }
       case 'createResponse': {
+        args = { ...args, count: 1 };
+        const lastResponse = await ResponseModel.findOne({ formId: args.formId }).sort('-count');
+        if (lastResponse) {
+          args = { ...args, count: lastResponse?.count + 1 };
+        }
         let response = await ResponseModel.create(args);
         response = await response.populate(responsePopulate).execPopulate();
         // Run Actions
-        const form = await FormModel.findById(response.formId);
-        await runFormActions(response, form);
         if (!(process.env.NODE_ENV === 'test')) {
+          const form = await FormModel.findById(response.formId);
+          await runFormActions(response, form);
           await sendResponseNotification(form, response);
         }
         return response;

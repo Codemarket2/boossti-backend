@@ -3,6 +3,7 @@ type Query {
   getFormBySlug(slug: String!): Form @aws_api_key @aws_cognito_user_pools
   getForms(page: Int, limit: Int, search: String): Forms
   getResponse(_id: ID!): Response
+  getResponseByCount(formId: ID!, count: Int!): Response
   getResponses(
     formId: ID!
     parentId: ID
@@ -113,6 +114,7 @@ input FieldValue2Input {
 
 type Response @aws_api_key @aws_cognito_user_pools {
   _id: ID
+  count: Int
   formId: ID
   parentId: ListItem
   values: [FieldValue2]
@@ -123,6 +125,7 @@ type Response @aws_api_key @aws_cognito_user_pools {
 }
 type Response2 @aws_api_key @aws_cognito_user_pools {
   _id: ID
+  count: Int
   formId: Form
   parentId: ListItem
   values: [FieldValue2]

@@ -3,6 +3,7 @@ import { ISchema } from '../../utils/cutomTypes';
 
 export interface IResponse extends ISchema {
   formId: string;
+  count: number;
   values: [IValue];
 }
 
@@ -50,6 +51,11 @@ const responseSchema = new Schema<IResponse>(
       required: true,
       ref: 'Form',
     },
+    count: {
+      type: Number,
+      // default: 0,
+      required: true,
+    },
     parentId: {
       type: Schema.Types.ObjectId,
       ref: 'ListItem',
@@ -67,5 +73,7 @@ const responseSchema = new Schema<IResponse>(
   },
   { timestamps: true },
 );
+
+responseSchema.index({ formId: 1, count: 1 }, { unique: true });
 
 export const ResponseModel = model<IResponse>('Response', responseSchema);

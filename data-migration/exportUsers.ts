@@ -4,7 +4,7 @@ import { DB } from './db';
 
 const exportUsersToFile = async () => {
   const users = await User.find();
-  fs.writeFileSync('data-migration/users.txt', JSON.stringify(users));
+  fs.writeFileSync('data-migration/users.json', JSON.stringify(users));
   console.log('All exported to file');
 };
 

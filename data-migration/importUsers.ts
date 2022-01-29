@@ -3,7 +3,7 @@ import { User } from '../src/user/utils/userModel';
 import { DB } from './db';
 
 const importUsersFromFile = async () => {
-  let users: any = fs.readFileSync('data-migration/users.txt');
+  let users: any = fs.readFileSync('data-migration/users.json');
   users = JSON.parse(users);
   await User.deleteMany();
   const newUsers = await User.create(users);
@@ -18,7 +18,7 @@ const importUsersFromFile = async () => {
     }
     await DB();
     // Run your function here
-    await importUsersFromFile();
+    // await importUsersFromFile();
     process.exit();
   } catch (error) {
     console.log('Error', error);

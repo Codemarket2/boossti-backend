@@ -166,6 +166,11 @@ describe('List Lambda Tests', () => {
     await listHandler(createListItemEvent);
     await handler(createFormEvent);
     const response = await handler(createResponseEvent);
+    console.log({ response });
+    const response2 = await handler(
+      createMockEvent('createResponse', { ...mockResponse, _id: '60fc4d29f11b170008d9ec52' }),
+    );
+    console.log({ response2 });
     expect(response._id).toBeDefined();
     expect(response.formId.toString()).toBe(mockResponse.formId);
     expect(response.parentId._id.toString()).toBe(mockResponse.parentId);
@@ -232,8 +237,6 @@ describe('List Lambda Tests', () => {
     expect(response.createdAt).toBeDefined();
     expect(response.updatedAt).toBeDefined();
   });
-
-  // sonu
 
   it('getMyResponses test', async () => {
     await listHandler(createListTypeEvent);

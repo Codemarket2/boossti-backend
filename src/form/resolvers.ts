@@ -6,6 +6,7 @@ export const formResolvers = {
   'Mutation updateForm': 'formLambda',
   'Mutation deleteForm': 'formLambda',
   'Query getResponse': 'formLambda',
+  'Query getResponseByCount': 'formLambda',
   'Query getResponses': 'formLambda',
   'Mutation createResponse': 'formLambda',
   'Mutation updateResponse': 'formLambda',

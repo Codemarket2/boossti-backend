@@ -1,6 +1,6 @@
 import { DB as defaultDB } from '../src/utils/DB';
 
-export const DB = async () => {
+export const db = async () => {
   let dbString =
     'mongodb+srv://<username>:<password>@codemarket-staging.k16z7.mongodb.net/PROJECT_NAME?retryWrites=true&w=majority';
   dbString = dbString.replace('PROJECT_NAME', process.argv[2]);
