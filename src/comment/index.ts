@@ -17,7 +17,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     let data: any = [];
     let tempComment: any;
     const user = await getCurrentUser(identity);
-    const { page = 1, limit = 10 } = args;
+    const { page = 1, limit = 50 } = args;
 
     if (fieldName.toLocaleLowerCase().includes('create') && user && user._id) {
       args = { ...args, createdBy: user._id };

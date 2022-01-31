@@ -6,7 +6,8 @@ export interface INotification extends ISchema {
   title: string;
   description?: string;
   link?: string;
-  formId: string;
+  formId?: string;
+  threadId?: string;
   parentId?: string;
 }
 
@@ -22,6 +23,9 @@ const notificationSchema = new Schema<INotification>(
     formId: {
       type: Schema.Types.ObjectId,
       ref: 'Form',
+    },
+    threadId: {
+      type: Schema.Types.ObjectId,
     },
     parentId: {
       type: Schema.Types.ObjectId,

@@ -4,8 +4,9 @@ type Notification @aws_api_key @aws_cognito_user_pools {
   title: String
   description: String
   link: String
-  formId: ID
   parentId: ID
+  threadId: ID
+  formId: ID
   isClicked: Boolean
 }
 
@@ -15,16 +16,16 @@ type Mutation {
     title: String!
     description: String
     link: String
-    formId: ID!
     parentId: ID
+    threadId: ID
   ): Notification @aws_api_key @aws_cognito_user_pools
   callNotification(
     userId: ID!
     title: String!
     description: String
     link: String
-    formId: ID!
     parentId: ID
+    threadId: ID
   ): Notification
   setIsClicked(_id: ID!): Boolean
 }
@@ -42,10 +43,10 @@ type NotificationListItem {
   _id: ID
   lastNotification: Notification
   notificationCount: Int
-  formId: Form
+  threadId: Form
 }
 
 type Query {
-  getMyNotifications(formId: ID!): Notifications
+  getMyNotifications(threadId: ID!): Notifications
   getNotificationList: [NotificationListItem]
 }
