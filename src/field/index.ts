@@ -37,7 +37,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     } else if (fieldName.toLocaleLowerCase().includes('update') && user && user._id) {
       args = { ...args, updatedBy: user._id };
     }
-
+    console.log(fieldName);
     switch (fieldName) {
       case 'getField': {
         return await Field.findById(args._id).populate(fieldPopulate);
@@ -61,6 +61,29 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         }
         const field = await Field.create({ ...args, position });
         return await field.populate(fieldPopulate).execPopulate();
+      }
+      case 'getPageMentions': {
+        const { page = 1, _id, limit = 20, parentId, field, onlyShowByUser = null } = args;
+        const tempFilter: any = {};
+        if (onlyShowByUser) {
+          tempFilter.createdBy = user._id;
+        }
+        const data = await FieldValue.find({
+          value: { $regex: `data-id="${_id}"`, $options: 'i' },
+        })
+          .populate(fieldValuePopulate)
+          .limit(limit * 1)
+          .skip((page - 1) * limit);
+        console.log(data);
+        const count = await FieldValue.countDocuments({
+          ...tempFilter,
+          parentId,
+          field,
+        });
+        return {
+          data,
+          count,
+        };
       }
       case 'updateField': {
         const field: any = await Field.findByIdAndUpdate(args._id, args, {

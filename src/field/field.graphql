@@ -11,6 +11,7 @@ type Query {
     onlyShowByUser: Boolean
   ): FieldValues @aws_api_key @aws_cognito_user_pools
   getFieldValue(_id: ID!): FieldValue
+  getPageMentions(_id: ID!, page: Int, limit: Int, active: Boolean, search: String): FieldValues
 }
 
 type Mutation {

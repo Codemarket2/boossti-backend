@@ -5,6 +5,7 @@ export const listResolvers = {
   'Query  getListItem': 'listLambda',
   'Query  getListTypeBySlug': 'listLambda',
   'Query  getListItemBySlug': 'listLambda',
+  'Query  getListPageMentions': 'listLambda',
   'Mutation createListType': 'listLambda',
   'Mutation createListItem': 'listLambda',
   'Mutation updateListItem': 'listLambda',

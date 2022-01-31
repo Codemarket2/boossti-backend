@@ -3,6 +3,7 @@ export const fieldResolvers = {
   'Query getFields': 'fieldLambda',
   'Query getFieldValue': 'fieldLambda',
   'Query getFieldValues': 'fieldLambda',
+  'Query getPageMentions': 'fieldLambda',
   'Mutation createField': 'fieldLambda',
   'Mutation updateField': 'fieldLambda',
   'Mutation deleteField': 'fieldLambda',

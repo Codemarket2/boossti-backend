@@ -51,6 +51,29 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           count,
         };
       }
+      case 'getListPageMentions': {
+        const { page = 1, _id, limit = 20, parentId, field, onlyShowByUser = null } = args;
+        const tempFilter: any = {};
+        if (onlyShowByUser) {
+          tempFilter.createdBy = user._id;
+        }
+        const data = await ListItem.find({
+          'fields.options.values.value': { $regex: `data-id="${_id}"`, $options: 'i' },
+        })
+          .populate(listItemPopulate)
+          .limit(limit * 1)
+          .skip((page - 1) * limit);
+        // console.log(data)
+        const count = await ListItem.countDocuments({
+          ...tempFilter,
+          parentId,
+          field,
+        });
+        return {
+          data,
+          count,
+        };
+      }
       case 'getListTypeBySlug': {
         return await ListType.findOne({ slug: args.slug }).populate(userPopulate);
       }
