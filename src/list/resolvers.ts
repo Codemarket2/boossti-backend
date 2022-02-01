@@ -1,5 +1,6 @@
 export const listResolvers = {
   'Query  getListTypes': 'listLambda',
+  'Query  getMenuListTypes': 'listLambda',
   'Query  getListItems': 'listLambda',
   'Query  getListType': 'listLambda',
   'Query  getListItem': 'listLambda',

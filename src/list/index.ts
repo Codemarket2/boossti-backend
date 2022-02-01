@@ -51,6 +51,12 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           count,
         };
       }
+      case 'getMenuListTypes': {
+        return await ListType.find({
+          showInMenu: true,
+          active: true,
+        }).select('title slug');
+      }
       case 'getListPageMentions': {
         const { page = 1, _id, limit = 20, parentId, field, onlyShowByUser = null } = args;
         const tempFilter: any = {};
@@ -63,7 +69,6 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           .populate(listItemPopulate)
           .limit(limit * 1)
           .skip((page - 1) * limit);
-        // console.log(data)
         const count = await ListItem.countDocuments({
           ...tempFilter,
           parentId,

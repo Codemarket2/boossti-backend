@@ -8,6 +8,7 @@ export interface IListType extends ISchema {
   media: [IMedia];
   active: boolean;
   inUse: boolean;
+  showInMenu: boolean;
 }
 
 const listTypeSchema = new Schema<IListType>(
@@ -25,6 +26,10 @@ const listTypeSchema = new Schema<IListType>(
       default: true,
     },
     inUse: {
+      type: Boolean,
+      default: false,
+    },
+    showInMenu: {
       type: Boolean,
       default: false,
     },

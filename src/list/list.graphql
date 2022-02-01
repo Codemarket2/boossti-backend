@@ -1,5 +1,6 @@
 type Query {
   getListTypes(page: Int, limit: Int, active: Boolean, search: String): ListTypes
+  getMenuListTypes: [ListType]
   getListItems(page: Int, limit: Int, active: Boolean, search: String, types: [ID]): ListItems
     @aws_api_key
     @aws_cognito_user_pools
@@ -24,6 +25,7 @@ type Mutation {
     media: [MediaInput]
     fields: [Field2Input]
     active: Boolean
+    showInMenu: Boolean
   ): ListType
   deleteListType(_id: ID!): String
   createListItem(
@@ -70,6 +72,7 @@ type ListType @aws_api_key @aws_cognito_user_pools {
   fields: [Field2]
   active: Boolean
   inUse: Boolean
+  showInMenu: Boolean
   createdAt: AWSDateTime
   createdBy: User
 }
