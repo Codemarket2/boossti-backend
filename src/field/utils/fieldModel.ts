@@ -4,7 +4,7 @@ import { ISchema } from '../../utils/cutomTypes';
 interface IField extends ISchema {
   label: string;
   multipleValues: boolean;
-  oneUserMultipleValues: boolean;
+  allowOthers: boolean;
   fieldType: string;
   typeId: string;
   position: number;
@@ -28,11 +28,11 @@ const fieldSchema = new Schema<IField>(
     },
     multipleValues: {
       type: Boolean,
-      default: true,
+      default: false,
     },
-    oneUserMultipleValues: {
+    allowOthers: {
       type: Boolean,
-      default: true,
+      default: false,
     },
     active: {
       type: Boolean,

@@ -23,7 +23,7 @@ type Mutation {
     fieldType: String!
     typeId: ID
     multipleValues: Boolean
-    oneUserMultipleValues: Boolean
+    allowOthers: Boolean
   ): Field
   updateField(
     _id: ID!
@@ -33,7 +33,7 @@ type Mutation {
     fieldType: String
     typeId: ID
     multipleValues: Boolean
-    oneUserMultipleValues: Boolean
+    allowOthers: Boolean
     options: AWSJSON
   ): Field
   updateFieldPosition(_id: ID!, position: Float!): Field
@@ -85,7 +85,7 @@ type Field @aws_api_key @aws_cognito_user_pools {
   label: String
   fieldLabel: String
   multipleValues: Boolean
-  oneUserMultipleValues: Boolean
+  allowOthers: Boolean
   fieldType: String
   typeId: ListType
   createdBy: User
