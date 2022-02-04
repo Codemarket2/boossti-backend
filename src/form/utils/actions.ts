@@ -1,7 +1,8 @@
 import { sendEmail } from '../../utils/email';
+import { User } from '../../user/utils/userModel';
 
 export const runFormActions = async (response, form) => {
-  if (form && form?.settings?.actions && form?.settings?.actions?.length > 0) {
+  if (form?.settings?.actions?.length > 0) {
     form?.settings?.actions?.forEach(async (action) => {
       if (
         action?.active &&
@@ -9,7 +10,10 @@ export const runFormActions = async (response, form) => {
         action?.senderEmail &&
         action?.subject &&
         action?.body &&
-        (action?.receiverEmail || (action?.useEmailField && action?.emailFieldId))
+        (action?.receiverType === 'formOwner' ||
+          (action?.receiverType === 'responseSubmitter' && response.createdBy?._id) ||
+          (action?.receiverType === 'customEmail' && action?.receiverEmails?.length > 0) ||
+          (action?.receiverType === 'emailField' && action?.emailFieldId))
       ) {
         const payload: any = {
           from: action?.senderEmail,
@@ -37,17 +41,27 @@ export const runFormActions = async (response, form) => {
             payload.body = payload.body.split(`{{${variable.name}}}`).join(variable.value || '');
           });
         }
-
-        if (action?.useEmailField && action?.emailFieldId) {
+        if (action?.receiverType === 'formOwner') {
+          const user = await User.findById(form?.createdBy?._id);
+          if (user?.email) {
+            payload.to = [user?.email];
+          }
+        } else if (action?.receiverType === 'responseSubmitter') {
+          const user = await User.findById(response?.createdBy?._id);
+          if (user?.email) {
+            payload.to = [user?.email];
+          }
+        } else if (action?.receiverType === 'customEmail') {
+          payload.to = action?.receiverEmails;
+        } else if (action?.receiverType === 'emailField') {
           const emailField = response?.values?.filter(
             (value) => value.field === action?.emailFieldId,
           )[0];
           if (emailField) {
             payload.to = [emailField?.value];
-            await sendEmail(payload);
           }
-        } else {
-          payload.to = [action?.receiverEmail];
+        }
+        if (payload?.to?.length > 0) {
           await sendEmail(payload);
         }
       }
