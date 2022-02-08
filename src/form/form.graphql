@@ -2,8 +2,8 @@ type Query {
   getForm(_id: ID!): Form @aws_api_key @aws_cognito_user_pools
   getFormBySlug(slug: String!): Form @aws_api_key @aws_cognito_user_pools
   getForms(page: Int, limit: Int, search: String): Forms
-  getResponse(_id: ID!): Response
-  getResponseByCount(formId: ID!, count: Int!): Response
+  getResponse(_id: ID!): Response @aws_api_key @aws_cognito_user_pools
+  getResponseByCount(formId: ID!, count: Int!): Response @aws_api_key @aws_cognito_user_pools
   getResponses(
     formId: ID!
     parentId: ID
