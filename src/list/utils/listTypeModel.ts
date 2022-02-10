@@ -14,7 +14,7 @@ export interface IListType extends ISchema {
 const listTypeSchema = new Schema<IListType>(
   {
     title: String,
-    slug: { type: String, unique: true },
+    slug: { type: String, unique: true, required: true },
     description: String,
     media: {
       type: [{ url: String, caption: String }],
@@ -44,8 +44,6 @@ const listTypeSchema = new Schema<IListType>(
   },
   { timestamps: true },
 );
-
-listTypeSchema.index({ slug: 1 });
 
 const ListType = model<IListType>('ListType', listTypeSchema);
 

@@ -31,6 +31,13 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       args = { ...args, slug: slugify(args.title, { lower: true }) };
     }
 
+    if (
+      Object.prototype.hasOwnProperty.call(args, 'slug') &&
+      fieldName.toLocaleLowerCase().includes('update')
+    ) {
+      args = { ...args, slug: slugify(args.slug, { lower: true }) };
+    }
+
     switch (fieldName) {
       case 'getListTypes': {
         const { page = 1, limit = 20, search = '', active = null } = args;
