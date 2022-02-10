@@ -13,8 +13,8 @@ export interface IListType extends ISchema {
 
 const listTypeSchema = new Schema<IListType>(
   {
-    title: { type: String, unique: true },
-    slug: String,
+    title: String,
+    slug: { type: String, unique: true },
     description: String,
     media: {
       type: [{ url: String, caption: String }],
