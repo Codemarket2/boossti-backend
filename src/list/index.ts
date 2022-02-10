@@ -8,6 +8,7 @@ import { getCurrentUser } from '../utils/authentication';
 import { AppSyncEvent } from '../utils/cutomTypes';
 import getAdminFilter from '../utils/adminFilter';
 import { userPopulate } from '../utils/populate';
+import { User } from '../user/utils/userModel';
 
 const listItemPopulate = [userPopulate, { path: 'types', select: 'title slug' }];
 
@@ -66,6 +67,42 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           showInMenu: true,
           active: true,
         }).select('title slug');
+      }
+      case 'getMentionItems': {
+        const { search = '' } = args;
+        let listItems: any = await ListItem.find({
+          $or: [
+            { title: { $regex: search, $options: 'i' } },
+            { description: { $regex: search, $options: 'i' } },
+          ],
+        })
+          .populate(listItemPopulate)
+          .limit(5);
+
+        listItems = listItems.map(
+          (val) =>
+            (val = {
+              title: val.title,
+              _id: val._id,
+              category: val.types[0].title,
+              type: 'listitem',
+            }),
+        );
+
+        let users: any = await User.find({
+          $or: [
+            { name: { $regex: search, $options: 'i' } },
+            { email: { $regex: search, $options: 'i' } },
+          ],
+        }).limit(5);
+
+        users = users.map(
+          (val) => (val = { title: val.name, _id: val._id, category: val.email, type: 'user' }),
+        );
+        console.log(users);
+        const combinedItems = listItems.concat(users);
+        // console.log(combinedItems);
+        return combinedItems;
       }
       case 'getListPageMentions': {
         const { page = 1, _id, limit = 20, parentId, field, onlyShowByUser = null } = args;
