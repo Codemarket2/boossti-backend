@@ -22,6 +22,7 @@ type Mutation {
     _id: ID!
     title: String
     description: String
+    slug: String
     media: [MediaInput]
     fields: [Field2Input]
     active: Boolean
@@ -40,6 +41,7 @@ type Mutation {
     _id: ID!
     types: [ID]
     title: String
+    slug: String
     description: String
     media: [MediaInput]
     fields: [Field2Input]

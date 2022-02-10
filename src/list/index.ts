@@ -24,7 +24,10 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       args = { ...args, updatedBy: user._id };
     }
 
-    if (Object.prototype.hasOwnProperty.call(args, 'title')) {
+    if (
+      Object.prototype.hasOwnProperty.call(args, 'title') &&
+      fieldName.toLocaleLowerCase().includes('create')
+    ) {
       args = { ...args, slug: slugify(args.title, { lower: true }) };
     }
 
