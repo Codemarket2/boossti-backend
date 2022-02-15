@@ -166,11 +166,9 @@ describe('List Lambda Tests', () => {
     await listHandler(createListItemEvent);
     await handler(createFormEvent);
     const response = await handler(createResponseEvent);
-    console.log({ response });
     const response2 = await handler(
       createMockEvent('createResponse', { ...mockResponse, _id: '60fc4d29f11b170008d9ec52' }),
     );
-    console.log({ response2 });
     expect(response._id).toBeDefined();
     expect(response.formId.toString()).toBe(mockResponse.formId);
     expect(response.parentId._id.toString()).toBe(mockResponse.parentId);
@@ -264,5 +262,23 @@ describe('List Lambda Tests', () => {
     await handler(createResponseEvent);
     const responseId = await handler(createMockEvent('deleteResponse', { _id: mockResponse._id }));
     expect(responseId.toString()).toBe(mockResponse._id);
+  });
+
+  it('getSection test', async () => {
+    await listHandler(createListTypeEvent);
+    await listHandler(createListItemEvent);
+    const form = await handler(createFormEvent);
+    const section = await handler(createMockEvent('getSection', { _id: form._id }));
+    console.log({ section });
+    // expect(responseId.toString()).toBe(mockResponse._id);
+  });
+
+  it('updateSection test', async () => {
+    await listHandler(createListTypeEvent);
+    await listHandler(createListItemEvent);
+    const form = await handler(createFormEvent);
+    const section = await handler(createMockEvent('updateSection', { _id: form._id }));
+    console.log({ section });
+    // expect(responseId.toString()).toBe(mockResponse._id);
   });
 });

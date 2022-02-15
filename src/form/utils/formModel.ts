@@ -4,6 +4,7 @@ import { ISchema } from '../../utils/cutomTypes';
 export interface IForm extends ISchema {
   parentId: string;
   name: string;
+  slug: string;
   fields: [IField];
   settings: any;
   published: boolean;

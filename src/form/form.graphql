@@ -2,17 +2,6 @@ type Query {
   getForm(_id: ID!): Form @aws_api_key @aws_cognito_user_pools
   getFormBySlug(slug: String!): Form @aws_api_key @aws_cognito_user_pools
   getForms(page: Int, limit: Int, search: String): Forms
-  getResponse(_id: ID!): Response @aws_api_key @aws_cognito_user_pools
-  getResponseByCount(formId: ID!, count: Int!): Response @aws_api_key @aws_cognito_user_pools
-  getResponses(
-    formId: ID!
-    parentId: ID
-    page: Int
-    limit: Int
-    search: String
-    formField: ID
-  ): Responses @aws_api_key @aws_cognito_user_pools
-  getMyResponses(page: Int, limit: Int): Responses2
 }
 
 type Mutation {
@@ -26,27 +15,12 @@ type Mutation {
     published: Boolean
   ): Form
   deleteForm(_id: ID!): ID!
-  createResponse(formId: ID!, parentId: ID, values: [FieldValue2Input]): Response
-    @aws_api_key
-    @aws_cognito_user_pools
-  updateResponse(_id: ID!, formId: ID, values: [FieldValue2Input]): Response
-  deleteResponse(_id: ID!): ID!
-  createBulkResponses(
-    formId: ID!
-    fileUrl: String!
-    map: AWSJSON!
-    parentId: ID
-    fileData: AWSJSON
-  ): Boolean
 }
 
 type Subscription {
   formSub: Form @aws_subscribe(mutations: ["createForm", "updateForm"])
   updatedForm(_id: ID!): Form @aws_subscribe(mutations: ["updateForm"])
   deletedForm: ID @aws_subscribe(mutations: ["deleteForm"])
-  responseSub(formId: ID!): Response @aws_subscribe(mutations: ["createResponse", "updateResponse"])
-  updatedResponse(_id: ID!): Response @aws_subscribe(mutations: ["updateResponse"])
-  deletedResponse: ID @aws_subscribe(mutations: ["deleteResponse"])
 }
 
 type Field2 @aws_api_key @aws_cognito_user_pools {
@@ -84,62 +58,4 @@ type Form @aws_api_key @aws_cognito_user_pools {
 type Forms {
   count: Int
   data: [Form]
-}
-
-type FieldValue2 @aws_api_key @aws_cognito_user_pools {
-  _id: ID
-  field: String
-  value: String
-  valueNumber: Float
-  valueBoolean: Boolean
-  valueDate: AWSDateTime
-  itemId: ListItem
-  media: [Media]
-  response: Response
-  values: [String]
-}
-
-input FieldValue2Input {
-  _id: ID
-  field: String
-  value: String
-  valueNumber: Float
-  valueBoolean: Boolean
-  valueDate: AWSDateTime
-  itemId: ID
-  media: [MediaInput]
-  response: ID
-  values: [String]
-}
-
-type Response @aws_api_key @aws_cognito_user_pools {
-  _id: ID
-  count: Int
-  formId: ID
-  parentId: ListItem
-  values: [FieldValue2]
-  createdBy: User
-  updatedBy: ID
-  createdAt: AWSDateTime
-  updatedAt: AWSDateTime
-}
-type Response2 @aws_api_key @aws_cognito_user_pools {
-  _id: ID
-  count: Int
-  formId: Form
-  parentId: ListItem
-  values: [FieldValue2]
-  createdBy: User
-  updatedBy: ID
-  createdAt: AWSDateTime
-  updatedAt: AWSDateTime
-}
-
-type Responses @aws_api_key @aws_cognito_user_pools {
-  count: Int
-  data: [Response]
-}
-type Responses2 {
-  count: Int
-  data: [Response2]
 }

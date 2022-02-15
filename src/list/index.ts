@@ -9,7 +9,26 @@ import { AppSyncEvent } from '../utils/cutomTypes';
 import getAdminFilter from '../utils/adminFilter';
 import { userPopulate } from '../utils/populate';
 
-const listItemPopulate = [userPopulate, { path: 'types', select: 'title slug' }];
+const listItemPopulate = [
+  userPopulate,
+  { path: 'types', select: 'title slug' },
+  {
+    path: 'fields.typeId',
+    select: 'title description media slug',
+  },
+  {
+    path: 'fields.form',
+    select: 'name',
+  },
+  {
+    path: 'values.itemId',
+    select: 'types title media slug',
+  },
+  {
+    path: 'values.response',
+    select: 'values',
+  },
+];
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {

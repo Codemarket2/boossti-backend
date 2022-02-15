@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import { User } from '../src/user/utils/userModel';
-import { DB } from './db';
+import { db } from './db';
 
 const importUsersFromFile = async () => {
   let users: any = fs.readFileSync('data-migration/users.json');
@@ -12,11 +12,11 @@ const importUsersFromFile = async () => {
 
 (async () => {
   try {
-    if (process.argv[2] === 'prod-master-vijaa') {
+    if (process.argv[2] === 'prod-master-boossti') {
       console.log("You can't do this");
       process.exit();
     }
-    await DB();
+    await db();
     // Run your function here
     // await importUsersFromFile();
     process.exit();

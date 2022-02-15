@@ -1,6 +1,8 @@
 export default [
   'schema.graphql',
   'src/form/form.graphql',
+  'src/form/response.graphql',
+  'src/form/section.graphql',
   'src/notification/notification.graphql',
   'src/list/list.graphql',
   'src/field/field.graphql',

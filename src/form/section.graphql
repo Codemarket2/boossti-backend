@@ -1,0 +1,27 @@
+type Query {
+  getSection(_id: ID!): Section @aws_api_key @aws_cognito_user_pools
+}
+
+type Mutation {
+  updateSection(
+    _id: ID!
+    fields: [Field2Input]
+    values: [FieldValue2Input]
+    options: AWSJSON
+  ): Section
+}
+
+type Subscription {
+  sectionSub(_id: ID!): Section @aws_subscribe(mutations: ["updateSection"])
+}
+
+type Section @aws_api_key @aws_cognito_user_pools {
+  _id: ID!
+  fields: [Field2]
+  values: [FieldValue2]
+  options: AWSJSON
+  createdBy: User
+  updatedBy: ID
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}

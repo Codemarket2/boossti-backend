@@ -2,6 +2,7 @@ import slugify from 'slugify';
 import { DB } from '../utils/DB';
 import { FormModel } from './utils/formModel';
 import { ResponseModel } from './utils/responseModel';
+import { SectionModel } from './utils/sectionModel';
 import ListType from '../list/utils/listTypeModel';
 import ListItem from '../list/utils/listItemModel';
 import { getCurrentUser } from '../utils/authentication';
@@ -41,6 +42,26 @@ const responsePopulate = [
     select: 'values',
   },
 ];
+
+const sectionPopulate = [
+  {
+    path: 'fields.typeId',
+    select: 'title description media slug',
+  },
+  {
+    path: 'fields.form',
+    select: 'name',
+  },
+  {
+    path: 'values.itemId',
+    select: itemSelect,
+  },
+  {
+    path: 'values.response',
+    select: 'values',
+  },
+];
+
 const myResponsePopulate = [
   ...responsePopulate,
   {
@@ -106,6 +127,8 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       }
       case 'deleteForm': {
         await FormModel.findByIdAndDelete(args._id);
+        await ResponseModel.deleteMany({ formId: args._id });
+        await SectionModel.findByIdAndDelete(args._id);
         return args._id;
       }
       case 'getResponse': {
@@ -223,8 +246,27 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         // if (!(process.env.NODE_ENV === 'test')) {
         //   await sendResponseNotification(form, responseCreated);
         // }
-
         return true;
+      }
+      case 'getSection': {
+        let section = await SectionModel.findById(args._id).populate(sectionPopulate);
+        if (section) {
+          return section;
+        } else if (user?._id) {
+          section = await SectionModel.create({ _id: args._id, createdBy: user._id });
+          return await section.populate(sectionPopulate).execPopulate();
+        }
+        return null;
+      }
+      case 'updateSection': {
+        const section: any = await SectionModel.findByIdAndUpdate(args._id, args, {
+          new: true,
+          runValidators: true,
+        });
+        if (section) {
+          return await section.populate(sectionPopulate).execPopulate();
+        }
+        return null;
       }
       default:
         throw new Error('Something went wrong! Please check your Query or Mutation');

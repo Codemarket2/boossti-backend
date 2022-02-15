@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import { User } from '../src/user/utils/userModel';
-import { DB } from './db';
+import { db } from './db';
 
 const exportUsersToFile = async () => {
   const users = await User.find();
@@ -10,7 +10,7 @@ const exportUsersToFile = async () => {
 
 (async () => {
   try {
-    await DB();
+    await db();
     // Run your function here
     await exportUsersToFile();
     process.exit();

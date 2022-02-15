@@ -13,4 +13,6 @@ export const formResolvers = {
   'Mutation deleteResponse': 'formLambda',
   'Query getMyResponses': 'formLambda',
   'Mutation createBulkResponses': 'formLambda',
+  'Query getSection': 'formLambda',
+  'Mutation updateSection': 'formLambda',
 };
