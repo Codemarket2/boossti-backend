@@ -35,7 +35,7 @@ export const sendPushNotification = function (payload: IPayload) {
 
       const req = https.request(options, function (res) {
         res.on('data', function (data) {
-          console.log(data);
+          // console.log(data);
           resolve(true);
         });
       });

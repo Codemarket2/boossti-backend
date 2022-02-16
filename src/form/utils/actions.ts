@@ -1,5 +1,6 @@
 import { sendEmail } from '../../utils/email';
 import { User } from '../../user/utils/userModel';
+import { sendSms } from '../../utils/sms';
 
 export const runFormActions = async (response, form) => {
   if (form?.settings?.actions?.length > 0) {
@@ -21,19 +22,8 @@ export const runFormActions = async (response, form) => {
           subject: action?.subject,
         };
 
-        if (action?.variables && action?.variables?.length > 0) {
-          const variables = action?.variables?.map((v) => {
-            v = { ...v, value: '' };
-            const variableValue = response?.values?.filter((value) => value.field === v?.field)[0];
-            if (variableValue) {
-              v.value =
-                variableValue.value ||
-                variableValue.valueNumber ||
-                variableValue.valueBoolean ||
-                variableValue.valueDate;
-            }
-            return v;
-          });
+        if (action?.variables?.length > 0) {
+          const variables = getVariables(action?.variables, response);
           variables.forEach((variable) => {
             payload.subject = payload.subject
               .split(`{{${variable.name}}}`)
@@ -41,6 +31,7 @@ export const runFormActions = async (response, form) => {
             payload.body = payload.body.split(`{{${variable.name}}}`).join(variable.value || '');
           });
         }
+
         if (action?.receiverType === 'formOwner') {
           const user = await User.findById(form?.createdBy?._id);
           if (user?.email) {
@@ -64,7 +55,46 @@ export const runFormActions = async (response, form) => {
         if (payload?.to?.length > 0) {
           await sendEmail(payload);
         }
+      } else if (
+        action?.active &&
+        action?.actionType === 'sendSms' &&
+        action?.phoneFieldId &&
+        action?.body
+      ) {
+        const payload = {
+          body: action?.body,
+          phoneNumber: '',
+        };
+        if (action?.variables?.length > 0) {
+          const variables = getVariables(action?.variables, response);
+          variables.forEach((variable) => {
+            payload.body = payload.body.split(`{{${variable.name}}}`).join(variable.value || '');
+          });
+        }
+        const phoneField = response?.values?.filter(
+          (value) => value.field === action?.phoneFieldId,
+        )[0];
+
+        if (phoneField?.valueNumber) {
+          payload.phoneNumber = `+${phoneField?.valueNumber}`;
+        }
+        await sendSms(payload);
       }
     });
   }
+};
+
+const getVariables = (variables, response) => {
+  return variables?.map((v) => {
+    v = { ...v, value: '' };
+    const variableValue = response?.values?.filter((value) => value.field === v?.field)[0];
+    if (variableValue) {
+      v.value =
+        variableValue.value ||
+        variableValue.valueNumber ||
+        variableValue.valueBoolean ||
+        variableValue.valueDate;
+    }
+    return v;
+  });
 };

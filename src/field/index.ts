@@ -37,7 +37,6 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     } else if (fieldName.toLocaleLowerCase().includes('update') && user && user._id) {
       args = { ...args, updatedBy: user._id };
     }
-    console.log(fieldName);
     switch (fieldName) {
       case 'getField': {
         return await Field.findById(args._id).populate(fieldPopulate);
@@ -74,7 +73,6 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           .populate(fieldValuePopulate)
           .limit(limit * 1)
           .skip((page - 1) * limit);
-        console.log(data);
         const count = await FieldValue.countDocuments({
           ...tempFilter,
           parentId,

@@ -5,7 +5,6 @@ import { sendPushNotification } from '../../utils/onesignal';
 import { NotificationModel } from './notificationSchema';
 import { User } from '../../user/utils/userModel';
 import { sendEmail } from '../../utils/email';
-import { sendMessage } from '../../utils/message';
 
 const notificationMuattion = gql`
   mutation MyMutation($userId: ID!, $title: String!, $description: String, $link: String) {

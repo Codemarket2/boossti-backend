@@ -118,9 +118,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         users = users.map(
           (val) => (val = { title: val.name, _id: val._id, category: val.email, type: 'user' }),
         );
-        console.log(users);
         const combinedItems = listItems.concat(users);
-        // console.log(combinedItems);
         return combinedItems;
       }
       case 'getListPageMentions': {

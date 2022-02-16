@@ -55,7 +55,6 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           ...tempFilter,
           body: { $regex: search, $options: 'i' },
         });
-        // console.log('data', data[0].tags);
         return {
           data,
           count,
