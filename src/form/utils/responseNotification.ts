@@ -13,7 +13,7 @@ export const sendResponseNotification = async (form: any, response: any) => {
     userId: [`${createdBy}`],
     title: form.name,
     description: desc,
-    link: `/response/${response?._id}`,
+    link: `/forms/${form?.slug}/response/${response?.count}`,
     formId: form._id,
     threadId: form._id,
     parentId: form.parentId,
