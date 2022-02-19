@@ -1,6 +1,6 @@
 import * as AWS from 'aws-sdk';
 
-const pinpoint = new AWS.Pinpoint({ region: 'us-east-1' });
+const sns = new AWS.SNS({ region: 'us-east-1', apiVersion: '2010-03-31' });
 
 interface Payload {
   phoneNumber: string;
@@ -9,20 +9,8 @@ interface Payload {
 
 export const sendSms = (payload: Payload) => {
   const params = {
-    ApplicationId: 'e5f40d45fb424afa8dc402b9d31cff29',
-    MessageRequest: {
-      Addresses: {
-        [payload.phoneNumber]: {
-          ChannelType: 'SMS',
-        },
-      },
-      MessageConfiguration: {
-        SMSMessage: {
-          Body: payload.body,
-          MessageType: 'TRANSACTIONAL',
-        },
-      },
-    },
+    Message: payload.body,
+    PhoneNumber: payload.phoneNumber,
   };
-  return pinpoint.sendMessages(params).promise();
+  return sns.publish(params).promise();
 };
