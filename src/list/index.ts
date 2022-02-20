@@ -186,10 +186,10 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         if (types.length > 0) {
           tempFilter.types = { $elemMatch: { $in: types } };
         }
-        const adminFilter = getAdminFilter(identity, user);
+        // const adminFilter = getAdminFilter(identity, user);
         const data = await ListItem.find({
           ...tempFilter,
-          ...adminFilter,
+          // ...adminFilter,
           $or: [
             { title: { $regex: search, $options: 'i' } },
             { description: { $regex: search, $options: 'i' } },
@@ -200,7 +200,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           .skip((page - 1) * limit);
         const count = await ListItem.countDocuments({
           ...tempFilter,
-          ...adminFilter,
+          // ...adminFilter,
           $or: [
             { title: { $regex: search, $options: 'i' } },
             { description: { $regex: search, $options: 'i' } },
