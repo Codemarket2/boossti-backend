@@ -53,7 +53,6 @@ const responseSchema = new Schema<IResponse>(
     },
     count: {
       type: Number,
-      // default: 0,
       required: true,
     },
     parentId: {
@@ -61,10 +60,10 @@ const responseSchema = new Schema<IResponse>(
       ref: 'ListItem',
     },
     values: [valueSchema],
+    options: { type: Schema.Types.Mixed, default: { option: false } },
     createdBy: {
       type: Schema.Types.ObjectId,
       ref: 'User',
-      // required: true,
     },
     updatedBy: {
       type: Schema.Types.ObjectId,

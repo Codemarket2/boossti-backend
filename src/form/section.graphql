@@ -3,6 +3,7 @@ type Query {
 }
 
 type Mutation {
+  createSection: Section
   updateSection(
     _id: ID!
     fields: [Field2Input]

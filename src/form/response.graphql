@@ -13,7 +13,7 @@ type Query {
 }
 
 type Mutation {
-  createResponse(formId: ID!, parentId: ID, values: [FieldValue2Input]): Response
+  createResponse(formId: ID!, parentId: ID, values: [FieldValue2Input], options: AWSJSON): Response
     @aws_api_key
     @aws_cognito_user_pools
   updateResponse(_id: ID!, formId: ID, values: [FieldValue2Input]): Response
@@ -65,6 +65,7 @@ type Response @aws_api_key @aws_cognito_user_pools {
   formId: ID
   parentId: ListItem
   values: [FieldValue2]
+  options: AWSJSON
   createdBy: User
   updatedBy: ID
   createdAt: AWSDateTime

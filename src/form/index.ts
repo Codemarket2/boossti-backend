@@ -258,6 +258,9 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         }
         return null;
       }
+      case 'createSection': {
+        return await SectionModel.create({ createdBy: user._id });
+      }
       case 'updateSection': {
         const section: any = await SectionModel.findByIdAndUpdate(args._id, args, {
           new: true,
