@@ -6,7 +6,7 @@ import Field from '../field/utils/fieldModel';
 import FieldValue from '../field/utils/fieldValueModel';
 import { getCurrentUser } from '../utils/authentication';
 import { AppSyncEvent } from '../utils/cutomTypes';
-import getAdminFilter from '../utils/adminFilter';
+// import getAdminFilter from '../utils/adminFilter';
 import { userPopulate } from '../utils/populate';
 import { User } from '../user/utils/userModel';
 
@@ -28,6 +28,17 @@ const listItemPopulate = [
   {
     path: 'values.response',
     select: 'values',
+  },
+];
+const listTypePopulate = [
+  userPopulate,
+  {
+    path: 'fields.typeId',
+    select: 'title description media slug',
+  },
+  {
+    path: 'fields.form',
+    select: 'name',
   },
 ];
 
@@ -69,7 +80,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           ...tempFilter,
           title: { $regex: search, $options: 'i' },
         })
-          .populate(userPopulate)
+          .populate(listTypePopulate)
           .limit(limit * 1)
           .skip((page - 1) * limit);
         const count = await ListType.countDocuments({
@@ -144,21 +155,21 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         };
       }
       case 'getListTypeBySlug': {
-        return await ListType.findOne({ slug: args.slug }).populate(userPopulate);
+        return await ListType.findOne({ slug: args.slug }).populate(listTypePopulate);
       }
       case 'getListType': {
-        return await ListType.findById(args._id).populate(userPopulate);
+        return await ListType.findById(args._id).populate(listTypePopulate);
       }
       case 'createListType': {
         const listType = await ListType.create(args);
-        return await listType.populate(userPopulate).execPopulate();
+        return await listType.populate(listTypePopulate).execPopulate();
       }
       case 'updateListType': {
         const listType: any = await ListType.findByIdAndUpdate(args._id, args, {
           new: true,
           runValidators: true,
         });
-        return await listType.populate(userPopulate).execPopulate();
+        return await listType.populate(listTypePopulate).execPopulate();
       }
       case 'deleteListType': {
         let count = await ListItem.countDocuments({
