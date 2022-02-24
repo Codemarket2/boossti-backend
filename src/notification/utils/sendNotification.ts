@@ -6,7 +6,7 @@ import { NotificationModel } from './notificationSchema';
 import { User } from '../../user/utils/userModel';
 import { sendEmail } from '../../utils/email';
 
-const notificationMuattion = gql`
+const notificationMutation = gql`
   mutation MyMutation($userId: ID!, $title: String!, $description: String, $link: String) {
     sendNotification(userId: $userId, title: $title, description: $description, link: $link) {
       userId
@@ -35,22 +35,26 @@ type payload = {
 
 export const sendNotification = async (payload: payload) => {
   if (GRAPHQL_API_URL && GRAPHQL_API_KEY) {
-    await axios({
-      url: GRAPHQL_API_URL,
-      method: 'post',
-      headers: {
-        'x-api-key': GRAPHQL_API_KEY,
-      },
-      data: {
-        query: graphql.print(notificationMuattion),
-        variables: payload,
-      },
-    });
     try {
       const payloadArray = payload?.userId?.map((uid) => ({
         ...payload,
         userId: uid,
       }));
+      await Promise.all(
+        payloadArray.map(async (p) => {
+          return axios({
+            url: GRAPHQL_API_URL,
+            method: 'post',
+            headers: {
+              'x-api-key': GRAPHQL_API_KEY,
+            },
+            data: {
+              query: graphql.print(notificationMutation),
+              variables: p,
+            },
+          });
+        }),
+      );
       await NotificationModel.create(payloadArray);
 
       // const user = await User.findById(payload.userId);
