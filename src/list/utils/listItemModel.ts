@@ -33,9 +33,9 @@ const listItemSchema = new Schema<IListItem>(
       type: Boolean,
       default: false,
     },
-    layouts: {
+    options: {
       type: Schema.Types.Mixed,
-      default: {},
+      default: { option: false },
     },
     createdBy: {
       type: Schema.Types.ObjectId,

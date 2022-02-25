@@ -33,6 +33,10 @@ const listTypeSchema = new Schema<IListType>(
       type: Boolean,
       default: false,
     },
+    options: {
+      type: Schema.Types.Mixed,
+      default: { option: false },
+    },
     createdBy: {
       type: Schema.Types.ObjectId,
       ref: 'User',
