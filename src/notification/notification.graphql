@@ -20,7 +20,6 @@ type Notification2 @aws_api_key @aws_cognito_user_pools {
   parentId: ID
   threadId: ID
   formId: ID
-  createdAt: AWSDateTime
   isClicked: Boolean
   createdAt: AWSDateTime
 }
