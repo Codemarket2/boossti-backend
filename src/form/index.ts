@@ -176,8 +176,14 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         response = await response.populate(responsePopulate).execPopulate();
         // Run Actions
         if (!(process.env.NODE_ENV === 'test')) {
-          const form = await FormModel.findById(response.formId);
-          await runFormActions(response, form, args?.options?.actions);
+          const form: any = await FormModel.findById(response.formId);
+          await runFormActions(response, {
+            ...form,
+            settings: {
+              ...form.settings,
+              actions: args?.options?.actions || form.settings?.actions,
+            },
+          });
           await sendResponseNotification(form, response);
         }
         return response;
