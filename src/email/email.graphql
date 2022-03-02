@@ -1,0 +1,103 @@
+type Mutation {
+  createSendEmail(
+    senderEmail: String!
+    body: String!
+    subject: String!
+    receiverEmail: [String]
+    mailingList: String
+  ): Email
+  createOneEmailCampaign(
+    userId: String!
+    campaignName: String!
+    mailingList: String!
+    templateName: String!
+    defaultTemplateData: YelpEmailScrapedInput
+    defaultTags: [DefaultTagsInput]
+    collection_of_email_scraped: [YelpEmailScrapedInput]
+  ): EmailCampaign
+  updateOneEmailCampaign(
+    id: ID!
+    userId: String!
+    mailingList: String
+    templateName: String
+  ): EmailCampaign
+  deleteOneEmailCampaign(id: ID!): String
+
+  createOneEmailTemplate(
+    userId: String!
+    templateName: String
+    htmlPart: String
+    subjectPart: String
+    textPart: String
+  ): EmailTemplate
+  updateOneEmailTemplate(
+    id: ID!
+    templateName: String!
+    htmlPart: String
+    subjectPart: String!
+    textPart: String
+  ): EmailTemplate
+  deleteOneEmailTemplate(id: ID!, templateName: String): String
+}
+
+type Query {
+  getAllEmails: Emails
+  getOneEmailTemplate(id: ID!): EmailTemplate
+  getAllEmailTemplatesByUserId(userId: String!): [EmailTemplate]
+  getAllEmailTemplates: [EmailTemplate]
+
+  getOneEmailCampaign(id: ID!): EmailCampaign
+  getAllEmailCampaignsByUserId(userId: String!): [EmailCampaign]
+  getAllEmailCampaigns: [EmailCampaign]
+}
+
+type Email @aws_api_key @aws_cognito_user_pools {
+  _id: ID
+  body: String
+  subject: String
+  senderEmail: String
+  receiverEmail: [String]
+  createdBy: User
+}
+
+type Emails @aws_api_key @aws_cognito_user_pools {
+  data: [Email]
+  count: Int
+}
+
+type EmailCampaign {
+  _id: ID!
+  userId: String!
+  campaignName: String!
+  mailingList: String
+  templateName: String
+  createdAt: String
+}
+
+type EmailTemplate {
+  _id: ID!
+  userId: String!
+  templateName: String
+  htmlPart: String
+  subjectPart: String
+  textPart: String
+  createdAt: String
+}
+
+input YelpEmailScrapedInput {
+  business_name: String
+  website_link: String
+  emails: [String]
+  telephone: String
+  postal_code: String
+  state: String
+  city: String
+  keyword: String
+  Address_line1: String
+  __typename: String
+}
+
+input DefaultTagsInput {
+  Name: String
+  Value: String
+}

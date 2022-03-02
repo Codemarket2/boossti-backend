@@ -13,7 +13,7 @@ import { sendResponseNotification } from './utils/responseNotification';
 import getAdminFilter from '../utils/adminFilter';
 import { fileParser } from './utils/readCsvFile';
 
-const formPopulate = [
+export const formPopulate = [
   userPopulate,
   {
     path: 'fields.typeId',
@@ -27,7 +27,7 @@ const formPopulate = [
 
 const itemSelect = 'types title media slug';
 
-const responsePopulate = [
+export const responsePopulate = [
   userPopulate,
   {
     path: 'parentId',

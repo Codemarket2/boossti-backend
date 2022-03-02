@@ -7,6 +7,8 @@ import { commentResolvers } from '../src/comment/resolvers';
 import { likeResolvers } from '../src/like/resolvers';
 import { formResolvers } from '../src/form/resolvers';
 import { notificationResolvers } from '../src/notification/resolvers';
+import { emailResolvers } from '../src/email/resolvers';
+import { contactResolvers } from '../src/contact/resolvers';
 
 export default {
   ...userResolvers,
@@ -18,4 +20,6 @@ export default {
   ...commentResolvers,
   ...formResolvers,
   ...notificationResolvers,
+  ...emailResolvers,
+  ...contactResolvers,
 };
