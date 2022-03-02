@@ -15,6 +15,10 @@ export default class MyStack extends sst.Stack {
       this,
       '/codemarket/default/senderEmail',
     );
+    const SNS_ORIGINAL_NUMBER = StringParameter.valueForStringParameter(
+      this,
+      '/codemarket/sns/originalNumber',
+    );
     const USER_POOL_ID = StringParameter.valueForStringParameter(this, '/vijaa/userpoolId');
     const userPol = UserPool.fromUserPoolId(this, 'UserPool', USER_POOL_ID);
 
@@ -46,12 +50,11 @@ export default class MyStack extends sst.Stack {
           SENDER_EMAIL: SENDER_EMAIL || '',
           DATABASE: `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@codemarket-staging.k16z7.mongodb.net/${scope.stage}?retryWrites=true&w=majority`,
           USER_POOL_ID: USER_POOL_ID,
-          GRAPHQL_API_URL: process.env.GRAPHQL_API_URL || 'old',
+          SNS_ORIGINAL_NUMBER: SNS_ORIGINAL_NUMBER,
+          GRAPHQL_API_URL: process.env.GRAPHQL_API_URL || '',
           GRAPHQL_API_KEY: process.env.GRAPHQL_API_KEY || '',
           ONESIGNAL_API_KEY: process.env.ONESIGNAL_API_KEY || '',
           ONESIGNAL_APP_ID: process.env.ONESIGNAL_APP_ID || '',
-          TWILIO_ACCOUNT_SID: process.env.TWILIO_ACCOUNT_SID || '',
-          TWILIO_AUTH_TOKEN: process.env.TWILIO_AUTH_TOKEN || '',
         },
       },
       dataSources: dataSources,

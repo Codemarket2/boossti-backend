@@ -2,7 +2,7 @@ import { sendEmail } from '../../utils/email';
 import { User } from '../../user/utils/userModel';
 import { sendSms } from '../../utils/sms';
 
-export const runFormActions = async (response, form, actions?: any) => {
+export const runFormActions = async (response, form) => {
   if (form?.settings?.actions?.length > 0) {
     form?.settings?.actions?.forEach(async (action) => {
       if (
