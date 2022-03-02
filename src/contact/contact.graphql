@@ -1,0 +1,57 @@
+type Query {
+  getAllContacts(page: Int, limit: Int): Contacts @aws_api_key @aws_cognito_user_pools
+  getContact(_id: ID!): Contact
+  getAllMailingList(page: Int, limit: Int): [MailingList]
+}
+
+type Mutation {
+  createContact(
+    firstName: String
+    lastName: String
+    title: String
+    businessName: String
+    email: String!
+    phone: String
+    groupName: String!
+    website: String
+    city: String
+  ): Contact
+  updateContact(
+    _id: ID!
+    firstName: String
+    lastName: String
+    title: String
+    businessName: String
+    email: String
+    phone: String
+    groupName: String
+    website: String
+    city: String
+  ): Contact
+  deleteContact(_id: ID!): ID!
+  createMailingList(fileUrl: String, collectionName: String, map: AWSJSON): Boolean
+}
+
+type Contact @aws_api_key @aws_cognito_user_pools {
+  _id: ID
+  firstName: String
+  lastName: String
+  title: String
+  businessName: String
+  email: String
+  phone: String
+  groupName: String
+  website: String
+  city: String
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+type Contacts @aws_api_key @aws_cognito_user_pools {
+  count: Int
+  data: [Contact]
+}
+
+type MailingList {
+  _id: String
+  emailCount: String
+}

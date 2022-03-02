@@ -104,7 +104,7 @@ export const sendNotification = async (payload: payload) => {
 //   }
 // };
 const pushNotification = async (payload: payload, users: any) => {
-  const uids = users?.map((u) => `${u.userId}`);
+  const uids = users?.map((u) => `${u._id}`);
   const pushPayload = {
     title: payload.title,
     message: payload.description,

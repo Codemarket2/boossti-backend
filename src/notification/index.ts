@@ -36,6 +36,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       const count = await NotificationModel.countDocuments({
         userId: user._id,
         threadId: args.threadId,
+        isClicked: false,
       });
       return {
         data,
@@ -47,6 +48,11 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         {
           $match: {
             userId: user._id,
+          },
+        },
+        {
+          $sort: {
+            createdAt: -1,
           },
         },
         {

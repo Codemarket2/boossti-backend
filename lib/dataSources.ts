@@ -9,4 +9,6 @@ export default {
   fieldLambda: 'src/field/index.handler',
   formLambda: 'src/form/index.handler',
   notificationLambda: 'src/notification/index.handler',
+  emailLambda: 'src/email/index.handler',
+  contactLambda: 'src/contact/index.handler',
 };
