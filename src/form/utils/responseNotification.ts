@@ -6,8 +6,8 @@ export const sendResponseNotification = async (form: any, response: any) => {
     submitedBy = response?.createdBy?.name;
   }
   const desc = response?.parentId?.title
-    ? `${submitedBy} has submitted a new response on ${form?.name} From ${response?.parentId?.title} Page.`
-    : `${submitedBy} has submitted a new response on ${form?.name}`;
+    ? `${submitedBy} has submitted form <i>${form?.name}</i> on <b>${response?.parentId?.title}</b> Page.`
+    : `${submitedBy} has submitted form <i>${form?.name}</i>`;
 
   const payload = {
     userId: [`${createdBy}`],

@@ -7,8 +7,24 @@ import { User } from '../../user/utils/userModel';
 import { sendEmail } from '../../utils/email';
 
 const notificationMutation = gql`
-  mutation MyMutation($userId: ID!, $title: String!, $description: String, $link: String) {
-    sendNotification(userId: $userId, title: $title, description: $description, link: $link) {
+  mutation MyMutation(
+    $userId: ID!
+    $title: String!
+    $description: String
+    $link: String
+    $formId: ID
+    $threadId: ID
+    $parentId: ID
+  ) {
+    sendNotification(
+      userId: $userId
+      title: $title
+      description: $description
+      link: $link
+      formId: $formId
+      threadId: $threadId
+      parentId: $parentId
+    ) {
       userId
       title
       description

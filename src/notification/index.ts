@@ -4,6 +4,13 @@ import { sendNotification } from './utils/sendNotification';
 import { DB } from '../utils/DB';
 import { getCurrentUser } from '../utils/authentication';
 
+const notificationPopulate = [
+  {
+    path: 'userId',
+    select: '_id userId name picture',
+  },
+];
+
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   const {
     info: { fieldName },
@@ -23,11 +30,9 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       return args;
     }
     case 'getMyNotifications': {
-      const data = await NotificationModel.find({ userId: user._id, threadId: args.threadId }).sort(
-        {
-          createdAt: -1,
-        },
-      );
+      const data = await NotificationModel.find({ userId: user._id, threadId: args.threadId })
+        .sort({ createdAt: -1 })
+        .populate(notificationPopulate);
       const count = await NotificationModel.countDocuments({
         userId: user._id,
         threadId: args.threadId,

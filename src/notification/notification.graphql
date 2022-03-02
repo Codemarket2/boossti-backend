@@ -7,6 +7,20 @@ type Notification @aws_api_key @aws_cognito_user_pools {
   parentId: ID
   threadId: ID
   formId: ID
+  createdAt: AWSDateTime
+  isClicked: Boolean
+}
+
+type Notification2 @aws_api_key @aws_cognito_user_pools {
+  _id: ID
+  userId: User
+  title: String
+  description: String
+  link: String
+  parentId: ID
+  threadId: ID
+  formId: ID
+  createdAt: AWSDateTime
   isClicked: Boolean
 }
 
@@ -17,6 +31,7 @@ type Mutation {
     description: String
     link: String
     parentId: ID
+    formId: ID
     threadId: ID
   ): Notification @aws_api_key @aws_cognito_user_pools
   callNotification(
@@ -39,6 +54,11 @@ type Notifications {
   count: Int
 }
 
+type Notifications2 {
+  data: [Notification2]
+  count: Int
+}
+
 type NotificationListItem {
   _id: ID
   lastNotification: Notification
@@ -47,6 +67,6 @@ type NotificationListItem {
 }
 
 type Query {
-  getMyNotifications(threadId: ID!): Notifications
+  getMyNotifications(threadId: ID!): Notifications2
   getNotificationList: [NotificationListItem]
 }
