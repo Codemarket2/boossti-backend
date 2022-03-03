@@ -73,7 +73,7 @@ export const sendBulkEmails = async (data) => {
       ),
     })),
     // ConfigurationSetName: 'sonu-config',
-    Source: 'info@boossti.com',
+    Source: data.from,
     Template: 'TestEmailTemplate',
     DefaultTags: [
       {
@@ -108,12 +108,12 @@ export const sendBulkEmails = async (data) => {
   return sentData;
 };
 
-const d = {
-  from: 'info@boossti.com',
-  to: ['sonu.patna0808@gmail.com', 'sonukumar.patna81800@gmail.com'],
-  body: 'This is a test body of email sending from aws sesv2',
-  subject: 'test bulk email',
-};
+// const d = {
+//   from: 'info@boossti.com',
+//   to: ['sonu.patna0808@gmail.com', 'sonukumar.patna81800@gmail.com'],
+//   body: 'This is a test body of email sending from aws sesv2',
+//   subject: 'test bulk email',
+// };
 
 // deleteTemplate({ templateName: 'TestEmailTemplate' })
 //   .then(() => console.log('Template Deleted'))
