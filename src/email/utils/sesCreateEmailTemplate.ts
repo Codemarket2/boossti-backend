@@ -9,7 +9,7 @@ export const createTemplate = (data) => {
       TextPart: data.textPart,
     },
   };
-  return new AWS.SES().createTemplate(params).promise();
+  return new AWS.SES({ region: 'us-east-1' }).createTemplate(params).promise();
 };
 
 export const updateTemplate = (data) => {
@@ -21,12 +21,12 @@ export const updateTemplate = (data) => {
       TextPart: data.textPart,
     },
   };
-  return new AWS.SES().updateTemplate(params).promise();
+  return new AWS.SES({ region: 'us-east-1' }).updateTemplate(params).promise();
 };
 
 export const deleteTemplate = (data) => {
   const params = {
     TemplateName: data.templateName,
   };
-  return new AWS.SES().deleteTemplate(params).promise();
+  return new AWS.SES({ region: 'us-east-1' }).deleteTemplate(params).promise();
 };

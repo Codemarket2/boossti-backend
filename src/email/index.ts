@@ -5,7 +5,7 @@ import EmailModel, { EmailCampaign, EmailTemplate } from './utils/emailModel';
 import { sendEmail } from '../utils/email';
 import { userPopulate } from '../utils/populate';
 import { createTemplate, deleteTemplate, updateTemplate } from './utils/sesCreateEmailTemplate';
-import { sendBulkTemplatedEmail } from './utils/sesTemplateEmail';
+import { sendBulkEmails, sendBulkTemplatedEmail } from './utils/sesTemplateEmail';
 import ContactModel from '../contact/utils/contactModel';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
@@ -44,12 +44,14 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
             subject,
           });
           response = await response.populate(userPopulate).execPopulate();
-          await sendEmail({
+          await sendBulkEmails({
             from: senderEmail,
             to: findReceiverEmail,
             body: body,
             subject: subject,
-          });
+          })
+            .then(() => console.log('Email Sent'))
+            .catch((e) => console.error(e.message));
           return response;
         }
         break;
