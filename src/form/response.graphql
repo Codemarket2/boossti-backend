@@ -13,16 +13,16 @@ type Query {
 }
 
 type Mutation {
-  createResponse(formId: ID!, parentId: ID, values: [FieldValue2Input], options: AWSJSON): Response
+  createResponse(formId: ID!, parentId: [ID], values: [FieldValue2Input], options: AWSJSON): Response
     @aws_api_key
     @aws_cognito_user_pools
-  updateResponse(_id: ID!, formId: ID, values: [FieldValue2Input]): Response
+  updateResponse(_id: ID!, formId: ID, values: [FieldValue2Input], parentId: [ID]): Response
   deleteResponse(_id: ID!): ID!
   createBulkResponses(
     formId: ID!
     fileUrl: String!
     map: AWSJSON!
-    parentId: ID
+    parentId: [ID]
     fileData: AWSJSON
   ): Boolean
 }

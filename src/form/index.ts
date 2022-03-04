@@ -141,7 +141,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         const { page = 1, limit = 20, formId, parentId, search = '', formField } = args;
         let filter: any = { formId };
         if (parentId) {
-          filter = { ...filter, parentId };
+          filter.parentId = { $elemMatch: { $eq: parentId } };
         }
 
         if (search && formField) {
