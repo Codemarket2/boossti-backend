@@ -1,8 +1,12 @@
+import * as moment from 'moment';
 import { sendEmail } from '../../utils/email';
 import { User } from '../../user/utils/userModel';
+import { FormModel } from './formModel';
+import { ResponseModel } from './responseModel';
 import { sendSms } from '../../utils/sms';
+import { responsePopulate } from '../index';
 
-export const runFormActions = async (response, form) => {
+export const runFormActions = async (response, form, pageId: any = null) => {
   if (form?.settings?.actions?.length > 0) {
     form?.settings?.actions?.forEach(async (action) => {
       if (
@@ -23,13 +27,17 @@ export const runFormActions = async (response, form) => {
         };
 
         if (action?.variables?.length > 0) {
-          const variables = getVariables(action?.variables, response);
-          variables.forEach((variable) => {
-            payload.subject = payload.subject
-              .split(`{{${variable.name}}}`)
-              .join(variable.value || '');
-            payload.body = payload.body.split(`{{${variable.name}}}`).join(variable.value || '');
-          });
+          const { subject, body } = await replaceVariables(
+            payload?.subject,
+            payload?.body,
+            action?.variables,
+            form?.fields,
+            response?.values,
+            pageId,
+          );
+
+          payload.subject = subject;
+          payload.body = body;
         }
 
         if (action?.receiverType === 'formOwner') {
@@ -66,15 +74,19 @@ export const runFormActions = async (response, form) => {
           phoneNumber: '',
         };
         if (action?.variables?.length > 0) {
-          const variables = getVariables(action?.variables, response);
-          variables.forEach((variable) => {
-            payload.body = payload.body.split(`{{${variable.name}}}`).join(variable.value || '');
-          });
+          const { body } = await replaceVariables(
+            '',
+            payload.body,
+            action?.variables,
+            form?.fields,
+            response?.values,
+            pageId,
+          );
+          payload.body = body;
         }
         const phoneField = response?.values?.filter(
           (value) => value.field === action?.phoneFieldId,
         )[0];
-
         if (phoneField?.valueNumber) {
           payload.phoneNumber = `+${phoneField?.valueNumber}`;
         }
@@ -84,17 +96,93 @@ export const runFormActions = async (response, form) => {
   }
 };
 
-const getVariables = (variables, response) => {
-  return variables?.map((v) => {
-    v = { ...v, value: '' };
-    const variableValue = response?.values?.filter((value) => value.field === v?.field)[0];
-    if (variableValue) {
-      v.value =
-        variableValue.value ||
-        variableValue.valueNumber ||
-        variableValue.valueBoolean ||
-        variableValue.valueDate;
+const replaceVariables = async (oldSubject, oldBody, oldVariables, fields, values, pageId) => {
+  let subject = oldSubject;
+  let body = oldBody;
+  const formIds: any = [];
+  const forms: any = [];
+
+  oldVariables?.forEach((variable: any) => {
+    if (variable.formId && !formIds.includes(variable.formId)) {
+      formIds.push(variable.formId);
     }
-    return v;
   });
+
+  for (const formId of formIds) {
+    const form = await FormModel.findById(formId);
+    const response = await ResponseModel.findOne({ formId: formId, parentId: pageId })
+      .sort({
+        createdAt: -1,
+      })
+      .populate(responsePopulate);
+    if (form && response) {
+      forms.push({ ...form?.toObject(), response });
+    }
+  }
+
+  const variables = oldVariables?.map((oneVariable) => {
+    const variable = { ...oneVariable, value: '' };
+    let field = null;
+    let value = null;
+    field = fields.find((f) => f._id?.toString() === variable?.field);
+    value = values.find((v) => v.field === variable?.field);
+
+    if (variable.formId) {
+      const form = forms.find((f) => f._id?.toString() === variable.formId);
+      if (form) {
+        field = form?.fields?.find((f) => f._id?.toString() === variable?.field);
+        value = form?.response?.values?.find((v) => v.field === variable?.field);
+      }
+    }
+    if (field && value) {
+      variable.value = getValue(field, value);
+    }
+    return variable;
+  });
+  variables.forEach((variable) => {
+    body = body.split(`{{${variable.name}}}`).join(variable.value || '');
+    subject = subject.split(`{{${variable.name}}}`).join(variable.value || '');
+  });
+  return { subject, body };
+};
+
+const getValue = (field, value) => {
+  switch (field?.fieldType) {
+    case 'number':
+    case 'phoneNumber': {
+      return value.valueNumber;
+    }
+    case 'date': {
+      return value?.valueDate && moment(value?.valueDate).format('L');
+    }
+    case 'dateTime': {
+      return value?.valueDate && moment(value?.valueDate).format('lll');
+    }
+    case 'checkbox': {
+      return value.valueBoolean?.toString();
+    }
+    case 'select': {
+      if (field?.options?.optionsListType === 'type') {
+        return value?.itemId?.title;
+      }
+      if (field?.options?.optionsListType === 'existingForm') {
+        return getLabel(field?.options?.formField, value?.response);
+      }
+      return value?.value;
+    }
+    default: {
+      return value.value;
+    }
+  }
+};
+
+export const getLabel = (formField: string, response: any): string => {
+  let label = '';
+  const fieldValues = response?.values?.filter((value) => value?.field === formField);
+  fieldValues?.forEach((f, i) => {
+    if (f?.value) {
+      label += i > 0 ? `${f?.value}` : f?.value;
+    }
+  });
+  return label;
 };
