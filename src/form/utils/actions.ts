@@ -4,6 +4,7 @@ import { User } from '../../user/utils/userModel';
 import { FormModel } from './formModel';
 import { ResponseModel } from './responseModel';
 import { sendSms } from '../../utils/sms';
+import { responsePopulate } from '../index';
 
 export const runFormActions = async (response, form, pageId: any = null) => {
   if (form?.settings?.actions?.length > 0) {
@@ -34,6 +35,7 @@ export const runFormActions = async (response, form, pageId: any = null) => {
             response?.values,
             pageId,
           );
+
           payload.subject = subject;
           payload.body = body;
         }
@@ -108,9 +110,11 @@ const replaceVariables = async (oldSubject, oldBody, oldVariables, fields, value
 
   for (const formId of formIds) {
     const form = await FormModel.findById(formId);
-    const response = await ResponseModel.findOne({ formId: formId, parentId: pageId }).sort({
-      createdAt: -1,
-    });
+    const response = await ResponseModel.findOne({ formId: formId, parentId: pageId })
+      .sort({
+        createdAt: -1,
+      })
+      .populate(responsePopulate);
     if (form && response) {
       forms.push({ ...form?.toObject(), response });
     }
@@ -122,6 +126,7 @@ const replaceVariables = async (oldSubject, oldBody, oldVariables, fields, value
     let value = null;
     field = fields.find((f) => f._id?.toString() === variable?.field);
     value = values.find((v) => v.field === variable?.field);
+
     if (variable.formId) {
       const form = forms.find((f) => f._id?.toString() === variable.formId);
       if (form) {
