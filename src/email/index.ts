@@ -6,7 +6,7 @@ import { sendEmail } from '../utils/email';
 import { userPopulate } from '../utils/populate';
 import { createTemplate, deleteTemplate, updateTemplate } from './utils/sesCreateEmailTemplate';
 import { sendBulkEmails, sendBulkTemplatedEmail } from './utils/sesTemplateEmail';
-import ContactModel from '../contact/utils/contactModel';
+import { MailingList } from '../contact/utils/contactModel';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -31,8 +31,13 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           const { senderEmail, receiverEmail, body, subject, mailingList } = args;
           let response, findReceiverEmail;
           if (mailingList && receiverEmail.length === 0) {
-            const contacts = await ContactModel.find({ groupName: mailingList });
-            findReceiverEmail = contacts.map((contact) => contact.email);
+            const mList = await MailingList.findOne({ listName: mailingList })
+              .populate({
+                path: 'contacts',
+                select: '_id email groupName',
+              })
+              .exec();
+            findReceiverEmail = mList?.contacts?.map((e) => e.email);
           } else {
             findReceiverEmail = receiverEmail;
           }

@@ -30,6 +30,7 @@ type Mutation {
   ): Contact
   deleteContact(_id: ID!): ID!
   createMailingList(fileUrl: String, collectionName: String, map: AWSJSON): Boolean
+  createMailingListFromContact(listName: String!, selectedContact: [ID!]!): Boolean
 }
 
 type Contact @aws_api_key @aws_cognito_user_pools {
@@ -52,6 +53,6 @@ type Contacts @aws_api_key @aws_cognito_user_pools {
 }
 
 type MailingList {
-  _id: String
-  emailCount: String
+  listName: String
+  contacts: [ID]
 }
