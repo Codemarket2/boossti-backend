@@ -1,7 +1,7 @@
 import { DB } from '../utils/DB';
 import { getCurrentUser } from '../utils/authentication';
 import { AppSyncEvent } from '../utils/cutomTypes';
-import ContactModel from './utils/contactModel';
+import { Contact, MailingList } from './utils/contactModel';
 import { fileParser } from '../form/utils/readCsvFile';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
@@ -22,7 +22,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
 
     switch (fieldName) {
       case 'createContact': {
-        const response = await ContactModel.create(args);
+        const response = await Contact.create(args);
         return response;
       }
 
@@ -43,44 +43,53 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           // console.log(response);
           responses.push(response);
         });
-        const responseCreated = await ContactModel.create(responses);
+        const responseCreated = await Contact.create(responses);
         console.log(responseCreated);
+        return true;
+      }
+      case 'createMailingListFromContact': {
+        const { listName, selectedContact } = args;
+        console.log(args);
+        const createdList = await MailingList.create({ listName, contacts: selectedContact });
+        console.log(createdList);
         return true;
       }
 
       case 'getAllContacts': {
         const { page = 1, limit = 50 } = args;
 
-        const data = await ContactModel.find()
+        const data = await Contact.find()
           .sort({ createdAt: -1 })
           .limit(limit * 1)
           .skip((page - 1) * limit);
-        const count = await ContactModel.countDocuments();
+        const count = await Contact.countDocuments();
         return {
           data,
           count,
         };
       }
       case 'getAllMailingList': {
-        const data = await ContactModel.aggregate([
-          {
-            $sort: {
-              createdAt: -1,
-            },
-          },
-          {
-            $group: {
-              _id: '$groupName',
-              emailCount: { $sum: 1 },
-            },
-          },
-        ]);
-        console.log('data', data);
-        return data;
+        // const data = await Contact.aggregate([
+        //   {
+        //     $sort: {
+        //       createdAt: -1,
+        //     },
+        //   },
+        //   {
+        //     $group: {
+        //       _id: '$groupName',
+        //       emailCount: { $sum: 1 },
+        //     },
+        //   },
+        // ]);
+        // console.log('data', data);
+        const list = await MailingList.find();
+        console.log(list);
+        return list;
       }
 
       case 'getContact': {
-        return await ContactModel.findById(args._id);
+        return await Contact.findById(args._id);
       }
 
       case 'updateContact': {
@@ -89,7 +98,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         break;
       }
       case 'deleteContact': {
-        await ContactModel.findByIdAndDelete(args._id);
+        await Contact.findByIdAndDelete(args._id);
         return args._id;
       }
       default:

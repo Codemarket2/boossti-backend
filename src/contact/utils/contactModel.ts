@@ -13,8 +13,11 @@ export interface IContact {
   website: string;
   city: string;
 }
-
-export const contactSchema = new Schema<IContact>(
+export interface IMailingList {
+  listName: string;
+  contacts: [Schema.Types.ObjectId];
+}
+const contactSchema = new Schema<IContact>(
   {
     firstName: {
       type: String,
@@ -49,5 +52,22 @@ export const contactSchema = new Schema<IContact>(
   },
   { timestamps: true },
 );
-const ContactModel = model<IContact>('Contact', contactSchema);
-export default ContactModel;
+
+const MailingListSchema = new Schema<IMailingList>(
+  {
+    listName: {
+      type: String,
+      unique: true,
+      required: true,
+    },
+    contacts: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Contact',
+      },
+    ],
+  },
+  { timestamps: true },
+);
+export const Contact = model<IContact>('Contact', contactSchema);
+export const MailingList = model<IMailingList>('MailingList', MailingListSchema);
