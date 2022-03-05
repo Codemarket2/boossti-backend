@@ -143,9 +143,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         if (parentId) {
           filter.parentId = { $elemMatch: { $eq: parentId } };
         }
-
         if (search && formField) {
-          console.warn('filter');
           filter = {
             ...filter,
             $and: [
@@ -154,7 +152,6 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
             ],
           };
         }
-
         const data = await ResponseModel.find(filter)
           .sort({ createdAt: -1 })
           .populate(responsePopulate)
@@ -176,15 +173,22 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         response = await response.populate(responsePopulate).execPopulate();
         // Run Actions
         if (!(process.env.NODE_ENV === 'test')) {
-          const form: any = await FormModel.findById(response.formId);
-          await runFormActions(response, {
-            ...form,
-            settings: {
-              ...form.settings,
-              actions: args?.options?.actions || form.settings?.actions,
-            },
-          });
-          await sendResponseNotification(form, response);
+          const res: any = await FormModel.findById(response?.formId).populate(formPopulate);
+          const form = { ...res.toObject() };
+          if (form) {
+            await runFormActions(
+              response,
+              {
+                ...form,
+                settings: {
+                  ...form.settings,
+                  actions: args?.options?.actions || form.settings?.actions,
+                },
+              },
+              args?.parentId,
+            );
+            await sendResponseNotification(form, response);
+          }
         }
         return response;
       }

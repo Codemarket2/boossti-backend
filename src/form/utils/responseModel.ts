@@ -2,7 +2,8 @@ import { Schema, model } from 'mongoose';
 import { ISchema } from '../../utils/cutomTypes';
 
 export interface IResponse extends ISchema {
-  formId: string;
+  formId: any;
+  parentId: string;
   count: number;
   values: [IValue];
 }
