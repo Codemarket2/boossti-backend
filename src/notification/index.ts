@@ -64,7 +64,13 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
             notificationCount: { $sum: 1 },
           },
         },
+        {
+          $sort: {
+            'lastNotification.updatedAt': -1,
+          },
+        },
       ]);
+      console.log(data);
       return data;
     }
 
