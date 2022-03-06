@@ -30,7 +30,11 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       return args;
     }
     case 'getMyNotifications': {
-      const data = await NotificationModel.find({ userId: user._id, threadId: args.threadId })
+      const data = await NotificationModel.find({
+        userId: user._id,
+        isClicked: false,
+        threadId: args.threadId,
+      })
         .sort({ createdAt: -1 })
         .populate(notificationPopulate);
       const count = await NotificationModel.countDocuments({
@@ -48,6 +52,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         {
           $match: {
             userId: user._id,
+            isClicked: false,
           },
         },
         {
@@ -70,7 +75,6 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           },
         },
       ]);
-      console.log(data);
       return data;
     }
 
