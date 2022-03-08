@@ -1,10 +1,10 @@
-import * as moment from 'moment';
 import { sendEmail } from '../../utils/email';
 import { User } from '../../user/utils/userModel';
 import { FormModel } from './formModel';
 import { ResponseModel } from './responseModel';
 import { sendSms } from '../../utils/sms';
 import { responsePopulate } from '../index';
+import { getValue } from './variables';
 
 export const runFormActions = async (response, form, pageId: any = null) => {
   if (form?.settings?.actions?.length > 0) {
@@ -110,7 +110,10 @@ const replaceVariables = async (oldSubject, oldBody, oldVariables, fields, value
 
   for (const formId of formIds) {
     const form = await FormModel.findById(formId);
-    const response = await ResponseModel.findOne({ formId: formId, parentId: pageId })
+    const response = await ResponseModel.findOne({
+      formId,
+      parentId: { $elemMatch: { $eq: pageId } },
+    })
       .sort({
         createdAt: -1,
       })
@@ -144,45 +147,4 @@ const replaceVariables = async (oldSubject, oldBody, oldVariables, fields, value
     subject = subject.split(`{{${variable.name}}}`).join(variable.value || '');
   });
   return { subject, body };
-};
-
-const getValue = (field, value) => {
-  switch (field?.fieldType) {
-    case 'number':
-    case 'phoneNumber': {
-      return value.valueNumber;
-    }
-    case 'date': {
-      return value?.valueDate && moment(value?.valueDate).format('L');
-    }
-    case 'dateTime': {
-      return value?.valueDate && moment(value?.valueDate).format('lll');
-    }
-    case 'checkbox': {
-      return value.valueBoolean?.toString();
-    }
-    case 'select': {
-      if (field?.options?.optionsListType === 'type') {
-        return value?.itemId?.title;
-      }
-      if (field?.options?.optionsListType === 'existingForm') {
-        return getLabel(field?.options?.formField, value?.response);
-      }
-      return value?.value;
-    }
-    default: {
-      return value.value;
-    }
-  }
-};
-
-export const getLabel = (formField: string, response: any): string => {
-  let label = '';
-  const fieldValues = response?.values?.filter((value) => value?.field === formField);
-  fieldValues?.forEach((f, i) => {
-    if (f?.value) {
-      label += i > 0 ? `${f?.value}` : f?.value;
-    }
-  });
-  return label;
 };
