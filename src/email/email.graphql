@@ -5,6 +5,7 @@ type Mutation {
     subject: String!
     receiverEmail: [String]
     mailingList: String
+    sendIndividual: Boolean
   ): Email
   createOneEmailCampaign(
     userId: String!
