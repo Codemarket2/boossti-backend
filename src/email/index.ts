@@ -28,7 +28,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     switch (fieldName) {
       case 'createSendEmail':
         {
-          const { senderEmail, receiverEmail, body, subject, mailingList } = args;
+          const { senderEmail, receiverEmail, body, subject, mailingList, sendIndividual } = args;
           let response, findReceiverEmail;
           if (mailingList && receiverEmail.length === 0) {
             const mList = await MailingList.findOne({ listName: mailingList })
@@ -49,14 +49,30 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
             subject,
           });
           response = await response.populate(userPopulate).execPopulate();
-          await sendBulkEmails({
-            from: senderEmail,
-            to: findReceiverEmail,
-            body: body,
-            subject: subject,
-          })
-            .then(() => console.log('Email Sent'))
-            .catch((e) => console.error(e.message));
+          if (sendIndividual === true) {
+            console.log('send individual', sendIndividual);
+            await Promise.all(
+              findReceiverEmail.map(async (email) => {
+                await sendEmail({
+                  from: senderEmail,
+                  to: [email],
+                  body: body,
+                  subject: subject,
+                })
+                  .then(() => console.log('Email Sent'))
+                  .catch((e) => console.error(e.message));
+              }),
+            );
+          } else {
+            await sendBulkEmails({
+              from: senderEmail,
+              to: findReceiverEmail,
+              body: body,
+              subject: subject,
+            })
+              .then(() => console.log('Email Sent'))
+              .catch((e) => console.error(e.message));
+          }
           return response;
         }
         break;
