@@ -112,7 +112,7 @@ const replaceVariables = async (oldSubject, oldBody, oldVariables, fields, value
     const form = await FormModel.findById(formId);
     const response = await ResponseModel.findOne({
       formId,
-      parentId: { $elemMatch: { $eq: pageId } },
+      parentId: pageId,
     })
       .sort({
         createdAt: -1,
