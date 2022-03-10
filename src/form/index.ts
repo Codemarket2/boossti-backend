@@ -149,7 +149,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         } = args;
         let filter: any = { formId };
         if (parentId) {
-          filter.parentId = { $elemMatch: { $eq: parentId } };
+          filter = { ...filter, parentId };
         }
         if (onlyMy && user?._id) {
           filter.createdBy = user?._id;
