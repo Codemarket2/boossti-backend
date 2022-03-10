@@ -8,14 +8,18 @@ type Query {
     limit: Int
     search: String
     formField: ID
+    onlyMy: Boolean
   ): Responses @aws_api_key @aws_cognito_user_pools
   getMyResponses(page: Int, limit: Int): Responses2
 }
 
 type Mutation {
-  createResponse(formId: ID!, parentId: [ID], values: [FieldValue2Input], options: AWSJSON): Response
-    @aws_api_key
-    @aws_cognito_user_pools
+  createResponse(
+    formId: ID!
+    parentId: [ID]
+    values: [FieldValue2Input]
+    options: AWSJSON
+  ): Response @aws_api_key @aws_cognito_user_pools
   updateResponse(_id: ID!, formId: ID, values: [FieldValue2Input], parentId: [ID]): Response
   deleteResponse(_id: ID!): ID!
   createBulkResponses(

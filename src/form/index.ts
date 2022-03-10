@@ -138,10 +138,21 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         return await ResponseModel.findOne(args).populate(responsePopulate);
       }
       case 'getResponses': {
-        const { page = 1, limit = 20, formId, parentId, search = '', formField } = args;
+        const {
+          page = 1,
+          limit = 20,
+          formId,
+          parentId,
+          search = '',
+          formField,
+          onlyMy = false,
+        } = args;
         let filter: any = { formId };
         if (parentId) {
           filter.parentId = { $elemMatch: { $eq: parentId } };
+        }
+        if (onlyMy && user?._id) {
+          filter.createdBy = user?._id;
         }
         if (search && formField) {
           filter = {
