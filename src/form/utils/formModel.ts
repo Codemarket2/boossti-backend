@@ -60,6 +60,10 @@ const formSchema = new Schema<IForm>(
       type: Schema.Types.ObjectId,
       ref: 'User',
     },
+    virtualForm: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true },
 );
