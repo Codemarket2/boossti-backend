@@ -146,10 +146,14 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           search = '',
           formField,
           onlyMy = false,
+          responseId = null,
         } = args;
         let filter: any = { formId };
         if (parentId) {
           filter = { ...filter, parentId };
+        }
+        if (responseId) {
+          filter = { ...filter, responseId };
         }
         if (onlyMy && user?._id) {
           filter.createdBy = user?._id;

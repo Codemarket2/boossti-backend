@@ -4,6 +4,7 @@ type Query {
   getResponses(
     formId: ID!
     parentId: ID
+    responseId: ID
     page: Int
     limit: Int
     search: String
@@ -14,10 +15,14 @@ type Query {
 }
 
 type Mutation {
-  createResponse(formId: ID!, parentId: ID, values: [FieldValue2Input], options: AWSJSON): Response
-    @aws_api_key
-    @aws_cognito_user_pools
-  updateResponse(_id: ID!, formId: ID, values: [FieldValue2Input], parentId: ID): Response
+  createResponse(
+    formId: ID!
+    parentId: ID
+    responseId: ID
+    values: [FieldValue2Input]
+    options: AWSJSON
+  ): Response @aws_api_key @aws_cognito_user_pools
+  updateResponse(_id: ID!, formId: ID, values: [FieldValue2Input]): Response
   deleteResponse(_id: ID!): ID!
   createBulkResponses(
     formId: ID!
@@ -65,6 +70,7 @@ type Response @aws_api_key @aws_cognito_user_pools {
   count: Int
   formId: ID
   parentId: ListItem
+  responseId: ID
   values: [FieldValue2]
   options: AWSJSON
   createdBy: User
@@ -78,6 +84,7 @@ type Response2 @aws_api_key @aws_cognito_user_pools {
   count: Int
   formId: Form
   parentId: ListItem
+  responseId: ID
   values: [FieldValue2]
   createdBy: User
   updatedBy: ID
