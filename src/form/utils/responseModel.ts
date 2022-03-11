@@ -60,6 +60,10 @@ export const responseSchema = new Schema<IResponse>(
       type: Schema.Types.ObjectId,
       ref: 'ListItem',
     },
+    responseId: {
+      type: Schema.Types.ObjectId,
+      default: null,
+    },
     values: [valueSchema],
     options: { type: Schema.Types.Mixed, default: { option: false } },
     createdBy: {
