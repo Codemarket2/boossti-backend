@@ -1,0 +1,36 @@
+type Query {
+  getRole(_id: ID!): Role @aws_cognito_user_pools(cognito_groups: ["superadmin"])
+  getRoles(page: Int, limit: Int, search: String): Role
+    @aws_cognito_user_pools(cognito_groups: ["superadmin"])
+}
+
+type Mutation {
+  createRole(name: String!, options: AWSJSON, forms: [ID], users: [ID]): Role
+    @aws_cognito_user_pools(cognito_groups: ["superadmin"])
+  updateRole(_id: ID!, name: String, options: AWSJSON, forms: [ID], users: [ID]): Role
+    @aws_cognito_user_pools(cognito_groups: ["superadmin"])
+  deleteRole(_id: ID!): ID! @aws_cognito_user_pools(cognito_groups: ["superadmin"])
+}
+
+type Subscription {
+  roleSub: Role @aws_subscribe(mutations: ["createRole", "updateRole"])
+  updatedRole(_id: ID!): Role @aws_subscribe(mutations: ["updateRole"])
+  deletedRole: ID @aws_subscribe(mutations: ["deleteRole"])
+}
+
+type Role {
+  _id: ID
+  name: String
+  options: AWSJSON
+  forms: [Form]
+  users: [User]
+  createdBy: User
+  updatedBy: ID
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+type Roles @aws_api_key @aws_cognito_user_pools {
+  count: Int
+  data: [Role]
+}

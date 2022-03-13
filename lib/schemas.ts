@@ -10,4 +10,5 @@ export default [
   'src/comment/comment.graphql',
   'src/email/email.graphql',
   'src/contact/contact.graphql',
+  'src/role/role.graphql',
 ];
