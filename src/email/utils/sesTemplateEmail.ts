@@ -72,7 +72,7 @@ export const sendBulkEmails = async (data) => {
         } || {},
       ),
     })),
-    // ConfigurationSetName: 'sonu-config',
+     ConfigurationSetName: 'emailRules',
     Source: data.from,
     Template: 'TestEmailTemplate',
     DefaultTags: [
