@@ -5,7 +5,13 @@ type Query {
 }
 
 type Mutation {
-  createForm(parentId: ID, name: String!, fields: [Field2Input], settings: AWSJSON): Form
+  createForm(
+    parentId: ID
+    name: String!
+    fields: [Field2Input]
+    settings: AWSJSON
+    virtualForm: Boolean
+  ): Form
   updateForm(
     _id: ID!
     parentId: ID
