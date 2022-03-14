@@ -20,7 +20,7 @@ export const sendOneByOneEmail = (payload: IProps) => {
       // CcAddresses: ['recipient3@example.com'],
       ToAddresses: payload.to,
     },
-    ConfigurationSetName: 'sonu',
+    ConfigurationSetName: 'emailRules',
     Content: {
       Simple: {
         Body: {
