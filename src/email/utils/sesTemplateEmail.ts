@@ -38,9 +38,9 @@ export const sendBulkEmails = async (data) => {
     textPart: '',
   };
 
-  await createTemplate(templateData)
-    .then((e) => console.log('template Created'))
-    .catch((e) => console.error(e.message));
+  // await createTemplate(templateData)
+  //   .then((e) => console.log('template Created'))
+  //   .catch((e) => console.error(e.message));
 
   // for creating ConfigurationSet
   // var configParam = {
@@ -72,7 +72,7 @@ export const sendBulkEmails = async (data) => {
         } || {},
       ),
     })),
-    // ConfigurationSetName: 'sonu-config',
+    ConfigurationSetName: 'sonu',
     Source: data.from,
     Template: 'TestEmailTemplate',
     DefaultTags: [
@@ -101,9 +101,6 @@ export const sendBulkEmails = async (data) => {
       return err;
     })
     .promise();
-  await deleteTemplate({ templateName: 'TestEmailTemplate' })
-    .then(() => console.log('Template Deleted'))
-    .catch((e) => console.log(e.message));
 
   return sentData;
 };

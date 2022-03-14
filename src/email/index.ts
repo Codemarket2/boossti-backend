@@ -2,11 +2,11 @@ import { DB } from '../utils/DB';
 import { getCurrentUser } from '../utils/authentication';
 import { AppSyncEvent } from '../utils/cutomTypes';
 import EmailModel, { EmailCampaign, EmailTemplate } from './utils/emailModel';
-import { sendEmail } from '../utils/email';
 import { userPopulate } from '../utils/populate';
 import { createTemplate, deleteTemplate, updateTemplate } from './utils/sesCreateEmailTemplate';
 import { sendBulkEmails, sendBulkTemplatedEmail } from './utils/sesTemplateEmail';
 import { MailingList } from '../contact/utils/contactModel';
+import { sendOneByOneEmail } from './utils/sesOneEmail';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -53,7 +53,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
             console.log('send individual', sendIndividual);
             await Promise.all(
               findReceiverEmail.map(async (email) => {
-                await sendEmail({
+                await sendOneByOneEmail({
                   from: senderEmail,
                   to: [email],
                   body: body,
