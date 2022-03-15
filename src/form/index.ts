@@ -12,6 +12,7 @@ import { runFormActions } from './utils/actions';
 import { sendResponseNotification } from './utils/responseNotification';
 import getAdminFilter from '../utils/adminFilter';
 import { fileParser } from './utils/readCsvFile';
+import { User } from '../user/utils/userModel';
 
 export const formPopulate = [
   userPopulate,
@@ -184,6 +185,29 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         if (lastResponse) {
           args = { ...args, count: lastResponse?.count + 1 };
         }
+        const res: any = await FormModel.findById(args.formId).populate(formPopulate);
+        const form = { ...res.toObject() };
+        let emailId = '';
+        const action = form.settings?.actions?.filter((a) => a.actionType === 'generateNewUser')[0];
+        emailId = action?.emailFieldId;
+        let email = '';
+        lastResponse?.values.forEach((element) => {
+          if (element.field === emailId) {
+            email = element.value;
+          }
+        });
+        if (email) {
+          const tempUser = await User.findOne({ email: email });
+          if (tempUser) {
+            args = { ...args, createdBy: tempUser._id };
+          }
+        }
+        const oldOptions = { ...args.options };
+
+        if (args?.options) {
+          const { password, ...options } = args?.options;
+          args = { ...args, options };
+        }
         let response = await ResponseModel.create(args);
         response = await response.populate(responsePopulate).execPopulate();
         // Run Actions
@@ -192,7 +216,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           const form = { ...res.toObject() };
           if (form) {
             await runFormActions(
-              response,
+              { ...response.toObject(), options: oldOptions },
               {
                 ...form,
                 settings: {

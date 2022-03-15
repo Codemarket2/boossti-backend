@@ -91,6 +91,46 @@ export const runFormActions = async (response, form, pageId: any = null) => {
           payload.phoneNumber = `+${phoneField?.valueNumber}`;
         }
         await sendSms(payload);
+      } else if (
+        action?.active &&
+        action?.actionType === 'generateNewUser' &&
+        action?.senderEmail &&
+        action?.subject &&
+        action?.body &&
+        action?.receiverType === 'emailField' &&
+        action?.emailFieldId
+      ) {
+        const payload: any = {
+          from: action?.senderEmail,
+          body: action?.body,
+          subject: action?.subject,
+        };
+        payload.body = payload.body.split(`{{password}}`).join(response.options.password || '');
+        if (action?.variables?.length > 0) {
+          const { subject, body } = await replaceVariables(
+            payload?.subject,
+            payload?.body,
+            action?.variables,
+            form?.fields,
+            response?.values,
+            pageId,
+          );
+
+          payload.subject = subject;
+          payload.body = body;
+        }
+
+        const emailField = response?.values?.filter(
+          (value) => value.field === action?.emailFieldId,
+        )[0];
+        if (emailField) {
+          payload.to = [emailField?.value];
+        }
+        if (payload?.to?.length > 0) {
+          if (response.options.generateNewUserEmail) {
+            await sendEmail(payload);
+          }
+        }
       }
     });
   }
