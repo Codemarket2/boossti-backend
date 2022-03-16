@@ -57,10 +57,11 @@ export const responseSchema = new Schema<IResponse>(
       required: true,
     },
     parentId: {
+      // templatePageParentId
       type: Schema.Types.ObjectId,
       ref: 'ListItem',
     },
-    responseId: {
+    workFlowFormReponseParentId: {
       type: Schema.Types.ObjectId,
       default: null,
     },
