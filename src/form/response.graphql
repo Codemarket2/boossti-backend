@@ -4,7 +4,7 @@ type Query {
   getResponses(
     formId: ID!
     parentId: ID
-    responseId: ID
+    workFlowFormReponseParentId: ID
     page: Int
     limit: Int
     search: String
@@ -18,7 +18,7 @@ type Mutation {
   createResponse(
     formId: ID!
     parentId: ID
-    responseId: ID
+    workFlowFormReponseParentId: ID
     values: [FieldValue2Input]
     options: AWSJSON
   ): Response @aws_api_key @aws_cognito_user_pools
@@ -70,7 +70,7 @@ type Response @aws_api_key @aws_cognito_user_pools {
   count: Int
   formId: ID
   parentId: ListItem
-  responseId: ID
+  workFlowFormReponseParentId: ID
   values: [FieldValue2]
   options: AWSJSON
   createdBy: User
@@ -84,7 +84,7 @@ type Response2 @aws_api_key @aws_cognito_user_pools {
   count: Int
   formId: Form
   parentId: ListItem
-  responseId: ID
+  workFlowFormReponseParentId: ID
   values: [FieldValue2]
   createdBy: User
   updatedBy: ID
