@@ -12,4 +12,5 @@ export default {
   notificationLambda: 'src/notification/index.handler',
   emailLambda: 'src/email/index.handler',
   contactLambda: 'src/contact/index.handler',
+  starRatingLambda: 'src/starRating/index.handler',
 };

@@ -1,0 +1,34 @@
+type Query {
+  getStarRating(_id: ID!): StarRating
+  getStarRatingsByParentId(parentId: ID!, page: Int, limit: Int): StarRatings
+  getRatingCounts(parentId: ID!): RatingCounts @aws_api_key @aws_cognito_user_pools
+}
+
+type Mutation {
+  createStarRating(parentId: ID!, starRating: Int!): StarRating
+  updateStarRating(_id: ID!, starRating: Int!): StarRating
+  deleteStarRating(parentId: ID!): Boolean
+}
+
+type Subscription {
+  addedStarRating: StarRating @aws_subscribe(mutations: ["createStarRating"])
+}
+
+type StarRating {
+  _id: ID
+  starRating: Int
+  parentId: ID
+  createdBy: User
+  createdAt: AWSDateTime
+}
+
+type StarRatings {
+  count: Int
+  data: [StarRating]
+}
+
+type RatingCounts {
+  userStarRating: StarRating
+  averageStarRating: Float
+  ratingCount: Int
+}
