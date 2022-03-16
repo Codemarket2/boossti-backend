@@ -5,6 +5,7 @@ import { bookmarkResolvers } from '../src/bookmark/resolvers';
 import { fieldResolvers } from '../src/field/resolvers';
 import { commentResolvers } from '../src/comment/resolvers';
 import { likeResolvers } from '../src/like/resolvers';
+import { starRatingResolver } from '../src/starRating/resolvers';
 import { formResolvers } from '../src/form/resolvers';
 import { notificationResolvers } from '../src/notification/resolvers';
 import { emailResolvers } from '../src/email/resolvers';
@@ -15,6 +16,7 @@ export default {
   ...userResolvers,
   ...listResolvers,
   ...likeResolvers,
+  ...starRatingResolver,
   ...postResolvers,
   ...bookmarkResolvers,
   ...fieldResolvers,

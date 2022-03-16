@@ -7,6 +7,7 @@ export default [
   'src/list/list.graphql',
   'src/field/field.graphql',
   'src/like/like.graphql',
+  'src/starRating/starRating.graphql',
   'src/comment/comment.graphql',
   'src/email/email.graphql',
   'src/contact/contact.graphql',
