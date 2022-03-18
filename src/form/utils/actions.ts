@@ -27,17 +27,19 @@ export const runFormActions = async (response, form, pageId: any = null) => {
         };
 
         if (action?.variables?.length > 0) {
-          const { subject, body } = await replaceVariables(
+          const { subject, body, senderEmail } = await replaceVariables(
             payload?.subject,
             payload?.body,
             action?.variables,
             form?.fields,
             response?.values,
             pageId,
+            payload.from,
           );
 
           payload.subject = subject;
           payload.body = body;
+          payload.from = senderEmail;
         }
 
         if (action?.receiverType === 'formOwner') {
@@ -136,8 +138,17 @@ export const runFormActions = async (response, form, pageId: any = null) => {
   }
 };
 
-const replaceVariables = async (oldSubject, oldBody, oldVariables, fields, values, pageId) => {
+const replaceVariables = async (
+  oldSubject,
+  oldBody,
+  oldVariables,
+  fields,
+  values,
+  pageId,
+  oldSenderEmail = '',
+) => {
   let subject = oldSubject;
+  let senderEmail = oldSenderEmail;
   let body = oldBody;
   const formIds: any = [];
   const forms: any = [];
@@ -185,6 +196,7 @@ const replaceVariables = async (oldSubject, oldBody, oldVariables, fields, value
   variables.forEach((variable) => {
     body = body.split(`{{${variable.name}}}`).join(variable.value || '');
     subject = subject.split(`{{${variable.name}}}`).join(variable.value || '');
+    senderEmail = senderEmail.split(`{{${variable.name}}}`).join(variable.value || '');
   });
-  return { subject, body };
+  return { subject, body, senderEmail };
 };
