@@ -7,6 +7,7 @@ import { createTemplate, deleteTemplate, updateTemplate } from './utils/sesCreat
 import { sendBulkEmails, sendBulkTemplatedEmail } from './utils/sesTemplateEmail';
 import { MailingList } from '../contact/utils/contactModel';
 import { sendOneByOneEmail } from './utils/sesOneEmail';
+import { replaceVariables } from './utils/variables';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -32,12 +33,9 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           let response, findReceiverEmail;
           if (mailingList && receiverEmail.length === 0) {
             const mList = await MailingList.findOne({ listName: mailingList })
-              .populate({
-                path: 'contacts',
-                select: '_id email groupName',
-              })
+              .populate('contacts')
               .exec();
-            findReceiverEmail = mList?.contacts?.map((e) => e.email);
+            findReceiverEmail = mList?.contacts;
           } else {
             findReceiverEmail = receiverEmail;
           }
@@ -52,12 +50,15 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           if (sendIndividual === true) {
             console.log('send individual', sendIndividual);
             await Promise.all(
-              findReceiverEmail.map(async (email) => {
+              findReceiverEmail.map(async (contact) => {
+                const newBody = replaceVariables(body, contact);
+                const newSubject = replaceVariables(subject, contact);
+                const newSenderEmail = replaceVariables(senderEmail, contact);
                 await sendOneByOneEmail({
-                  from: senderEmail,
-                  to: [email],
-                  body: body,
-                  subject: subject,
+                  from: newSenderEmail,
+                  to: [contact.email],
+                  body: newBody,
+                  subject: newSubject,
                 })
                   .then(() => console.log('Email Sent'))
                   .catch((e) => console.error(e.message));
