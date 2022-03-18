@@ -35,6 +35,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
             const mList = await MailingList.findOne({ listName: mailingList })
               .populate('contacts')
               .exec();
+
             findReceiverEmail = mList?.contacts;
           } else {
             findReceiverEmail = receiverEmail;
@@ -48,7 +49,6 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           });
           response = await response.populate(userPopulate).execPopulate();
           if (sendIndividual === true) {
-            console.log('send individual', sendIndividual);
             await Promise.all(
               findReceiverEmail.map(async (contact) => {
                 const newBody = replaceVariables(body, contact);
@@ -161,7 +161,9 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         }
         break;
       default:
-        throw new Error('Something went wrong! Please check your Query or Mutation');
+        throw new Error(
+          'Something went wrong in backend src/email/index.ts! Please check your Query or Mutation',
+        );
     }
   } catch (error) {
     if (error.runThis) {
