@@ -23,7 +23,7 @@ export const fieldSchema = new Schema({
   fieldType: { type: String, required: true },
   typeId: {
     type: Schema.Types.ObjectId,
-    ref: 'ListType',
+    ref: 'Template',
   },
   options: {
     type: Schema.Types.Mixed,

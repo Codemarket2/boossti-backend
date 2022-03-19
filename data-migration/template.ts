@@ -1,20 +1,20 @@
-import ListItemModel from '../src/list/utils/listItemModel';
+import TemplateModel from '../src/template/utils/templateModel';
 import { db } from './db';
 import * as fs from 'fs';
 
-const filePath = 'data-migration/listItems.json';
+const filePath = 'data-migration/listTypes.json';
 
-const exportListItems = async () => {
-  const data = await ListItemModel.find();
+const exportTemplates = async () => {
+  const data = await TemplateModel.find();
   console.log(data.length);
   fs.writeFileSync(filePath, JSON.stringify(data));
   console.log('All data exported to file');
 };
 
-const importListItems = async () => {
+const importTemplates = async () => {
   let oldData: any = await fs.readFileSync(filePath);
   oldData = JSON.parse(oldData);
-  const data: any = await ListItemModel.create(oldData);
+  const data: any = await TemplateModel.create(oldData);
   console.log(data.length);
   console.log('All data imported to database');
 };
@@ -23,8 +23,8 @@ const importListItems = async () => {
   try {
     await db();
     // Run your function here
-    // await exportListItems();
-    // await importListItems();
+    // await exportTemplates();
+    // await importTemplates();
 
     process.exit();
   } catch (error) {

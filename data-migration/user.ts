@@ -1,6 +1,6 @@
 import slugify from 'slugify';
 import { User } from '../src/user/utils/userModel';
-import ListItem from '../src/list/utils/listItemModel';
+import Page from '../src/template/utils/pageModel';
 import { DB } from './db';
 
 const userTypeId = '6119695c580ba8000904f06b';
@@ -18,7 +18,7 @@ const addUserToType = async () => {
     };
   });
   console.log('users', users);
-  const res = await ListItem.create(users);
+  const res = await Page.create(users);
 };
 
 // (async () => {

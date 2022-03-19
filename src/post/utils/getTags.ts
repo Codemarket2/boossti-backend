@@ -1,5 +1,5 @@
-import ListItem from '../../list/utils/listItemModel';
-import ListType from '../../list/utils/listTypeModel';
+import Page from '../../template/utils/pageModel';
+import Template from '../../template/utils/templateModel';
 
 export const getTags = async (body) => {
   let postBody = body;
@@ -13,19 +13,19 @@ export const getTags = async (body) => {
   });
   if (tags.length > 0) {
     let typeTags: any = [];
-    typeTags = await ListType.find({
+    typeTags = await Template.find({
       _id: {
         $in: tags,
       },
     });
-    typeTags = typeTags.map((l) => ({ tag: l._id, tagModel: 'ListType' }));
+    typeTags = typeTags.map((l) => ({ tag: l._id, tagModel: 'Template' }));
     let itemTags: any = [];
-    itemTags = await ListItem.find({
+    itemTags = await Page.find({
       _id: {
         $in: tags,
       },
     });
-    itemTags = itemTags.map((l) => ({ tag: l._id, tagModel: 'ListItem' }));
+    itemTags = itemTags.map((l) => ({ tag: l._id, tagModel: 'Page' }));
     tags = [...typeTags, ...itemTags];
   }
   // console.log('tags', tags);

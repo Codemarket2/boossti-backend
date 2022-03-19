@@ -3,8 +3,8 @@ import { DB } from '../utils/DB';
 import { FormModel } from './utils/formModel';
 import { ResponseModel } from './utils/responseModel';
 import { SectionModel } from './utils/sectionModel';
-import ListType from '../list/utils/listTypeModel';
-import ListItem from '../list/utils/listItemModel';
+import Template from '../template/utils/templateModel';
+import Page from '../template/utils/pageModel';
 import { getCurrentUser } from '../utils/authentication';
 import { AppSyncEvent } from '../utils/cutomTypes';
 import { userPopulate } from '../utils/populate';
@@ -325,8 +325,8 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     }
   } catch (error) {
     if (error.runThis) {
-      await ListType.findOne();
-      await ListItem.findOne();
+      await Template.findOne();
+      await Page.findOne();
     }
     const error2 = error;
     throw error2;

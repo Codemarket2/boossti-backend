@@ -16,10 +16,10 @@ export const getValue = (field, value) => {
       return value.valueBoolean?.toString();
     }
     case 'select': {
-      if (field?.options?.optionsListType === 'type') {
+      if (field?.options?.optionsTemplate === 'type') {
         return value?.itemId?.title;
       }
-      if (field?.options?.optionsListType === 'existingForm') {
+      if (field?.options?.optionsTemplate === 'existingForm') {
         return getLabel(field?.options?.formField, value?.response);
       }
       return value?.value;

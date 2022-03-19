@@ -59,7 +59,7 @@ type Notifications2 {
   count: Int
 }
 
-type NotificationListItem {
+type NotificationPage {
   _id: ID
   lastNotification: Notification
   notificationCount: Int
@@ -68,5 +68,5 @@ type NotificationListItem {
 
 type Query {
   getMyNotifications(threadId: ID!): Notifications2
-  getNotificationList: [NotificationListItem]
+  getNotificationList: [NotificationPage]
 }

@@ -1,26 +1,26 @@
 import '../jest/jestSetup';
 import { handler } from '../src/form';
-import { handler as listHandler } from '../src/list';
+import { handler as listHandler } from '../src/template';
 import { mockUser, createMockEvent } from '../jest/defaultArguments';
 
 // yarn test test/formLambda.test.ts
 
-export const mockListType = {
+export const mockTemplate = {
   _id: '60fc4d29f11b170008d9ec48',
   title: 'Doctors',
   media: [],
 };
 
-const mockListItem = {
+const mockPage = {
   _id: '60fc4d29f11b170008d9ec46',
-  types: [mockListType._id],
+  types: [mockTemplate._id],
   title: 'Dr John',
   description: 'NYC',
   media: [],
 };
 
 const mockFields = [
-  { label: 'Doctor', fieldType: 'type', options: {}, typeId: mockListType._id },
+  { label: 'Doctor', fieldType: 'type', options: {}, typeId: mockTemplate._id },
   { label: 'Email', fieldType: 'email', options: {}, typeId: null },
   { label: 'Message', fieldType: 'textarea', options: {}, typeId: null },
 ];
@@ -48,7 +48,7 @@ const mockValues = [
     valueNumber: null,
     valueBoolean: null,
     valueDate: null,
-    itemId: mockListItem._id,
+    itemId: mockPage._id,
   },
   {
     field: 'Email',
@@ -62,7 +62,7 @@ const mockValues = [
 
 const mockResponse = {
   _id: '60fc4d29f11b170008d9ec99',
-  parentId: mockListItem._id,
+  parentId: mockPage._id,
   formId: mockForm._id,
   values: mockValues,
 };
@@ -84,12 +84,12 @@ const updatedMockResponse = {
 
 const createFormEvent = createMockEvent('createForm', mockForm);
 const createResponseEvent = createMockEvent('createResponse', mockResponse);
-const createListTypeEvent = createMockEvent('createListType', mockListType);
-const createListItemEvent = createMockEvent('createListItem', mockListItem);
+const createTemplateEvent = createMockEvent('createTemplate', mockTemplate);
+const createPageEvent = createMockEvent('createPage', mockPage);
 
 describe('List Lambda Tests', () => {
   it('createForm test', async () => {
-    await listHandler(createListTypeEvent);
+    await listHandler(createTemplateEvent);
     const form = await handler(createFormEvent);
     expect(form._id).toBeDefined();
     expect(form.name).toBe(mockForm.name);
@@ -104,7 +104,7 @@ describe('List Lambda Tests', () => {
   });
 
   it('updateForm test', async () => {
-    await listHandler(createListTypeEvent);
+    await listHandler(createTemplateEvent);
     await handler(createFormEvent);
     const form = await handler(createMockEvent('updateForm', updatedMockForm));
     expect(form._id).toBeDefined();
@@ -120,7 +120,7 @@ describe('List Lambda Tests', () => {
   });
 
   it('getForm test', async () => {
-    await listHandler(createListTypeEvent);
+    await listHandler(createTemplateEvent);
     await handler(createFormEvent);
     const form = await handler(createMockEvent('getForm', { _id: mockForm._id }));
     expect(form._id).toBeDefined();
@@ -136,7 +136,7 @@ describe('List Lambda Tests', () => {
   });
 
   it('getForms test', async () => {
-    await listHandler(createListTypeEvent);
+    await listHandler(createTemplateEvent);
     await handler(createFormEvent);
     const forms = await handler(createMockEvent('getForms'));
     expect(forms.data.length).toBe(1);
@@ -155,15 +155,15 @@ describe('List Lambda Tests', () => {
   });
 
   it('getForms test', async () => {
-    await listHandler(createListTypeEvent);
+    await listHandler(createTemplateEvent);
     await handler(createFormEvent);
     const formId = await handler(createMockEvent('deleteForm', { _id: mockForm._id }));
     expect(formId.toString()).toBe(mockForm._id);
   });
 
   it('createResponse test', async () => {
-    await listHandler(createListTypeEvent);
-    await listHandler(createListItemEvent);
+    await listHandler(createTemplateEvent);
+    await listHandler(createPageEvent);
     await handler(createFormEvent);
     const response = await handler(createResponseEvent);
     const response2 = await handler(
@@ -181,8 +181,8 @@ describe('List Lambda Tests', () => {
   });
 
   it('updateResponse test', async () => {
-    await listHandler(createListTypeEvent);
-    await listHandler(createListItemEvent);
+    await listHandler(createTemplateEvent);
+    await listHandler(createPageEvent);
     await handler(createFormEvent);
     await handler(createResponseEvent);
     const response = await handler(createMockEvent('updateResponse', updatedMockResponse));
@@ -198,8 +198,8 @@ describe('List Lambda Tests', () => {
   });
 
   it('getResponse test', async () => {
-    await listHandler(createListTypeEvent);
-    await listHandler(createListItemEvent);
+    await listHandler(createTemplateEvent);
+    await listHandler(createPageEvent);
     await handler(createFormEvent);
     await handler(createResponseEvent);
     const response = await handler(createMockEvent('getResponse', { _id: mockResponse._id }));
@@ -215,8 +215,8 @@ describe('List Lambda Tests', () => {
   });
 
   it('getResponses test', async () => {
-    await listHandler(createListTypeEvent);
-    await listHandler(createListItemEvent);
+    await listHandler(createTemplateEvent);
+    await listHandler(createPageEvent);
     await handler(createFormEvent);
     await handler(createResponseEvent);
     const responses = await handler(
@@ -237,8 +237,8 @@ describe('List Lambda Tests', () => {
   });
 
   it('getMyResponses test', async () => {
-    await listHandler(createListTypeEvent);
-    await listHandler(createListItemEvent);
+    await listHandler(createTemplateEvent);
+    await listHandler(createPageEvent);
     await handler(createFormEvent);
     await handler(createResponseEvent);
     const responses = await handler(createMockEvent('getMyResponses'));
@@ -256,8 +256,8 @@ describe('List Lambda Tests', () => {
   });
 
   it('deleteResponse test', async () => {
-    await listHandler(createListTypeEvent);
-    await listHandler(createListItemEvent);
+    await listHandler(createTemplateEvent);
+    await listHandler(createPageEvent);
     await handler(createFormEvent);
     await handler(createResponseEvent);
     const responseId = await handler(createMockEvent('deleteResponse', { _id: mockResponse._id }));
@@ -265,8 +265,8 @@ describe('List Lambda Tests', () => {
   });
 
   it('getSection test', async () => {
-    await listHandler(createListTypeEvent);
-    await listHandler(createListItemEvent);
+    await listHandler(createTemplateEvent);
+    await listHandler(createPageEvent);
     const form = await handler(createFormEvent);
     const section = await handler(createMockEvent('getSection', { _id: form._id }));
     console.log({ section });
@@ -274,8 +274,8 @@ describe('List Lambda Tests', () => {
   });
 
   it('updateSection test', async () => {
-    await listHandler(createListTypeEvent);
-    await listHandler(createListItemEvent);
+    await listHandler(createTemplateEvent);
+    await listHandler(createPageEvent);
     const form = await handler(createFormEvent);
     const section = await handler(createMockEvent('updateSection', { _id: form._id }));
     console.log({ section });
