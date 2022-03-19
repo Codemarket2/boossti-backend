@@ -1,8 +1,9 @@
-import { Comment } from './commentModel';
-import { sendNotification } from '../../notification/utils/sendNotification';
-import { Post } from '../../post/utils/postModel';
-import { getAllIntrestedUsers } from '../../utils/getAllIntrestedUser';
-export const sendCommentNotification = async (comment) => {};
+// import { Comment } from './commentModel';
+// import { Post } from '../../post/utils/postModel';
+// import { getAllIntrestedUsers } from '../../utils/getAllIntrestedUser';
+export const sendCommentNotification = async (comment) => {
+  console.log('sendCommentNotification');
+};
 /* export const sendCommentNotification = async (comment) => {
   const fieldValue = await FieldValueModel.findById(comment.threadId);
   if (fieldValue && fieldValue?.createdBy.toString() !== comment.createdBy?._id.toString()) {
