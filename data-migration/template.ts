@@ -2,7 +2,7 @@ import TemplateModel from '../src/template/utils/templateModel';
 import { db } from './db';
 import * as fs from 'fs';
 
-const filePath = 'data-migration/listTypes.json';
+const filePath = 'data-migration/templates.json';
 
 const exportTemplates = async () => {
   const data = await TemplateModel.find();

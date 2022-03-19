@@ -2,7 +2,7 @@ import PageModel from '../src/template/utils/pageModel';
 import { db } from './db';
 import * as fs from 'fs';
 
-const filePath = 'data-migration/listItems.json';
+const filePath = 'data-migration/pages.json';
 
 const exportPages = async () => {
   const data = await PageModel.find();
