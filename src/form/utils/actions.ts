@@ -1,16 +1,18 @@
 import { sendEmail } from '../../utils/email';
 import { User } from '../../user/utils/userModel';
 import { FormModel } from './formModel';
+import PageModel from '../../template/utils/pageModel';
 import { ResponseModel } from './responseModel';
 import { sendSms } from '../../utils/sms';
 import { responsePopulate } from '../index';
 import { getValue } from './variables';
+import moment from 'moment';
 
 export const runFormActions = async (response, form, pageId: any = null) => {
   if (form?.settings?.actions?.length > 0) {
-    form?.settings?.actions?.forEach(async (action) => {
+    const actions = form?.settings?.actions?.filter((a) => a.active);
+    for (const action of actions) {
       if (
-        action?.active &&
         action?.actionType === 'sendEmail' &&
         action?.senderEmail &&
         action?.subject &&
@@ -65,12 +67,7 @@ export const runFormActions = async (response, form, pageId: any = null) => {
         if (payload?.to?.length > 0) {
           await sendEmail(payload);
         }
-      } else if (
-        action?.active &&
-        action?.actionType === 'sendSms' &&
-        action?.phoneFieldId &&
-        action?.body
-      ) {
+      } else if (action?.actionType === 'sendSms' && action?.phoneFieldId && action?.body) {
         const payload = {
           body: action?.body,
           phoneNumber: '',
@@ -94,7 +91,6 @@ export const runFormActions = async (response, form, pageId: any = null) => {
         }
         await sendSms(payload);
       } else if (
-        action?.active &&
         action?.actionType === 'generateNewUser' &&
         action?.senderEmail &&
         action?.subject &&
@@ -133,8 +129,95 @@ export const runFormActions = async (response, form, pageId: any = null) => {
             await sendEmail(payload);
           }
         }
+      } else if (
+        action?.actionType === 'sendInAppNotification' &&
+        (action?.receiverType === 'formOwner' ||
+          (action?.receiverType === 'responseSubmitter' && response?.createdBy?._id)) &&
+        action?.body
+      ) {
+        const notificationForm = await FormModel.findOne({ slug: 'notification' });
+        const feedPage = await PageModel.findOne({ slug: 'feed' });
+        if (notificationForm && feedPage) {
+          let body = action?.body;
+          body = body.split('{{formName}}').join(`${form?.name}`);
+          body = body.split('{{createdBy}}').join(`${response?.createdBy?.name || ''}`);
+          body = body.split('{{createdAt}}').join(`${moment(response?.createdAt).format('llll')}`);
+          body = body.split('{{pageName}}').join(`${response?.parentId?.title || ''}`);
+          const { body: newBody } = await replaceVariables(
+            '',
+            body,
+            action?.variables,
+            form?.fields,
+            response?.values,
+            pageId,
+          );
+          const payload = { description: '', link: '', responseId: '' };
+          payload.description = newBody;
+          payload.link = `/${form.slug}/response/${response.count}`;
+          payload.responseId = response._id;
+          //description 62379e4b828b831ecc288710
+          //link 62379e6d31b3457eca741a4e
+          //responseId 62379e5f8e1b532b40973bd9
+          const responsePayload: any = {
+            formId: notificationForm._id,
+            values: [],
+            count: 1,
+            createdBy: null,
+            parentId: feedPage._id,
+          };
+
+          responsePayload.values.push({
+            field: '62379e4b828b831ecc288710',
+            value: payload.description,
+            valueNumber: null,
+            valueBoolean: null,
+            valueDate: null,
+            itemId: null,
+            media: null,
+            response: null,
+            values: null,
+          });
+          responsePayload.values.push({
+            field: '62379e6d31b3457eca741a4e',
+            value: payload.link,
+            valueNumber: null,
+            valueBoolean: null,
+            valueDate: null,
+            itemId: null,
+            media: null,
+            response: null,
+            values: null,
+          });
+          responsePayload.values.push({
+            field: '62379e5f8e1b532b40973bd9',
+            value: payload.responseId,
+            valueNumber: null,
+            valueBoolean: null,
+            valueDate: null,
+            itemId: null,
+            media: null,
+            response: null,
+            values: null,
+          });
+          if (action.receiverType === 'formOwner') {
+            responsePayload.createdBy = form.createdBy._id;
+          } else if (action.receiverType === 'responseSubmitter') {
+            responsePayload.createdBy = response.createdBy._id;
+          }
+          const lastResponse = await ResponseModel.findOne({
+            formId: responsePayload.formId,
+          }).sort('-count');
+          console.log({ lastResponse });
+          if (lastResponse) {
+            responsePayload.count = lastResponse?.count + 1;
+          }
+          console.log(action.receiverType, responsePayload.count);
+          const responseNotification = await ResponseModel.create(responsePayload);
+          console.log({ responseNotification });
+        }
       }
-    });
+    }
+    // actions?.forEach(async (action) => );
   }
 };
 
