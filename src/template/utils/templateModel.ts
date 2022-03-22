@@ -2,7 +2,7 @@ import { Schema, model } from 'mongoose';
 import { ISchema, IMedia } from '../../utils/cutomTypes';
 import { fieldSchema } from '../../form/utils/formModel';
 
-export interface IListType extends ISchema {
+export interface ITemplate extends ISchema {
   title: string;
   description: string;
   media: [IMedia];
@@ -11,7 +11,7 @@ export interface IListType extends ISchema {
   showInMenu: boolean;
 }
 
-const listTypeSchema = new Schema<IListType>(
+const templateSchema = new Schema<ITemplate>(
   {
     title: String,
     slug: { type: String, unique: true, required: true },
@@ -49,6 +49,6 @@ const listTypeSchema = new Schema<IListType>(
   { timestamps: true },
 );
 
-const ListType = model<IListType>('ListType', listTypeSchema);
+const Template = model<ITemplate>('Template', templateSchema);
 
-export default ListType;
+export default Template;

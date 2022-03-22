@@ -1,18 +1,16 @@
 import slugify from 'slugify';
 import { DB } from '../utils/DB';
-import ListType from './utils/listTypeModel';
-import ListItem from './utils/listItemModel';
-import Field from '../field/utils/fieldModel';
-import FieldValue from '../field/utils/fieldValueModel';
+import Template from './utils/templateModel';
+import Page from './utils/pageModel';
 import { getCurrentUser } from '../utils/authentication';
 import { AppSyncEvent } from '../utils/cutomTypes';
 // import getAdminFilter from '../utils/adminFilter';
 import { userPopulate } from '../utils/populate';
 import { User } from '../user/utils/userModel';
 
-const listItemPopulate = [
+const pagePopulate = [
   userPopulate,
-  { path: 'types', select: 'title slug' },
+  { path: 'template', select: 'title slug' },
   {
     path: 'fields.typeId',
     select: 'title description media slug',
@@ -23,14 +21,14 @@ const listItemPopulate = [
   },
   {
     path: 'values.itemId',
-    select: 'types title media slug',
+    select: 'template title media slug',
   },
   {
     path: 'values.response',
     select: 'values',
   },
 ];
-const listTypePopulate = [
+const templatePopulate = [
   userPopulate,
   {
     path: 'fields.typeId',
@@ -70,20 +68,20 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     }
 
     switch (fieldName) {
-      case 'getListTypes': {
+      case 'getTemplates': {
         const { page = 1, limit = 20, search = '', active = null } = args;
         const tempFilter: any = {};
         if (active !== null) {
           tempFilter.active = active;
         }
-        const data = await ListType.find({
+        const data = await Template.find({
           ...tempFilter,
           title: { $regex: search, $options: 'i' },
         })
-          .populate(listTypePopulate)
+          .populate(templatePopulate)
           .limit(limit * 1)
           .skip((page - 1) * limit);
-        const count = await ListType.countDocuments({
+        const count = await Template.countDocuments({
           ...tempFilter,
           title: { $regex: search, $options: 'i' },
         });
@@ -92,30 +90,30 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           count,
         };
       }
-      case 'getMenuListTypes': {
-        return await ListType.find({
+      case 'getMenuTemplates': {
+        return await Template.find({
           showInMenu: true,
           active: true,
         }).select('title slug');
       }
       case 'getMentionItems': {
         const { search = '' } = args;
-        let listItems: any = await ListItem.find({
+        let pages: any = await Page.find({
           $or: [
             { title: { $regex: search, $options: 'i' } },
             { description: { $regex: search, $options: 'i' } },
           ],
         })
-          .populate(listItemPopulate)
+          .populate(pagePopulate)
           .limit(5);
 
-        listItems = listItems.map(
+        pages = pages.map(
           (val) =>
             (val = {
               title: val.title,
               _id: val._id,
-              category: val.types[0].title,
-              type: 'listitem',
+              category: val.template[0].title,
+              type: 'page',
             }),
         );
 
@@ -129,22 +127,22 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         users = users.map(
           (val) => (val = { title: val.name, _id: val._id, category: val.email, type: 'user' }),
         );
-        const combinedItems = listItems.concat(users);
+        const combinedItems = pages.concat(users);
         return combinedItems;
       }
-      case 'getListPageMentions': {
+      case 'getPageMentions': {
         const { page = 1, _id, limit = 20, parentId, field, onlyShowByUser = null } = args;
         const tempFilter: any = {};
         if (onlyShowByUser) {
           tempFilter.createdBy = user._id;
         }
-        const data = await ListItem.find({
+        const data = await Page.find({
           'fields.options.values.value': { $regex: `data-id="${_id}"`, $options: 'i' },
         })
-          .populate(listItemPopulate)
+          .populate(pagePopulate)
           .limit(limit * 1)
           .skip((page - 1) * limit);
-        const count = await ListItem.countDocuments({
+        const count = await Page.countDocuments({
           ...tempFilter,
           parentId,
           field,
@@ -154,51 +152,44 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           count,
         };
       }
-      case 'getListTypeBySlug': {
-        return await ListType.findOne({ slug: args.slug }).populate(listTypePopulate);
+      case 'getTemplateBySlug': {
+        return await Template.findOne({ slug: args.slug }).populate(templatePopulate);
       }
-      case 'getListType': {
-        return await ListType.findById(args._id).populate(listTypePopulate);
+      case 'getTemplate': {
+        return await Template.findById(args._id).populate(templatePopulate);
       }
-      case 'createListType': {
-        const listType = await ListType.create(args);
-        return await listType.populate(listTypePopulate).execPopulate();
+      case 'createTemplate': {
+        const template = await Template.create(args);
+        return await template.populate(templatePopulate).execPopulate();
       }
-      case 'updateListType': {
-        const listType: any = await ListType.findByIdAndUpdate(args._id, args, {
+      case 'updateTemplate': {
+        const template: any = await Template.findByIdAndUpdate(args._id, args, {
           new: true,
           runValidators: true,
         });
-        return await listType.populate(listTypePopulate).execPopulate();
+        return await template.populate(templatePopulate).execPopulate();
       }
-      case 'deleteListType': {
-        let count = await ListItem.countDocuments({
-          types: { $elemMatch: { $in: [args._id] } },
+      case 'deleteTemplate': {
+        const count = await Page.countDocuments({
+          template: args._id,
         });
         if (count > 0) {
           throw new Error('First delete the items under this type');
         }
-        count = 0;
-        count = await Field.countDocuments({
-          typeId: args._id,
-        });
-        if (count > 0) {
-          throw new Error('This type is being used in dynamic field, first delete that field');
-        }
-        await ListType.findByIdAndDelete(args._id);
+        await Template.findByIdAndDelete(args._id);
         return args._id;
       }
-      case 'getListItems': {
-        const { page = 1, limit = 20, search = '', active = null, types = [] } = args;
+      case 'getPages': {
+        const { page = 1, limit = 20, search = '', active = null, template = null } = args;
         const tempFilter: any = {};
         if (active !== null) {
           tempFilter.active = active;
         }
-        if (types.length > 0) {
-          tempFilter.types = { $elemMatch: { $in: types } };
+        if (template) {
+          tempFilter.template = template;
         }
         // const adminFilter = getAdminFilter(identity, user);
-        const data = await ListItem.find({
+        const data = await Page.find({
           ...tempFilter,
           // ...adminFilter,
           $or: [
@@ -206,10 +197,10 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
             { description: { $regex: search, $options: 'i' } },
           ],
         })
-          .populate(listItemPopulate)
+          .populate(pagePopulate)
           .limit(limit * 1)
           .skip((page - 1) * limit);
-        const count = await ListItem.countDocuments({
+        const count = await Page.countDocuments({
           ...tempFilter,
           // ...adminFilter,
           $or: [
@@ -222,31 +213,25 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           count,
         };
       }
-      case 'getListItemBySlug': {
-        return await ListItem.findOne({ slug: args.slug }).populate(listItemPopulate);
+      case 'getPageBySlug': {
+        return await Page.findOne({ slug: args.slug }).populate(pagePopulate);
       }
-      case 'getListItem': {
-        return await ListItem.findById(args._id).populate(listItemPopulate);
+      case 'getPage': {
+        return await Page.findById(args._id).populate(pagePopulate);
       }
-      case 'createListItem': {
-        const listItem = await ListItem.create(args);
-        return await listItem.populate(listItemPopulate).execPopulate();
+      case 'createPage': {
+        const page = await Page.create(args);
+        return await page.populate(pagePopulate).execPopulate();
       }
-      case 'updateListItem': {
-        const listItem: any = await ListItem.findByIdAndUpdate(args._id, args, {
+      case 'updatePage': {
+        const page: any = await Page.findByIdAndUpdate(args._id, args, {
           new: true,
           runValidators: true,
         });
-        return await listItem.populate(listItemPopulate).execPopulate();
+        return await page.populate(pagePopulate).execPopulate();
       }
-      case 'deleteListItem': {
-        const count = await FieldValue.countDocuments({
-          itemId: args._id,
-        });
-        if (count > 0) {
-          throw new Error('This type is being used in dynamic field, first delete that field');
-        }
-        await ListItem.findByIdAndDelete(args._id);
+      case 'deletePage': {
+        await Page.findByIdAndDelete(args._id);
         return args._id;
       }
       default:

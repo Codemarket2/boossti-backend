@@ -1,6 +1,6 @@
 import { DB } from '../utils/DB';
-import ListType from '../list/utils/listTypeModel';
-import ListItem from '../list/utils/listItemModel';
+import Template from '../template/utils/templateModel';
+import Page from '../template/utils/pageModel';
 import { getCurrentUser } from '../utils/authentication';
 import { Post } from './utils/postModel';
 import { getTags } from './utils/getTags';
@@ -32,7 +32,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         select: 'title description media slug types',
         populate: {
           path: 'types',
-          model: 'ListType',
+          model: 'Template',
           select: 'slug',
         },
       },
@@ -128,8 +128,8 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       }
       default:
         if (args.registerModel) {
-          await ListType.findOne();
-          await ListItem.findOne();
+          await Template.findOne();
+          await Page.findOne();
         }
         throw new Error('Something went wrong! Please check your Query or Mutation');
     }

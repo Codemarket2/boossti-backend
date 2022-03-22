@@ -46,7 +46,7 @@ type FieldValue2 @aws_api_key @aws_cognito_user_pools {
   valueNumber: Float
   valueBoolean: Boolean
   valueDate: AWSDateTime
-  itemId: ListItem
+  itemId: Page
   media: [Media]
   response: Response
   values: [String]
@@ -69,7 +69,7 @@ type Response @aws_api_key @aws_cognito_user_pools {
   _id: ID
   count: Int
   formId: ID
-  parentId: ListItem
+  parentId: Page
   workFlowFormReponseParentId: ID
   values: [FieldValue2]
   options: AWSJSON
@@ -83,7 +83,7 @@ type Response2 @aws_api_key @aws_cognito_user_pools {
   _id: ID
   count: Int
   formId: Form
-  parentId: ListItem
+  parentId: Page
   workFlowFormReponseParentId: ID
   values: [FieldValue2]
   createdBy: User

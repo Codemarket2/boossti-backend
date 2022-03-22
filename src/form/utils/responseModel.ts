@@ -33,7 +33,7 @@ export const valueSchema = new Schema({
   },
   itemId: {
     type: Schema.Types.ObjectId,
-    ref: 'ListItem',
+    ref: 'Page',
   },
   response: {
     type: Schema.Types.ObjectId,
@@ -59,7 +59,7 @@ export const responseSchema = new Schema<IResponse>(
     parentId: {
       // templatePageParentId
       type: Schema.Types.ObjectId,
-      ref: 'ListItem',
+      ref: 'Page',
     },
     workFlowFormReponseParentId: {
       type: Schema.Types.ObjectId,

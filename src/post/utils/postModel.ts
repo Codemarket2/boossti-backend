@@ -9,7 +9,7 @@ const tagSchema = new mongoose.Schema({
   tagModel: {
     type: String,
     required: true,
-    enum: ['ListType', 'ListItem'],
+    enum: ['Template', 'Page'],
   },
 });
 
@@ -19,7 +19,7 @@ const postSchema = new mongoose.Schema({
     type: [{ url: String, caption: String }],
     default: [],
   },
-  // tags: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ListType' }],
+  // tags: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Template' }],
   tags: [tagSchema],
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,

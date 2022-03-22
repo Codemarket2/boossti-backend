@@ -3,7 +3,7 @@ import { ISchema, IMedia } from '../../utils/cutomTypes';
 import { fieldSchema, IField } from '../../form/utils/formModel';
 import { valueSchema, IValue } from '../../form/utils/responseModel';
 
-export interface IListItem extends ISchema {
+export interface IPage extends ISchema {
   title: string;
   slug: string;
   description: string;
@@ -13,9 +13,9 @@ export interface IListItem extends ISchema {
   values: [IValue];
 }
 
-const listItemSchema = new Schema<IListItem>(
+const pageSchema = new Schema<IPage>(
   {
-    types: [{ type: Schema.Types.ObjectId, ref: 'ListType' }],
+    template: { type: Schema.Types.ObjectId, ref: 'Template' },
     title: String,
     slug: { type: String, unique: true, required: true },
     description: String,
@@ -49,6 +49,6 @@ const listItemSchema = new Schema<IListItem>(
   { timestamps: true },
 );
 
-const ListItem = model<IListItem>('ListItem', listItemSchema);
+const Page = model<IPage>('Page', pageSchema);
 
-export default ListItem;
+export default Page;

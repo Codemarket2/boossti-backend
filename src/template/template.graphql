@@ -1,0 +1,110 @@
+type Query {
+  getTemplates(page: Int, limit: Int, active: Boolean, search: String): Templates
+  getMenuTemplates: [Template]
+  getPages(page: Int, limit: Int, active: Boolean, search: String, template: ID): Pages
+    @aws_api_key
+    @aws_cognito_user_pools
+  getTemplate(_id: ID!): Template
+  getPage(_id: ID!): Page
+  getTemplateBySlug(slug: String!): Template @aws_api_key @aws_cognito_user_pools
+  getPageBySlug(slug: String!): Page @aws_api_key @aws_cognito_user_pools
+  getMentionItems(search: String): [MentionItems]
+  getPageMentions(_id: ID!, page: Int, limit: Int, active: Boolean, search: String): Pages
+}
+
+type Mutation {
+  createTemplate(
+    title: String!
+    description: String
+    media: [MediaInput]
+    active: Boolean
+  ): Template
+  updateTemplate(
+    _id: ID!
+    title: String
+    description: String
+    slug: String
+    media: [MediaInput]
+    fields: [Field2Input]
+    active: Boolean
+    showInMenu: Boolean
+    options: AWSJSON
+  ): Template
+  deleteTemplate(_id: ID!): String
+  createPage(
+    template: ID!
+    title: String!
+    description: String
+    media: [MediaInput]
+    active: Boolean
+  ): Page
+  updatePage(
+    _id: ID!
+    template: ID
+    title: String
+    slug: String
+    description: String
+    media: [MediaInput]
+    fields: [Field2Input]
+    active: Boolean
+    authenticateUser: Boolean
+    options: AWSJSON
+    values: [FieldValue2Input]
+  ): Page
+  deletePage(_id: ID!): String
+}
+
+type Subscription {
+  addedTemplate: Template @aws_subscribe(mutations: ["createTemplate", "updateTemplate"])
+  updatedTemplate(_id: ID!): Template @aws_subscribe(mutations: ["updateTemplate"])
+  addedPage: Page @aws_subscribe(mutations: ["createPage", "updatePage"])
+  updatedPage(_id: ID!): Page @aws_subscribe(mutations: ["updatePage"])
+}
+
+type Templates {
+  data: [Template]
+  count: Int
+}
+
+type Template @aws_api_key @aws_cognito_user_pools {
+  _id: ID
+  title: String
+  slug: String
+  description: String
+  media: [Media]
+  fields: [Field2]
+  active: Boolean
+  inUse: Boolean
+  showInMenu: Boolean
+  options: AWSJSON
+  createdAt: AWSDateTime
+  createdBy: User
+}
+
+type Pages @aws_api_key @aws_cognito_user_pools {
+  data: [Page]
+  count: Int
+}
+
+type MentionItems {
+  title: String
+  _id: ID
+  category: String
+  type: String
+}
+
+type Page @aws_api_key @aws_cognito_user_pools {
+  _id: ID
+  title: String
+  slug: String
+  authenticateUser: Boolean
+  description: String
+  active: Boolean
+  media: [Media]
+  fields: [Field2]
+  template: Template
+  options: AWSJSON
+  createdBy: User
+  createdAt: AWSDateTime
+  values: [FieldValue2]
+}

@@ -1,6 +1,6 @@
 import '../jest/jestSetup';
 import { handler } from '../src/post';
-import { handler as listHandler } from '../src/list';
+import { handler as listHandler } from '../src/template';
 import { mockUser, createMockEvent } from '../jest/defaultArguments';
 
 const mockPost = {
@@ -14,23 +14,23 @@ const updatedMockPost = {
   body: 'Hello Guys, How are you all doing?',
 };
 
-export const mockListType = {
+export const mockTemplate = {
   _id: '611003ae70e3a6000870e145',
   title: 'Doctors',
   description: 'Doctors description',
 };
 
-const mockListItem = {
+const mockPage = {
   _id: '60fc4d29f11b170008d9ec99',
-  types: [mockListType._id],
+  types: [mockTemplate._id],
   title: 'Dr John',
   description: 'NYC',
   media: [],
 };
 
 const createPostEvent = createMockEvent('createPost', mockPost);
-const createListTypeEvent = createMockEvent('createListType', mockListType);
-const createListItemEvent = createMockEvent('createListItem', mockListItem);
+const createTemplateEvent = createMockEvent('createTemplate', mockTemplate);
+const createPageEvent = createMockEvent('createPage', mockPage);
 
 // yarn test test/postLambda.test.ts
 
@@ -42,8 +42,8 @@ describe('Post Lambda Tests', () => {
   });
 
   it('getPostsByUserId test', async () => {
-    await listHandler(createListTypeEvent);
-    await listHandler(createListItemEvent);
+    await listHandler(createTemplateEvent);
+    await listHandler(createPageEvent);
     await handler(createPostEvent);
     const res = await handler(
       createMockEvent('getPostsByUserId', { userId: mockUser._id })
@@ -58,8 +58,8 @@ describe('Post Lambda Tests', () => {
     expect(post.createdBy.picture).toBe(mockUser.picture);
     const tag = post.tags[0];
     // console.log(post.tags[1].tag.types);
-    expect(tag.tag._id.toString()).toBe(mockListType._id);
-    expect(tag.tag.title).toBe(mockListType.title);
+    expect(tag.tag._id.toString()).toBe(mockTemplate._id);
+    expect(tag.tag.title).toBe(mockTemplate.title);
   });
 
   it('getPosts test', async () => {
