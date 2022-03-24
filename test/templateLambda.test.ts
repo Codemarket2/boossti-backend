@@ -80,7 +80,7 @@ describe('List Lambda Tests', () => {
     await handler(createTemplateEvent);
     const template = await handler(
       createMockEvent('getTemplateBySlug', {
-        slug: mockTemplate.title.toLowerCase(),
+        slug: 1,
       }),
     );
     expect(template._id).toBeDefined();

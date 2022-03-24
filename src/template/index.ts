@@ -159,6 +159,13 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         return await Template.findById(args._id).populate(templatePopulate);
       }
       case 'createTemplate': {
+        let count = 1;
+        args = { ...args, count, slug: count };
+        const lastTemplate = await Template.findOne().sort('-count');
+        if (lastTemplate) {
+          count = lastTemplate?.count + 1;
+          args = { ...args, count, slug: count };
+        }
         const template = await Template.create(args);
         return await template.populate(templatePopulate).execPopulate();
       }

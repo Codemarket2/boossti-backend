@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose';
 import { ISchema, IMedia } from '../../utils/cutomTypes';
-import { fieldSchema } from '../../form/utils/formModel';
+import { fieldSchema, IField } from '../../form/utils/formModel';
 
 export interface ITemplate extends ISchema {
   title: string;
@@ -9,12 +9,15 @@ export interface ITemplate extends ISchema {
   active: boolean;
   inUse: boolean;
   showInMenu: boolean;
+  count: number;
+  fields: IField[];
 }
 
 const templateSchema = new Schema<ITemplate>(
   {
     title: String,
     slug: { type: String, unique: true, required: true },
+    count: { type: Number, unique: true, required: true },
     description: String,
     media: {
       type: [{ url: String, caption: String }],

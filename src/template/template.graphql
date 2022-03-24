@@ -17,7 +17,7 @@ type Mutation {
     title: String!
     description: String
     media: [MediaInput]
-    active: Boolean
+    fields: [Field2Input!]
   ): Template
   updateTemplate(
     _id: ID!
