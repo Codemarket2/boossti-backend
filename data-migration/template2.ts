@@ -14,6 +14,10 @@ const exportTemplates = async () => {
 const importTemplates = async () => {
   let oldData: any = await fs.readFileSync(filePath);
   oldData = JSON.parse(oldData);
+  oldData = oldData.map((template, index) => {
+    const count = index + 1;
+    return { ...template, count, slug: count };
+  });
   const data: any = await TemplateModel.create(oldData);
   console.log(data.length);
   console.log('All data imported to database');
