@@ -136,7 +136,7 @@ export const runFormActions = async (response, form, pageId: any = null) => {
         action?.body
       ) {
         const notificationForm = await FormModel.findOne({ slug: 'notification' });
-        const feedPage = await PageModel.findOne({ slug: 'feed' });
+        const feedPage = await PageModel.findOne({ slug: 'my' });
         if (notificationForm && feedPage) {
           let body = action?.body;
           body = body.split('{{formName}}').join(`${form?.name}`);
