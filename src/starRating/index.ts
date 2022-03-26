@@ -2,7 +2,6 @@ import { DB } from '../utils/DB';
 import { getCurrentUser } from '../utils/authentication';
 import { AppSyncEvent } from '../utils/cutomTypes';
 import { User } from '../user/utils/userModel';
-import { LookoutMetrics } from 'aws-sdk';
 import { StarRating } from './utils/starRatingModel';
 import * as mongoose from 'mongoose';
 
@@ -34,7 +33,6 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           starRating: args.starRating,
         });
         const populated = await rating.populate(userPopulate).execPopulate();
-        // console.log(populated);
         return populated;
       }
       case 'updateStarRating': {
@@ -53,7 +51,6 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         return await getStarRating;
       }
       case 'getRatingCounts': {
-        console.log(args);
         const userStarRating = await StarRating.findOne({
           parentId: args.parentId,
           createdBy: user._id,
@@ -84,7 +81,6 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         };
       }
       case 'getStarRatingsByParentId': {
-        console.log(args, user);
         await User.findById(args.userId);
         data = await StarRating.find({
           parentId: args.parentId,

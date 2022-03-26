@@ -137,6 +137,7 @@ export const runFormActions = async (response, form, pageId: any = null) => {
       ) {
         const notificationForm = await FormModel.findOne({ slug: 'notification' });
         const feedPage = await PageModel.findOne({ slug: 'my' });
+
         if (notificationForm && feedPage) {
           let body = action?.body;
           body = body.split('{{formName}}').join(`${form?.name}`);
@@ -153,11 +154,8 @@ export const runFormActions = async (response, form, pageId: any = null) => {
           );
           const payload = { description: '', link: '', responseId: '' };
           payload.description = newBody;
-          payload.link = `/${form.slug}/response/${response.count}`;
+          payload.link = `/forms/${form.slug}/response/${response.count}`;
           payload.responseId = response._id;
-          //description 62379e4b828b831ecc288710
-          //link 62379e6d31b3457eca741a4e
-          //responseId 62379e5f8e1b532b40973bd9
           const responsePayload: any = {
             formId: notificationForm._id,
             values: [],
@@ -166,39 +164,27 @@ export const runFormActions = async (response, form, pageId: any = null) => {
             parentId: feedPage._id,
           };
 
-          responsePayload.values.push({
-            field: '62379e4b828b831ecc288710',
-            value: payload.description,
-            valueNumber: null,
-            valueBoolean: null,
-            valueDate: null,
-            itemId: null,
-            media: null,
-            response: null,
-            values: null,
+          notificationForm?.fields?.forEach((field) => {
+            if (field.label.toLocaleLowerCase() === 'description') {
+              responsePayload.values.push({
+                field: field._id,
+                value: payload.description,
+              });
+            }
+            if (field.label.toLocaleLowerCase() === 'response id') {
+              responsePayload.values.push({
+                field: field._id,
+                value: payload.responseId,
+              });
+            }
+            if (field.label.toLocaleLowerCase() === 'link') {
+              responsePayload.values.push({
+                field: field._id,
+                value: payload.link,
+              });
+            }
           });
-          responsePayload.values.push({
-            field: '62379e6d31b3457eca741a4e',
-            value: payload.link,
-            valueNumber: null,
-            valueBoolean: null,
-            valueDate: null,
-            itemId: null,
-            media: null,
-            response: null,
-            values: null,
-          });
-          responsePayload.values.push({
-            field: '62379e5f8e1b532b40973bd9',
-            value: payload.responseId,
-            valueNumber: null,
-            valueBoolean: null,
-            valueDate: null,
-            itemId: null,
-            media: null,
-            response: null,
-            values: null,
-          });
+
           if (action.receiverType === 'formOwner') {
             responsePayload.createdBy = form.createdBy._id;
           } else if (action.receiverType === 'responseSubmitter') {
@@ -207,17 +193,13 @@ export const runFormActions = async (response, form, pageId: any = null) => {
           const lastResponse = await ResponseModel.findOne({
             formId: responsePayload.formId,
           }).sort('-count');
-          console.log({ lastResponse });
           if (lastResponse) {
             responsePayload.count = lastResponse?.count + 1;
           }
-          console.log(action.receiverType, responsePayload.count);
-          const responseNotification = await ResponseModel.create(responsePayload);
-          console.log({ responseNotification });
+          await ResponseModel.create(responsePayload);
         }
       }
     }
-    // actions?.forEach(async (action) => );
   }
 };
 

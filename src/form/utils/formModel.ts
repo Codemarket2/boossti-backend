@@ -11,6 +11,7 @@ export interface IForm extends ISchema {
 }
 
 export interface IField {
+  _id: string;
   label: string;
   fieldType: string;
   typeId: any;
