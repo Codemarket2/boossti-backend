@@ -1,7 +1,8 @@
 import { Schema, model } from 'mongoose';
 import { ISchema, IMedia } from '../../utils/cutomTypes';
-import { fieldSchema, IField } from '../../form/utils/formModel';
-import { valueSchema, IValue } from '../../form/utils/responseModel';
+import { fieldSchema, fieldsPopulate, IField } from '../../form/utils/formModel';
+import { valueSchema, IValue, valuesPopulate } from '../../form/utils/responseModel';
+import { userPopulate } from '../../utils/populate';
 
 export interface IPage extends ISchema {
   title: string;
@@ -52,3 +53,10 @@ const pageSchema = new Schema<IPage>(
 const Page = model<IPage>('Page', pageSchema);
 
 export default Page;
+
+export const pagePopulate = [
+  userPopulate,
+  { path: 'template', select: 'title slug' },
+  ...fieldsPopulate,
+  ...valuesPopulate,
+];

@@ -4,7 +4,7 @@ import { FormModel } from './formModel';
 import PageModel from '../../template/utils/pageModel';
 import { ResponseModel } from './responseModel';
 import { sendSms } from '../../utils/sms';
-import { responsePopulate } from '../index';
+import { responsePopulate } from './responseModel';
 import { getValue } from './variables';
 import moment from 'moment';
 

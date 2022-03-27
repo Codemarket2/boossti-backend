@@ -13,16 +13,16 @@ export const mockTemplate = {
 
 const mockPage = {
   _id: '60fc4d29f11b170008d9ec46',
-  types: [mockTemplate._id],
+  template: [mockTemplate._id],
   title: 'Dr John',
   description: 'NYC',
   media: [],
 };
 
 const mockFields = [
-  { label: 'Doctor', fieldType: 'type', options: {}, typeId: mockTemplate._id },
-  { label: 'Email', fieldType: 'email', options: {}, typeId: null },
-  { label: 'Message', fieldType: 'textarea', options: {}, typeId: null },
+  { label: 'Doctor', fieldType: 'template', options: {}, template: mockTemplate._id },
+  { label: 'Email', fieldType: 'email', options: {}, template: null },
+  { label: 'Message', fieldType: 'textarea', options: {}, template: null },
 ];
 
 const mockForm = {
@@ -48,7 +48,7 @@ const mockValues = [
     valueNumber: null,
     valueBoolean: null,
     valueDate: null,
-    itemId: mockPage._id,
+    page: mockPage._id,
   },
   {
     field: 'Email',
@@ -56,7 +56,7 @@ const mockValues = [
     valueNumber: null,
     valueBoolean: null,
     valueDate: null,
-    itemId: null,
+    page: null,
   },
 ];
 
@@ -77,7 +77,7 @@ const updatedMockResponse = {
       valueNumber: null,
       valueBoolean: null,
       valueDate: null,
-      itemId: null,
+      page: null,
     },
   ],
 };
@@ -96,7 +96,7 @@ describe('List Lambda Tests', () => {
     expect(form.fields.length).toBe(mockForm.fields.length);
     expect(form.fields[0].label).toBe(mockForm.fields[0].label);
     expect(form.fields[0].fieldType).toBe(mockForm.fields[0].fieldType);
-    expect(form.fields[0].typeId._id.toString()).toBe(mockForm.fields[0].typeId);
+    expect(form.fields[0].template._id.toString()).toBe(mockForm.fields[0].template);
     expect(form.published).toBe(false);
     expect(form.createdBy._id).toMatchObject(mockUser._id);
     expect(form.createdAt).toBeDefined();
@@ -112,7 +112,7 @@ describe('List Lambda Tests', () => {
     expect(form.fields.length).toBe(updatedMockForm.fields.length);
     expect(form.fields[0].label).toBe(updatedMockForm.fields[0].label);
     expect(form.fields[0].fieldType).toBe(updatedMockForm.fields[0].fieldType);
-    expect(form.fields[0].typeId._id.toString()).toBe(updatedMockForm.fields[0].typeId);
+    expect(form.fields[0].template._id.toString()).toBe(updatedMockForm.fields[0].template);
     expect(form.published).toBe(updatedMockForm.published);
     expect(form.createdBy._id).toMatchObject(mockUser._id);
     expect(form.createdAt).toBeDefined();
@@ -128,7 +128,7 @@ describe('List Lambda Tests', () => {
     expect(form.fields.length).toBe(mockForm.fields.length);
     expect(form.fields[0].label).toBe(mockForm.fields[0].label);
     expect(form.fields[0].fieldType).toBe(mockForm.fields[0].fieldType);
-    expect(form.fields[0].typeId._id.toString()).toBe(mockForm.fields[0].typeId);
+    expect(form.fields[0].template._id.toString()).toBe(mockForm.fields[0].template);
     expect(form.published).toBe(false);
     expect(form.createdBy._id).toMatchObject(mockUser._id);
     expect(form.createdAt).toBeDefined();
@@ -147,7 +147,7 @@ describe('List Lambda Tests', () => {
     expect(form.fields.length).toBe(mockForm.fields.length);
     expect(form.fields[0].label).toBe(mockForm.fields[0].label);
     expect(form.fields[0].fieldType).toBe(mockForm.fields[0].fieldType);
-    expect(form.fields[0].typeId._id.toString()).toBe(mockForm.fields[0].typeId);
+    expect(form.fields[0].template._id.toString()).toBe(mockForm.fields[0].template);
     expect(form.published).toBe(false);
     expect(form.createdBy._id).toMatchObject(mockUser._id);
     expect(form.createdAt).toBeDefined();
@@ -174,7 +174,7 @@ describe('List Lambda Tests', () => {
     expect(response.parentId._id.toString()).toBe(mockResponse.parentId);
     expect(response.values.length).toBe(mockResponse.values.length);
     expect(response.values[0].field).toBe(mockResponse.values[0].field);
-    expect(response.values[0].itemId._id.toString()).toBe(mockResponse.values[0].itemId);
+    expect(response.values[0].page._id.toString()).toBe(mockResponse.values[0].page);
     expect(response.createdBy._id).toMatchObject(mockUser._id);
     expect(response.createdAt).toBeDefined();
     expect(response.updatedAt).toBeDefined();
@@ -191,7 +191,7 @@ describe('List Lambda Tests', () => {
     expect(response.parentId._id.toString()).toBe(updatedMockResponse.parentId);
     expect(response.values.length).toBe(updatedMockResponse.values.length);
     expect(response.values[0].field).toBe(updatedMockResponse.values[0].field);
-    expect(response.values[0].itemId._id.toString()).toBe(updatedMockResponse.values[0].itemId);
+    expect(response.values[0].page._id.toString()).toBe(updatedMockResponse.values[0].page);
     expect(response.createdBy._id).toMatchObject(mockUser._id);
     expect(response.createdAt).toBeDefined();
     expect(response.updatedAt).toBeDefined();
@@ -208,7 +208,7 @@ describe('List Lambda Tests', () => {
     expect(response.parentId._id.toString()).toBe(mockResponse.parentId);
     expect(response.values.length).toBe(mockResponse.values.length);
     expect(response.values[0].field).toBe(mockResponse.values[0].field);
-    expect(response.values[0].itemId._id.toString()).toBe(mockResponse.values[0].itemId);
+    expect(response.values[0].page._id.toString()).toBe(mockResponse.values[0].page);
     expect(response.createdBy._id).toMatchObject(mockUser._id);
     expect(response.createdAt).toBeDefined();
     expect(response.updatedAt).toBeDefined();
@@ -230,7 +230,7 @@ describe('List Lambda Tests', () => {
     expect(response.parentId._id.toString()).toBe(mockResponse.parentId);
     expect(response.values.length).toBe(mockResponse.values.length);
     expect(response.values[0].field).toBe(mockResponse.values[0].field);
-    expect(response.values[0].itemId._id.toString()).toBe(mockResponse.values[0].itemId);
+    expect(response.values[0].page._id.toString()).toBe(mockResponse.values[0].page);
     expect(response.createdBy._id).toMatchObject(mockUser._id);
     expect(response.createdAt).toBeDefined();
     expect(response.updatedAt).toBeDefined();
@@ -249,7 +249,7 @@ describe('List Lambda Tests', () => {
     expect(response.parentId._id.toString()).toBe(mockResponse.parentId);
     expect(response.values.length).toBe(mockResponse.values.length);
     expect(response.values[0].field).toBe(mockResponse.values[0].field);
-    expect(response.values[0].itemId._id.toString()).toBe(mockResponse.values[0].itemId);
+    expect(response.values[0].page._id.toString()).toBe(mockResponse.values[0].page);
     expect(response.createdBy._id).toMatchObject(mockUser._id);
     expect(response.createdAt).toBeDefined();
     expect(response.updatedAt).toBeDefined();

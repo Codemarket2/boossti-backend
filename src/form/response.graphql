@@ -46,10 +46,13 @@ type FieldValue2 @aws_api_key @aws_cognito_user_pools {
   valueNumber: Float
   valueBoolean: Boolean
   valueDate: AWSDateTime
-  itemId: Page
   media: [Media]
-  response: Response
   values: [String]
+  template: Template
+  page: Page
+  form: Form
+  response: Response
+  options: AWSJSON
 }
 
 input FieldValue2Input {
@@ -59,10 +62,13 @@ input FieldValue2Input {
   valueNumber: Float
   valueBoolean: Boolean
   valueDate: AWSDateTime
-  itemId: ID
   media: [MediaInput]
-  response: ID
   values: [String]
+  template: ID
+  page: ID
+  form: ID
+  response: ID
+  options: AWSJSON
 }
 
 type Response @aws_api_key @aws_cognito_user_pools {

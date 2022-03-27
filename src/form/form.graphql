@@ -34,7 +34,7 @@ type Field2 @aws_api_key @aws_cognito_user_pools {
   label: String
   fieldType: String
   options: AWSJSON
-  typeId: Template
+  template: Template
   form: Form
 }
 
@@ -43,7 +43,7 @@ input Field2Input {
   label: String!
   fieldType: String!
   options: AWSJSON
-  typeId: ID
+  template: ID
   form: ID
 }
 

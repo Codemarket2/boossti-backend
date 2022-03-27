@@ -1,5 +1,6 @@
 import { Schema, model } from 'mongoose';
 import { ISchema } from '../../utils/cutomTypes';
+import { userPopulate } from '../../utils/populate';
 
 export interface IForm extends ISchema {
   parentId: string;
@@ -14,15 +15,15 @@ export interface IField {
   _id: string;
   label: string;
   fieldType: string;
-  typeId: any;
   options: any;
+  template: any;
   form: any;
 }
 
 export const fieldSchema = new Schema({
   label: { type: String, required: true },
   fieldType: { type: String, required: true },
-  typeId: {
+  template: {
     type: Schema.Types.ObjectId,
     ref: 'Template',
   },
@@ -70,3 +71,16 @@ const formSchema = new Schema<IForm>(
 );
 
 export const FormModel = model<IForm>('Form', formSchema);
+
+export const fieldsPopulate = [
+  {
+    path: 'fields.template',
+    select: 'title description media slug',
+  },
+  {
+    path: 'fields.form',
+    select: 'name',
+  },
+];
+
+export const formPopulate = [userPopulate, ...fieldsPopulate];
