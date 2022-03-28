@@ -1,5 +1,6 @@
 import { Schema, model } from 'mongoose';
 import { ISchema } from '../../utils/cutomTypes';
+import { userPopulate } from '../../utils/populate';
 
 export interface IResponse extends ISchema {
   formId: any;
@@ -9,13 +10,18 @@ export interface IResponse extends ISchema {
 }
 
 export interface IValue {
+  _id: string;
   field: string;
   value: string;
   valueNumber: number;
   valueBoolean: boolean;
   valueDate: Date;
-  itemId: string;
   values: [string];
+  template: string;
+  page: string;
+  response: string;
+  form: string;
+  options: any;
 }
 
 export const valueSchema = new Schema({
@@ -31,18 +37,27 @@ export const valueSchema = new Schema({
     type: [{ url: String, caption: String }],
     default: [],
   },
-  itemId: {
+  values: {
+    type: [String],
+    default: [],
+  },
+  template: {
+    type: Schema.Types.ObjectId,
+    ref: 'Template',
+  },
+  page: {
     type: Schema.Types.ObjectId,
     ref: 'Page',
+  },
+  form: {
+    type: Schema.Types.ObjectId,
+    ref: 'Form',
   },
   response: {
     type: Schema.Types.ObjectId,
     ref: 'Response',
   },
-  values: {
-    type: [String],
-    default: [],
-  },
+  options: { type: Schema.Types.Mixed, default: { option: false } },
 });
 
 export const responseSchema = new Schema<IResponse>(
@@ -82,3 +97,31 @@ export const responseSchema = new Schema<IResponse>(
 responseSchema.index({ formId: 1, count: 1 }, { unique: true });
 
 export const ResponseModel = model<IResponse>('Response', responseSchema);
+
+export const valuesPopulate = [
+  {
+    path: 'values.page',
+    select: 'types title media slug',
+  },
+  {
+    path: 'values.response',
+    select: 'values',
+  },
+];
+
+export const responsePopulate = [
+  userPopulate,
+  {
+    path: 'parentId',
+    select: 'types title media slug',
+  },
+  ...valuesPopulate,
+];
+
+export const myResponsePopulate = [
+  ...responsePopulate,
+  {
+    path: 'formId',
+    select: 'name',
+  },
+];

@@ -1,44 +1,11 @@
 import slugify from 'slugify';
 import { DB } from '../utils/DB';
-import Template from './utils/templateModel';
-import Page from './utils/pageModel';
+import Template, { templatePopulate } from './utils/templateModel';
+import Page, { pagePopulate } from './utils/pageModel';
 import { getCurrentUser } from '../utils/authentication';
 import { AppSyncEvent } from '../utils/cutomTypes';
 // import getAdminFilter from '../utils/adminFilter';
-import { userPopulate } from '../utils/populate';
 import { User } from '../user/utils/userModel';
-
-const pagePopulate = [
-  userPopulate,
-  { path: 'template', select: 'title slug' },
-  {
-    path: 'fields.typeId',
-    select: 'title description media slug',
-  },
-  {
-    path: 'fields.form',
-    select: 'name',
-  },
-  {
-    path: 'values.itemId',
-    select: 'template title media slug',
-  },
-  {
-    path: 'values.response',
-    select: 'values',
-  },
-];
-const templatePopulate = [
-  userPopulate,
-  {
-    path: 'fields.typeId',
-    select: 'title description media slug',
-  },
-  {
-    path: 'fields.form',
-    select: 'name',
-  },
-];
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {

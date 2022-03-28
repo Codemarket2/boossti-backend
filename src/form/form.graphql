@@ -8,7 +8,7 @@ type Mutation {
   createForm(
     parentId: ID
     name: String!
-    fields: [Field2Input]
+    fields: [FieldInput]
     settings: AWSJSON
     virtualForm: Boolean
   ): Form
@@ -16,7 +16,7 @@ type Mutation {
     _id: ID!
     parentId: ID
     name: String
-    fields: [Field2Input]
+    fields: [FieldInput]
     settings: AWSJSON
     published: Boolean
   ): Form
@@ -34,16 +34,16 @@ type Field2 @aws_api_key @aws_cognito_user_pools {
   label: String
   fieldType: String
   options: AWSJSON
-  typeId: Template
+  template: Template
   form: Form
 }
 
-input Field2Input {
+input FieldInput {
   _id: ID
   label: String!
   fieldType: String!
   options: AWSJSON
-  typeId: ID
+  template: ID
   form: ID
 }
 

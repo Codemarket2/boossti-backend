@@ -1,6 +1,7 @@
 import { Schema, model } from 'mongoose';
 import { ISchema, IMedia } from '../../utils/cutomTypes';
-import { fieldSchema, IField } from '../../form/utils/formModel';
+import { fieldSchema, fieldsPopulate, IField } from '../../form/utils/formModel';
+import { userPopulate } from '../../utils/populate';
 
 export interface ITemplate extends ISchema {
   title: string;
@@ -53,5 +54,7 @@ const templateSchema = new Schema<ITemplate>(
 );
 
 const Template = model<ITemplate>('Template', templateSchema);
+
+export const templatePopulate = [userPopulate, ...fieldsPopulate];
 
 export default Template;

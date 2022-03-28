@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose';
 import { ISchema } from '../../utils/cutomTypes';
-import { fieldSchema, IField } from '../../form/utils/formModel';
-import { valueSchema, IValue } from '../../form/utils/responseModel';
+import { fieldSchema, fieldsPopulate, IField } from '../../form/utils/formModel';
+import { valueSchema, IValue, valuesPopulate } from '../../form/utils/responseModel';
 
 export interface Section extends ISchema {
   fields: [IField];
@@ -31,3 +31,5 @@ const sectionSchema = new Schema<Section>(
 );
 
 export const SectionModel = model<Section>('Section', sectionSchema);
+
+export const sectionPopulate = [...fieldsPopulate, ...valuesPopulate];

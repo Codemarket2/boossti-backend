@@ -1,75 +1,17 @@
 import slugify from 'slugify';
 import { DB } from '../utils/DB';
-import { FormModel } from './utils/formModel';
-import { ResponseModel } from './utils/responseModel';
-import { SectionModel } from './utils/sectionModel';
+import { FormModel, formPopulate } from './utils/formModel';
+import { ResponseModel, responsePopulate, myResponsePopulate } from './utils/responseModel';
+import { SectionModel, sectionPopulate } from './utils/sectionModel';
 import Template from '../template/utils/templateModel';
 import Page from '../template/utils/pageModel';
 import { getCurrentUser } from '../utils/authentication';
 import { AppSyncEvent } from '../utils/cutomTypes';
-import { userPopulate } from '../utils/populate';
 import { runFormActions } from './utils/actions';
 import { sendResponseNotification } from './utils/responseNotification';
 import getAdminFilter from '../utils/adminFilter';
 import { fileParser } from './utils/readCsvFile';
 import { User } from '../user/utils/userModel';
-
-export const formPopulate = [
-  userPopulate,
-  {
-    path: 'fields.typeId',
-    select: 'title description media slug',
-  },
-  {
-    path: 'fields.form',
-    select: 'name',
-  },
-];
-
-const itemSelect = 'types title media slug';
-
-export const responsePopulate = [
-  userPopulate,
-  {
-    path: 'parentId',
-    select: itemSelect,
-  },
-  {
-    path: 'values.itemId',
-    select: itemSelect,
-  },
-  {
-    path: 'values.response',
-    select: 'values',
-  },
-];
-
-const sectionPopulate = [
-  {
-    path: 'fields.typeId',
-    select: 'title description media slug',
-  },
-  {
-    path: 'fields.form',
-    select: 'name',
-  },
-  {
-    path: 'values.itemId',
-    select: itemSelect,
-  },
-  {
-    path: 'values.response',
-    select: 'values',
-  },
-];
-
-const myResponsePopulate = [
-  ...responsePopulate,
-  {
-    path: 'formId',
-    select: 'name',
-  },
-];
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -278,7 +220,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
               valueNumber: null,
               valueBoolean: null,
               valueDate: null,
-              itemId: null,
+              page: null,
               media: [],
             };
             response.values.push(value);
