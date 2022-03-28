@@ -17,7 +17,7 @@ type Mutation {
     title: String!
     description: String
     media: [MediaInput]
-    fields: [Field2Input!]
+    fields: [FieldInput!]
   ): Template
   updateTemplate(
     _id: ID!
@@ -25,7 +25,7 @@ type Mutation {
     description: String
     slug: String
     media: [MediaInput]
-    fields: [Field2Input]
+    fields: [FieldInput]
     active: Boolean
     showInMenu: Boolean
     options: AWSJSON
@@ -45,11 +45,11 @@ type Mutation {
     slug: String
     description: String
     media: [MediaInput]
-    fields: [Field2Input]
+    fields: [FieldInput]
     active: Boolean
     authenticateUser: Boolean
     options: AWSJSON
-    values: [FieldValue2Input]
+    values: [ValueInput]
   ): Page
   deletePage(_id: ID!): String
 }
@@ -106,5 +106,5 @@ type Page @aws_api_key @aws_cognito_user_pools {
   options: AWSJSON
   createdBy: User
   createdAt: AWSDateTime
-  values: [FieldValue2]
+  values: [Value]
 }

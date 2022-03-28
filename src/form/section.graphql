@@ -4,12 +4,7 @@ type Query {
 
 type Mutation {
   createSection: Section
-  updateSection(
-    _id: ID!
-    fields: [Field2Input]
-    values: [FieldValue2Input]
-    options: AWSJSON
-  ): Section
+  updateSection(_id: ID!, fields: [FieldInput], values: [ValueInput], options: AWSJSON): Section
 }
 
 type Subscription {
@@ -19,7 +14,7 @@ type Subscription {
 type Section @aws_api_key @aws_cognito_user_pools {
   _id: ID!
   fields: [Field2]
-  values: [FieldValue2]
+  values: [Value]
   options: AWSJSON
   createdBy: User
   updatedBy: ID
