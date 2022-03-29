@@ -100,8 +100,16 @@ export const ResponseModel = model<IResponse>('Response', responseSchema);
 
 export const valuesPopulate = [
   {
+    path: 'values.template',
+    select: 'title slug media',
+  },
+  {
     path: 'values.page',
     select: 'types title media slug',
+  },
+  {
+    path: 'values.form',
+    select: 'name',
   },
   {
     path: 'values.response',
