@@ -178,10 +178,60 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           new: true,
           runValidators: true,
         });
+        const oldOptions = { ...args.options };
+        if (!(process.env.NODE_ENV === 'test')) {
+          const res: any = await FormModel.findById(response?.formId).populate(formPopulate);
+          const form = { ...res.toObject() };
+          const act = form?.settings?.actions?.filter((e) => e.triggerType === 'onUpdate');
+          console.log('act', act);
+          if (form && act) {
+            console.log(
+              'form?.settings?.actions?.triggerType',
+              form?.settings?.actions?.triggerType,
+            );
+            await runFormActions(
+              { ...response.toObject(), options: oldOptions },
+              {
+                ...form,
+                settings: {
+                  ...form.settings,
+                  actions: args?.options?.actions || form.settings?.actions,
+                },
+              },
+              args?.parentId,
+            );
+            await sendResponseNotification(form, response);
+          }
+        }
         return await response.populate(responsePopulate).execPopulate();
       }
       case 'deleteResponse': {
-        await ResponseModel.findByIdAndDelete(args._id);
+        const response: any = await ResponseModel.findByIdAndDelete(args._id);
+        const oldOptions = { ...args.options };
+        if (!(process.env.NODE_ENV === 'test')) {
+          const res: any = await FormModel.findById(response?.formId).populate(formPopulate);
+          const form = { ...res.toObject() };
+          const act = form?.settings?.actions?.filter((e) => e.triggerType === 'onDelete');
+          console.log('act', act);
+          if (form && act) {
+            console.log(
+              'form?.settings?.actions?.triggerType',
+              form?.settings?.actions?.triggerType,
+            );
+            await runFormActions(
+              { ...response.toObject(), options: oldOptions },
+              {
+                ...form,
+                settings: {
+                  ...form.settings,
+                  actions: args?.options?.actions || form.settings?.actions,
+                },
+              },
+              args?.parentId,
+            );
+            await sendResponseNotification(form, response);
+          }
+        }
         return args._id;
       }
       case 'getMyResponses': {
