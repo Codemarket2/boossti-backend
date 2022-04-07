@@ -24,7 +24,7 @@ export const runFormActions = async (response, form, pageId: any = null) => {
       ) {
         const payload: any = {
           from: action?.senderEmail,
-          body: action?.body,
+          body: variableParser(action, form, response),
           subject: action?.subject,
         };
 
@@ -69,7 +69,7 @@ export const runFormActions = async (response, form, pageId: any = null) => {
         }
       } else if (action?.actionType === 'sendSms' && action?.phoneFieldId && action?.body) {
         const payload = {
-          body: action?.body,
+          body: variableParser(action, form, response),
           phoneNumber: '',
         };
         if (action?.variables?.length > 0) {
@@ -100,7 +100,7 @@ export const runFormActions = async (response, form, pageId: any = null) => {
       ) {
         const payload: any = {
           from: action?.senderEmail,
-          body: action?.body,
+          body: variableParser(action, form, response),
           subject: action?.subject,
         };
         payload.body = payload.body.split(`{{password}}`).join(response.options.password || '');
@@ -139,11 +139,7 @@ export const runFormActions = async (response, form, pageId: any = null) => {
         const feedPage = await PageModel.findOne({ slug: 'my' });
 
         if (notificationForm && feedPage) {
-          let body = action?.body;
-          body = body.split('{{formName}}').join(`${form?.name}`);
-          body = body.split('{{createdBy}}').join(`${response?.createdBy?.name || ''}`);
-          body = body.split('{{createdAt}}').join(`${moment(response?.createdAt).format('llll')}`);
-          body = body.split('{{pageName}}').join(`${response?.parentId?.title || ''}`);
+          const body = variableParser(action, form, response);
           const { body: newBody } = await replaceVariables(
             '',
             body,
@@ -201,6 +197,19 @@ export const runFormActions = async (response, form, pageId: any = null) => {
       }
     }
   }
+};
+
+//  variable parser function
+
+const variableParser = (action: any, form: any, response: any) => {
+  let body = action?.body;
+  body = body.split('{{formName}}').join(`${form?.name}`);
+  body = body.split('{{createdBy}}').join(`${response?.createdBy?.name || ''}`);
+  body = body.split('{{updatedBy}}').join(`${response?.updatedBy?.name || ''}`);
+  body = body.split('{{createdAt}}').join(`${moment(response?.createdAt).format('llll')}`);
+  body = body.split('{{updatedAt}}').join(`${moment(response?.updatedAt).format('llll')}`);
+  body = body.split('{{pageName}}').join(`${response?.parentId?.title || ''}`);
+  return body;
 };
 
 const replaceVariables = async (
