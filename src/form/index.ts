@@ -78,7 +78,29 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         return await ResponseModel.findById(args._id).populate(responsePopulate);
       }
       case 'getResponseByCount': {
-        return await ResponseModel.findOne(args).populate(responsePopulate);
+        const response: any = await ResponseModel.findOne(args).populate(responsePopulate);
+        const oldOptions = { ...args.options };
+        if (!(process.env.NODE_ENV === 'test')) {
+          const res: any = await FormModel.findById(response?.formId).populate(formPopulate);
+          const form = { ...res.toObject() };
+          const act = form?.settings?.actions?.filter((e) => e.triggerType === 'onView');
+          console.log('act', act);
+          if (form && act) {
+            await runFormActions(
+              { ...response.toObject(), options: oldOptions },
+              {
+                ...form,
+                settings: {
+                  ...form.settings,
+                  actions: args?.options?.actions || form.settings?.actions,
+                },
+              },
+              args?.parentId,
+            );
+            await sendResponseNotification(form, response);
+          }
+        }
+        return response;
       }
       case 'getResponses': {
         const {
@@ -156,7 +178,8 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         if (!(process.env.NODE_ENV === 'test')) {
           const res: any = await FormModel.findById(response?.formId).populate(formPopulate);
           const form = { ...res.toObject() };
-          if (form) {
+          const act = form?.settings?.actions?.filter((e) => e.triggerType === 'onCreate');
+          if (form && act) {
             await runFormActions(
               { ...response.toObject(), options: oldOptions },
               {
@@ -185,10 +208,6 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           const act = form?.settings?.actions?.filter((e) => e.triggerType === 'onUpdate');
           console.log('act', act);
           if (form && act) {
-            console.log(
-              'form?.settings?.actions?.triggerType',
-              form?.settings?.actions?.triggerType,
-            );
             await runFormActions(
               { ...response.toObject(), options: oldOptions },
               {
@@ -214,10 +233,6 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           const act = form?.settings?.actions?.filter((e) => e.triggerType === 'onDelete');
           console.log('act', act);
           if (form && act) {
-            console.log(
-              'form?.settings?.actions?.triggerType',
-              form?.settings?.actions?.triggerType,
-            );
             await runFormActions(
               { ...response.toObject(), options: oldOptions },
               {
