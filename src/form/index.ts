@@ -12,6 +12,11 @@ import { sendResponseNotification } from './utils/responseNotification';
 import getAdminFilter from '../utils/adminFilter';
 import { fileParser } from './utils/readCsvFile';
 import { User } from '../user/utils/userModel';
+import {
+  createCognitoGroup,
+  deleteCognitoGroup,
+  updateCognitoGroup,
+} from './utils/cognitoGroupHandler';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -84,7 +89,6 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           const res: any = await FormModel.findById(response?.formId).populate(formPopulate);
           const form = { ...res.toObject() };
           const act = form?.settings?.actions?.filter((e) => e.triggerType === 'onView');
-          console.log('act', act);
           if (form && act) {
             await runFormActions(
               { ...response.toObject(), options: oldOptions },
@@ -175,23 +179,37 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         let response = await ResponseModel.create(args);
         response = await response.populate(responsePopulate).execPopulate();
         // Run Actions
-        if (!(process.env.NODE_ENV === 'test')) {
-          const res: any = await FormModel.findById(response?.formId).populate(formPopulate);
-          const form = { ...res.toObject() };
-          const act = form?.settings?.actions?.filter((e) => e.triggerType === 'onCreate');
-          if (form && act) {
-            await runFormActions(
-              { ...response.toObject(), options: oldOptions },
-              {
-                ...form,
-                settings: {
-                  ...form.settings,
-                  actions: args?.options?.actions || form.settings?.actions,
+        const createGroupActionType = form?.settings?.actions?.filter(
+          (e) => e.actionType === 'createCognitoGroup',
+        )[0];
+        if (createGroupActionType?.actionType === 'createCognitoGroup') {
+          const ResponseValue = args?.values
+            ?.filter((e) => e.field === createGroupActionType?.cognitoGroupName)[0]
+            ?.value.trim();
+          const payload = {
+            GroupName: ResponseValue,
+            UserPoolId: 'us-east-1_eBnsz43bl',
+          };
+          await createCognitoGroup(payload);
+        } else {
+          if (!(process.env.NODE_ENV === 'test')) {
+            const res: any = await FormModel.findById(response?.formId).populate(formPopulate);
+            const form = { ...res.toObject() };
+            const act = form?.settings?.actions?.filter((e) => e.triggerType === 'onCreate');
+            if (form && act) {
+              await runFormActions(
+                { ...response.toObject(), options: oldOptions },
+                {
+                  ...form,
+                  settings: {
+                    ...form.settings,
+                    actions: args?.options?.actions || form.settings?.actions,
+                  },
                 },
-              },
-              args?.parentId,
-            );
-            await sendResponseNotification(form, response);
+                args?.parentId,
+              );
+              await sendResponseNotification(form, response);
+            }
           }
         }
         return response;
@@ -202,24 +220,39 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           runValidators: true,
         });
         const oldOptions = { ...args.options };
-        if (!(process.env.NODE_ENV === 'test')) {
-          const res: any = await FormModel.findById(response?.formId).populate(formPopulate);
-          const form = { ...res.toObject() };
-          const act = form?.settings?.actions?.filter((e) => e.triggerType === 'onUpdate');
-          console.log('act', act);
-          if (form && act) {
-            await runFormActions(
-              { ...response.toObject(), options: oldOptions },
-              {
-                ...form,
-                settings: {
-                  ...form.settings,
-                  actions: args?.options?.actions || form.settings?.actions,
+        const res: any = await FormModel.findById(args.formId).populate(formPopulate);
+        const form = { ...res.toObject() };
+        const createGroupActionType = form?.settings?.actions?.filter(
+          (e) => e.actionType === 'updateCognitoGroup',
+        )[0];
+        if (createGroupActionType?.actionType === 'updateCognitoGroup') {
+          const ResponseValue = args?.values
+            ?.filter((e) => e.field === createGroupActionType?.cognitoGroupName)[0]
+            ?.value.trim();
+          const payload = {
+            GroupName: ResponseValue,
+            UserPoolId: 'us-east-1_eBnsz43bl',
+          };
+          await updateCognitoGroup(payload);
+        } else {
+          if (!(process.env.NODE_ENV === 'test')) {
+            const res: any = await FormModel.findById(response?.formId).populate(formPopulate);
+            const form = { ...res.toObject() };
+            const act = form?.settings?.actions?.filter((e) => e.triggerType === 'onUpdate');
+            if (form && act) {
+              await runFormActions(
+                { ...response.toObject(), options: oldOptions },
+                {
+                  ...form,
+                  settings: {
+                    ...form.settings,
+                    actions: args?.options?.actions || form.settings?.actions,
+                  },
                 },
-              },
-              args?.parentId,
-            );
-            await sendResponseNotification(form, response);
+                args?.parentId,
+              );
+              await sendResponseNotification(form, response);
+            }
           }
         }
         return await response.populate(responsePopulate).execPopulate();
@@ -227,24 +260,40 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       case 'deleteResponse': {
         const response: any = await ResponseModel.findByIdAndDelete(args._id);
         const oldOptions = { ...args.options };
-        if (!(process.env.NODE_ENV === 'test')) {
-          const res: any = await FormModel.findById(response?.formId).populate(formPopulate);
-          const form = { ...res.toObject() };
-          const act = form?.settings?.actions?.filter((e) => e.triggerType === 'onDelete');
-          console.log('act', act);
-          if (form && act) {
-            await runFormActions(
-              { ...response.toObject(), options: oldOptions },
-              {
-                ...form,
-                settings: {
-                  ...form.settings,
-                  actions: args?.options?.actions || form.settings?.actions,
+
+        const res: any = await FormModel.findById(response.formId).populate(formPopulate);
+        const form = { ...res.toObject() };
+        const createGroupActionType = form?.settings?.actions?.filter(
+          (e) => e.actionType === 'deleteCognitoGroup',
+        )[0];
+        if (createGroupActionType?.actionType === 'deleteCognitoGroup') {
+          const ResponseValue = response?.values
+            ?.filter((e) => e.field === createGroupActionType?.cognitoGroupName)[0]
+            ?.value.trim();
+          const payload = {
+            GroupName: ResponseValue,
+            UserPoolId: 'us-east-1_eBnsz43bl',
+          };
+          await deleteCognitoGroup(payload);
+        } else {
+          if (!(process.env.NODE_ENV === 'test')) {
+            const res: any = await FormModel.findById(response?.formId).populate(formPopulate);
+            const form = { ...res?.toObject() };
+            const act = form?.settings?.actions?.filter((e) => e.triggerType === 'onDelete');
+            if (form && act) {
+              await runFormActions(
+                { ...response.toObject(), options: oldOptions },
+                {
+                  ...form,
+                  settings: {
+                    ...form.settings,
+                    actions: args?.options?.actions || form.settings?.actions,
+                  },
                 },
-              },
-              args?.parentId,
-            );
-            await sendResponseNotification(form, response);
+                args?.parentId,
+              );
+              await sendResponseNotification(form, response);
+            }
           }
         }
         return args._id;
