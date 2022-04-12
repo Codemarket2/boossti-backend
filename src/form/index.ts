@@ -182,15 +182,25 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         const createGroupActionType = form?.settings?.actions?.filter(
           (e) => e.actionType === 'createCognitoGroup',
         )[0];
+        console.log('actionType', createGroupActionType);
         if (createGroupActionType?.actionType === 'createCognitoGroup') {
           const ResponseValue = args?.values
             ?.filter((e) => e.field === createGroupActionType?.cognitoGroupName)[0]
             ?.value.trim();
           const payload = {
             GroupName: ResponseValue,
-            UserPoolId: 'us-east-1_eBnsz43bl',
+            UserPoolId: createGroupActionType?.userPoolId,
           };
-          await createCognitoGroup(payload);
+          const highPriorityGroup = [
+            'superadmin',
+            'us-east-1_eBnsz43bl_Facebook',
+            'us-east-1_eBnsz43bl_Google',
+          ];
+          if (!highPriorityGroup.includes(payload.GroupName)) await createCognitoGroup(payload);
+          else
+            return {
+              message: 'you are not allowd for this action',
+            };
         } else {
           if (!(process.env.NODE_ENV === 'test')) {
             const res: any = await FormModel.findById(response?.formId).populate(formPopulate);
@@ -231,9 +241,18 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
             ?.value.trim();
           const payload = {
             GroupName: ResponseValue,
-            UserPoolId: 'us-east-1_eBnsz43bl',
+            UserPoolId: createGroupActionType?.userPoolId,
           };
-          await updateCognitoGroup(payload);
+          const highPriorityGroup = [
+            'superadmin',
+            'us-east-1_eBnsz43bl_Facebook',
+            'us-east-1_eBnsz43bl_Google',
+          ];
+          if (!highPriorityGroup.includes(payload.GroupName)) await updateCognitoGroup(payload);
+          else
+            return {
+              message: 'you are not allowd for this action',
+            };
         } else {
           if (!(process.env.NODE_ENV === 'test')) {
             const res: any = await FormModel.findById(response?.formId).populate(formPopulate);
@@ -272,9 +291,18 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
             ?.value.trim();
           const payload = {
             GroupName: ResponseValue,
-            UserPoolId: 'us-east-1_eBnsz43bl',
+            UserPoolId: createGroupActionType?.userPoolId,
           };
-          await deleteCognitoGroup(payload);
+          const highPriorityGroup = [
+            'superadmin',
+            'us-east-1_eBnsz43bl_Facebook',
+            'us-east-1_eBnsz43bl_Google',
+          ];
+          if (!highPriorityGroup.includes(payload.GroupName)) await deleteCognitoGroup(payload);
+          else
+            return {
+              message: 'you are not allowd for this action',
+            };
         } else {
           if (!(process.env.NODE_ENV === 'test')) {
             const res: any = await FormModel.findById(response?.formId).populate(formPopulate);
