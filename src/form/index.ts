@@ -182,7 +182,6 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         const createGroupActionType = form?.settings?.actions?.filter(
           (e) => e.actionType === 'createCognitoGroup',
         )[0];
-        console.log('actionType', createGroupActionType);
         if (createGroupActionType?.actionType === 'createCognitoGroup') {
           const ResponseValue = args?.values
             ?.filter((e) => e.field === createGroupActionType?.cognitoGroupName)[0]
