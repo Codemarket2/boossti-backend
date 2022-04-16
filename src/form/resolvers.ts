@@ -16,4 +16,5 @@ export const formResolvers = {
   'Query getSection': 'formLambda',
   'Mutation createSection': 'formLambda',
   'Mutation updateSection': 'formLambda',
+  'Query getCheckUnique': 'formLambda',
 };
