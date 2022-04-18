@@ -2,7 +2,7 @@ type Query {
   getForm(_id: ID!): Form @aws_api_key @aws_cognito_user_pools
   getFormBySlug(slug: String!): Form @aws_api_key @aws_cognito_user_pools
   getForms(page: Int, limit: Int, search: String): Forms
-  getCheckUnique(values: [ValueInput], _id: ID!): Unique
+  getCheckUnique(values: [ValueInput], _id: ID): Unique
 }
 
 type Mutation {
@@ -50,7 +50,7 @@ input FieldInput {
 
 type ValueInput {
   value: String!
-  fieldId: ID!
+  fieldId: ID
 }
 
 type Unique{
