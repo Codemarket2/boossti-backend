@@ -228,9 +228,12 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           new: true,
           runValidators: true,
         });
+        console.log('response', response);
+        console.log('Update args', args);
         const oldOptions = { ...args.options };
-        const res: any = await FormModel.findById(args.formId).populate(formPopulate);
+        const res: any = await FormModel.findById(response.formId).populate(formPopulate);
         const form = { ...res.toObject() };
+
         const createGroupActionType = form?.settings?.actions?.filter(
           (e) => e.actionType === 'updateCognitoGroup',
         )[0];

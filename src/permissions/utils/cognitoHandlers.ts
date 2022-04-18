@@ -1,7 +1,9 @@
 import * as AWS from 'aws-sdk';
-
+AWS.config.apiVersions = {
+  cognitoidentityserviceprovider: '2016-04-18',
+};
 const cognitoidentityserviceprovider = new AWS.CognitoIdentityServiceProvider({
-  apiVersion: '2016-04-18',
+  region: 'us-east-1',
 });
 
 interface ICreateCognitoGroup {
@@ -11,6 +13,7 @@ interface ICreateCognitoGroup {
   Precedence?: number;
   RoleArn?: string;
 }
+
 interface IDeleteCognitoGroup {
   GroupName: string;
   UserPoolId: string;
@@ -25,6 +28,19 @@ interface IGetGroupList {
 interface IGetUserPoolList {
   MaxResults: number;
   NextToken?: string;
+}
+
+interface IGetUsersList {
+  GroupName: string;
+  UserPoolId: string;
+  Limit?: number;
+  NextToken?: string;
+}
+
+interface IAddRemoveUserToGroup {
+  GroupName: string;
+  UserPoolId: string;
+  Username: string;
 }
 
 export const createCognitoGroup = async (payload: ICreateCognitoGroup) => {
@@ -48,6 +64,7 @@ export const updateCognitoGroup = async (payload: ICreateCognitoGroup) => {
   };
   return cognitoidentityserviceprovider.updateGroup(params).promise();
 };
+
 export const deleteCognitoGroup = async (payload: IDeleteCognitoGroup) => {
   const params = {
     GroupName: payload.GroupName,
@@ -71,4 +88,31 @@ export const getUserPoolsList = async (payload: IGetUserPoolList) => {
     NextToken: payload.NextToken,
   };
   return cognitoidentityserviceprovider.listUserPools(params).promise();
+};
+
+export const getGroupUserList = async (payload: IGetUsersList) => {
+  const params = {
+    GroupName: payload.GroupName,
+    UserPoolId: payload.UserPoolId,
+    Limit: payload.Limit,
+    NextToken: payload.NextToken,
+  };
+  return cognitoidentityserviceprovider.listUsersInGroup(params).promise();
+};
+
+export const addUserToGroup = async (payload: IAddRemoveUserToGroup) => {
+  const params = {
+    GroupName: payload.GroupName,
+    UserPoolId: payload.UserPoolId,
+    Username: payload.Username,
+  };
+  return cognitoidentityserviceprovider.adminAddUserToGroup(params).promise();
+};
+export const removeUserFromGroup = async (payload: IAddRemoveUserToGroup) => {
+  const params = {
+    GroupName: payload.GroupName,
+    UserPoolId: payload.UserPoolId,
+    Username: payload.Username,
+  };
+  return cognitoidentityserviceprovider.adminRemoveUserFromGroup(params).promise();
 };
