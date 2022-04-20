@@ -186,9 +186,13 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           const ResponseValue = args?.values
             ?.filter((e) => e.field === createGroupActionType?.cognitoGroupName)[0]
             ?.value.trim();
+          const Desc = args?.values
+            ?.filter((e) => e?.field === createGroupActionType?.cognitoGroupDesc)[0]
+            ?.value.trim();
           const payload = {
             GroupName: ResponseValue,
             UserPoolId: createGroupActionType?.userPoolId,
+            Description: Desc,
           };
           const highPriorityGroup = [
             'superadmin',
@@ -228,8 +232,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           new: true,
           runValidators: true,
         });
-        console.log('response', response);
-        console.log('Update args', args);
+
         const oldOptions = { ...args.options };
         const res: any = await FormModel.findById(response.formId).populate(formPopulate);
         const form = { ...res.toObject() };
@@ -241,10 +244,15 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           const ResponseValue = args?.values
             ?.filter((e) => e.field === createGroupActionType?.cognitoGroupName)[0]
             ?.value.trim();
+          const Desc = args?.values
+            ?.filter((e) => e?.field === createGroupActionType?.cognitoGroupDesc)[0]
+            ?.value.trim();
           const payload = {
             GroupName: ResponseValue,
             UserPoolId: createGroupActionType?.userPoolId,
+            Description: Desc,
           };
+
           const highPriorityGroup = [
             'superadmin',
             'us-east-1_eBnsz43bl_Facebook',
