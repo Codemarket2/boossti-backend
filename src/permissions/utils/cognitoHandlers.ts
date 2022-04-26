@@ -116,3 +116,23 @@ export const removeUserFromGroup = async (payload: IAddRemoveUserToGroup) => {
   };
   return cognitoidentityserviceprovider.adminRemoveUserFromGroup(params).promise();
 };
+
+interface ICreateUser {
+  UserPoolId: string;
+  Username: string;
+  DesiredDeliveryMediums?: any;
+  UserAttributes?: { Name: string; value?: string }[];
+  TemporaryPassword?: string;
+}
+
+export const createUser = async (payload: ICreateUser) => {
+  const params = {
+    UserPoolId: payload.UserPoolId,
+    Username: payload.Username,
+    DesiredDeliveryMediums: payload.DesiredDeliveryMediums,
+    UserAttributes: payload.UserAttributes,
+    TemporaryPassword: payload.TemporaryPassword,
+  };
+
+  return cognitoidentityserviceprovider.adminCreateUser(params).promise();
+};

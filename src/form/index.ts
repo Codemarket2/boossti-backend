@@ -17,6 +17,7 @@ import {
   deleteCognitoGroup,
   updateCognitoGroup,
 } from './utils/cognitoGroupHandler';
+import { createUser } from '../permissions/utils/cognitoHandlers';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -175,6 +176,42 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         if (args?.options) {
           const { password, ...options } = args?.options;
           args = { ...args, options };
+        }
+
+        const createUserActionType = form?.settings?.actions?.filter(
+          (e) => e?.actionType === 'createCognitoUser',
+        )[0];
+
+        if (createUserActionType?.actionType === 'createCognitoUser') {
+          const fName = args?.values
+            ?.filter((e) => e?.field === createUserActionType?.firstName)[0]
+            ?.value.trim();
+          const lName = args?.values
+            ?.filter((e) => e?.field === createUserActionType?.lastName)[0]
+            ?.value.trim();
+          const uEmail = args?.values
+            ?.filter((e) => e?.field === createUserActionType?.userEmail)[0]
+            ?.value.trim();
+
+          const payload = {
+            UserPoolId: createUserActionType?.userPoolId,
+            Username: uEmail,
+            UserAttributes: [
+              {
+                Name: 'email',
+                Value: uEmail,
+              },
+              {
+                Name: 'email_verified',
+                Value: 'True',
+              },
+              {
+                Name: 'name',
+                Value: `${fName} ${lName}`,
+              },
+            ],
+          };
+          const nUser = await createUser(payload);
         }
         let response = await ResponseModel.create(args);
         response = await response.populate(responsePopulate).execPopulate();
@@ -414,17 +451,17 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         }
         return null;
       }
-      case 'getCheckUnique' : {
+      case 'getCheckUnique': {
         const latestResponse = await ResponseModel.find({ formId: args._id });
-        let finalRes = { res: false, fieldId: ""}
+        let finalRes = { res: false, fieldId: '' };
         latestResponse.map((response, i) => {
           response?.values?.map((val, j) => {
-              if(val.value === args.values[0].value){
-                finalRes = { res: true, fieldId: val.field}
-              }         
-          })
-        })
-        return finalRes
+            if (val.value === args.values[0].value) {
+              finalRes = { res: true, fieldId: val.field };
+            }
+          });
+        });
+        return finalRes;
       }
       default:
         throw new Error('Something went wrong! Please check your Query or Mutation');
