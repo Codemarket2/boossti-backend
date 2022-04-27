@@ -125,6 +125,11 @@ interface ICreateUser {
   TemporaryPassword?: string;
 }
 
+interface IDeleteUser {
+  UserPoolId: string;
+  Username: string;
+}
+
 export const createUser = async (payload: ICreateUser) => {
   const params = {
     UserPoolId: payload.UserPoolId,
@@ -136,3 +141,19 @@ export const createUser = async (payload: ICreateUser) => {
 
   return cognitoidentityserviceprovider.adminCreateUser(params).promise();
 };
+
+export const deleteUser = async (payload: IDeleteUser) => {
+  const params = {
+    UserPoolId: payload.UserPoolId,
+    Username: payload.Username,
+  };
+  return cognitoidentityserviceprovider.adminDeleteUser(params).promise();
+};
+
+// const deleteUSerFunc = () => {
+//   deleteUser({
+//     UserPoolId: 'us-east-1_eBnsz43bl',
+//     Username: 'sonukumar.patna81800@gmail.com',
+//   });
+// };
+// deleteUSerFunc();

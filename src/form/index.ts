@@ -17,7 +17,7 @@ import {
   deleteCognitoGroup,
   updateCognitoGroup,
 } from './utils/cognitoGroupHandler';
-import { createUser } from '../permissions/utils/cognitoHandlers';
+import { createUser, deleteUser } from '../permissions/utils/cognitoHandlers';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -211,7 +211,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
               },
             ],
           };
-          const nUser = await createUser(payload);
+          await createUser(payload);
         }
         let response = await ResponseModel.create(args);
         response = await response.populate(responsePopulate).execPopulate();
@@ -329,6 +329,29 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
 
         const res: any = await FormModel.findById(response.formId).populate(formPopulate);
         const form = { ...res.toObject() };
+
+        const deleteUserActionType = form?.settings?.actions?.filter(
+          (e) => e?.actionType === 'deleteCognitoUser',
+        )[0];
+
+        if (deleteUserActionType?.actionType === 'deleteCognitoUser') {
+          const fName = response?.values
+            ?.filter((e) => e?.field === deleteUserActionType?.firstName)[0]
+            ?.value.trim();
+          const lName = response?.values
+            ?.filter((e) => e?.field === deleteUserActionType?.lastName)[0]
+            ?.value.trim();
+          const uEmail = response?.values
+            ?.filter((e) => e?.field === deleteUserActionType?.userEmail)[0]
+            ?.value.trim();
+
+          const payload = {
+            UserPoolId: deleteUserActionType?.userPoolId,
+            Username: uEmail,
+          };
+          await deleteUser(payload);
+        }
+
         const createGroupActionType = form?.settings?.actions?.filter(
           (e) => e.actionType === 'deleteCognitoGroup',
         )[0];
