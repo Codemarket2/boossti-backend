@@ -116,3 +116,51 @@ export const removeUserFromGroup = async (payload: IAddRemoveUserToGroup) => {
   };
   return cognitoidentityserviceprovider.adminRemoveUserFromGroup(params).promise();
 };
+
+interface ICreateUser {
+  UserPoolId: string;
+  Username: string;
+  DesiredDeliveryMediums?: any;
+  UserAttributes?: { Name: string; value?: string }[];
+  TemporaryPassword?: string;
+}
+
+interface IDeleteUser {
+  UserPoolId: string;
+  Username: string;
+}
+
+export const createUser = async (payload: ICreateUser) => {
+  const params = {
+    UserPoolId: payload.UserPoolId,
+    Username: payload.Username,
+    DesiredDeliveryMediums: payload.DesiredDeliveryMediums,
+    UserAttributes: payload.UserAttributes,
+    TemporaryPassword: payload.TemporaryPassword,
+  };
+
+  return cognitoidentityserviceprovider.adminCreateUser(params).promise();
+};
+
+export const deleteUser = async (payload: IDeleteUser) => {
+  const params = {
+    UserPoolId: payload.UserPoolId,
+    Username: payload.Username,
+  };
+  return cognitoidentityserviceprovider.adminDeleteUser(params).promise();
+};
+
+interface IUpdateUserAttributes {
+  UserPoolId: string;
+  Username: string;
+  UserAttributes: { Name: string; value?: string }[];
+}
+
+export const updateUserAttributes = async (payload: IUpdateUserAttributes) => {
+  const params = {
+    UserPoolId: payload.UserPoolId,
+    Username: payload.Username,
+    UserAttributes: payload.UserAttributes,
+  };
+  return cognitoidentityserviceprovider.adminUpdateUserAttributes(params).promise();
+};

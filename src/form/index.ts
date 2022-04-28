@@ -17,6 +17,7 @@ import {
   deleteCognitoGroup,
   updateCognitoGroup,
 } from './utils/cognitoGroupHandler';
+import { createUser, deleteUser, updateUserAttributes } from '../permissions/utils/cognitoHandlers';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -176,6 +177,42 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           const { password, ...options } = args?.options;
           args = { ...args, options };
         }
+
+        const createUserActionType = form?.settings?.actions?.filter(
+          (e) => e?.actionType === 'createCognitoUser',
+        )[0];
+
+        if (createUserActionType?.actionType === 'createCognitoUser') {
+          const fName = args?.values
+            ?.filter((e) => e?.field === createUserActionType?.firstName)[0]
+            ?.value.trim();
+          const lName = args?.values
+            ?.filter((e) => e?.field === createUserActionType?.lastName)[0]
+            ?.value.trim();
+          const uEmail = args?.values
+            ?.filter((e) => e?.field === createUserActionType?.userEmail)[0]
+            ?.value.trim();
+
+          const payload = {
+            UserPoolId: createUserActionType?.userPoolId,
+            Username: uEmail,
+            UserAttributes: [
+              {
+                Name: 'email',
+                Value: uEmail,
+              },
+              {
+                Name: 'email_verified',
+                Value: 'True',
+              },
+              {
+                Name: 'name',
+                Value: `${fName} ${lName}`,
+              },
+            ],
+          };
+          await createUser(payload);
+        }
         let response = await ResponseModel.create(args);
         response = await response.populate(responsePopulate).execPopulate();
         // Run Actions
@@ -236,7 +273,41 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         const oldOptions = { ...args.options };
         const res: any = await FormModel.findById(response.formId).populate(formPopulate);
         const form = { ...res.toObject() };
+        const updateUserActionType = form?.settings?.actions?.filter(
+          (e) => e?.actionType === 'updateCognitoUser',
+        )[0];
 
+        if (updateUserActionType?.actionType === 'updateCognitoUser') {
+          const fName = args?.values
+            ?.filter((e) => e?.field === updateUserActionType?.firstName)[0]
+            ?.value.trim();
+          const lName = args?.values
+            ?.filter((e) => e?.field === updateUserActionType?.lastName)[0]
+            ?.value.trim();
+          const uEmail = args?.values
+            ?.filter((e) => e?.field === updateUserActionType?.userEmail)[0]
+            ?.value.trim();
+
+          const payload = {
+            UserPoolId: updateUserActionType?.userPoolId,
+            Username: uEmail,
+            UserAttributes: [
+              {
+                Name: 'email',
+                Value: uEmail,
+              },
+              {
+                Name: 'email_verified',
+                Value: 'True',
+              },
+              {
+                Name: 'name',
+                Value: `${fName} ${lName}`,
+              },
+            ],
+          };
+          await updateUserAttributes(payload);
+        }
         const createGroupActionType = form?.settings?.actions?.filter(
           (e) => e.actionType === 'updateCognitoGroup',
         )[0];
@@ -292,6 +363,29 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
 
         const res: any = await FormModel.findById(response.formId).populate(formPopulate);
         const form = { ...res.toObject() };
+
+        const deleteUserActionType = form?.settings?.actions?.filter(
+          (e) => e?.actionType === 'deleteCognitoUser',
+        )[0];
+
+        if (deleteUserActionType?.actionType === 'deleteCognitoUser') {
+          const fName = response?.values
+            ?.filter((e) => e?.field === deleteUserActionType?.firstName)[0]
+            ?.value.trim();
+          const lName = response?.values
+            ?.filter((e) => e?.field === deleteUserActionType?.lastName)[0]
+            ?.value.trim();
+          const uEmail = response?.values
+            ?.filter((e) => e?.field === deleteUserActionType?.userEmail)[0]
+            ?.value.trim();
+
+          const payload = {
+            UserPoolId: deleteUserActionType?.userPoolId,
+            Username: uEmail,
+          };
+          await deleteUser(payload);
+        }
+
         const createGroupActionType = form?.settings?.actions?.filter(
           (e) => e.actionType === 'deleteCognitoGroup',
         )[0];
@@ -414,17 +508,17 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         }
         return null;
       }
-      case 'getCheckUnique' : {
+      case 'getCheckUnique': {
         const latestResponse = await ResponseModel.find({ formId: args._id });
-        let finalRes = { res: false, fieldId: ""}
+        let finalRes = { res: false, fieldId: '' };
         latestResponse.map((response, i) => {
           response?.values?.map((val, j) => {
-              if(val.value === args.values[0].value){
-                finalRes = { res: true, fieldId: val.field}
-              }         
-          })
-        })
-        return finalRes
+            if (val.value === args.values[0].value) {
+              finalRes = { res: true, fieldId: val.field };
+            }
+          });
+        });
+        return finalRes;
       }
       default:
         throw new Error('Something went wrong! Please check your Query or Mutation');
