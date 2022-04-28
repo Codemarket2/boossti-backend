@@ -17,7 +17,7 @@ import {
   deleteCognitoGroup,
   updateCognitoGroup,
 } from './utils/cognitoGroupHandler';
-import { createUser, deleteUser } from '../permissions/utils/cognitoHandlers';
+import { createUser, deleteUser, updateUserAttributes } from '../permissions/utils/cognitoHandlers';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -273,7 +273,41 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         const oldOptions = { ...args.options };
         const res: any = await FormModel.findById(response.formId).populate(formPopulate);
         const form = { ...res.toObject() };
+        const updateUserActionType = form?.settings?.actions?.filter(
+          (e) => e?.actionType === 'updateCognitoUser',
+        )[0];
 
+        if (updateUserActionType?.actionType === 'updateCognitoUser') {
+          const fName = args?.values
+            ?.filter((e) => e?.field === updateUserActionType?.firstName)[0]
+            ?.value.trim();
+          const lName = args?.values
+            ?.filter((e) => e?.field === updateUserActionType?.lastName)[0]
+            ?.value.trim();
+          const uEmail = args?.values
+            ?.filter((e) => e?.field === updateUserActionType?.userEmail)[0]
+            ?.value.trim();
+
+          const payload = {
+            UserPoolId: updateUserActionType?.userPoolId,
+            Username: uEmail,
+            UserAttributes: [
+              {
+                Name: 'email',
+                Value: uEmail,
+              },
+              {
+                Name: 'email_verified',
+                Value: 'True',
+              },
+              {
+                Name: 'name',
+                Value: `${fName} ${lName}`,
+              },
+            ],
+          };
+          await updateUserAttributes(payload);
+        }
         const createGroupActionType = form?.settings?.actions?.filter(
           (e) => e.actionType === 'updateCognitoGroup',
         )[0];

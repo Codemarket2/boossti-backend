@@ -150,10 +150,17 @@ export const deleteUser = async (payload: IDeleteUser) => {
   return cognitoidentityserviceprovider.adminDeleteUser(params).promise();
 };
 
-// const deleteUSerFunc = () => {
-//   deleteUser({
-//     UserPoolId: 'us-east-1_eBnsz43bl',
-//     Username: 'sonukumar.patna81800@gmail.com',
-//   });
-// };
-// deleteUSerFunc();
+interface IUpdateUserAttributes {
+  UserPoolId: string;
+  Username: string;
+  UserAttributes: { Name: string; value?: string }[];
+}
+
+export const updateUserAttributes = async (payload: IUpdateUserAttributes) => {
+  const params = {
+    UserPoolId: payload.UserPoolId,
+    Username: payload.Username,
+    UserAttributes: payload.UserAttributes,
+  };
+  return cognitoidentityserviceprovider.adminUpdateUserAttributes(params).promise();
+};
