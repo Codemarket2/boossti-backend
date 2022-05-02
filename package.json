@@ -31,7 +31,6 @@
     "fast-csv": "^4.3.6",
     "graphql-tag": "^2.12.6",
     "moment": "^2.29.1",
-    "mongodb-client-encryption": "^1.2.6",
     "mongoose": "^5.13.2",
     "slugify": "^1.6.0"
   }
