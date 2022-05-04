@@ -17,7 +17,12 @@ import {
   deleteCognitoGroup,
   updateCognitoGroup,
 } from './utils/cognitoGroupHandler';
-import { createUser, deleteUser, updateUserAttributes } from '../permissions/utils/cognitoHandlers';
+import {
+  addUserToGroup,
+  createUser,
+  deleteUser,
+  updateUserAttributes,
+} from '../permissions/utils/cognitoHandlers';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -182,6 +187,17 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           (e) => e?.actionType === 'createCognitoUser',
         )[0];
 
+        const selectItemInForm = args?.values?.filter((e) => e?.response !== null)[0]?.response;
+        const selectItemResponse = await ResponseModel.findById(selectItemInForm);
+        const selectForm = await FormModel.findById(selectItemResponse?.formId);
+        const selectItemField = selectForm?.fields
+          ?.filter((e) => e?.fieldType === 'text' && e?.label?.toUpperCase().includes('ROLE'))
+          .map((e) => e._id);
+        const RoleName =
+          selectItemResponse?.values
+            ?.filter((e) => selectItemField?.includes(e.field))
+            .map((e) => e.value) || [];
+
         if (createUserActionType?.actionType === 'createCognitoUser') {
           const fName = args?.values
             ?.filter((e) => e?.field === createUserActionType?.firstName)[0]
@@ -212,6 +228,14 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
             ],
           };
           await createUser(payload);
+          for (let i = 0; i < RoleName?.length; i++) {
+            const payload = {
+              GroupName: RoleName[i],
+              UserPoolId: createUserActionType?.userPoolId,
+              Username: uEmail,
+            };
+            await addUserToGroup(payload);
+          }
         }
         let response = await ResponseModel.create(args);
         response = await response.populate(responsePopulate).execPopulate();
