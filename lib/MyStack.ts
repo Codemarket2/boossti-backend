@@ -61,6 +61,15 @@ export default class MyStack extends sst.Stack {
       resolvers: { ...resolvers },
     });
 
+    const csvFunction = new sst.Function(this, 'MyApiLambda', {
+      functionName: 'write-csv-to-mongodb',
+      handler: 'src/contact/csvFileLambda.ts',
+      timeout: 900,
+      environment: {
+        DATABASE: `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@codemarket-staging.k16z7.mongodb.net/${scope.stage}?retryWrites=true&w=majority`,
+      },
+    });
+
     // // Enable the AppSync API to access the DynamoDB table
     api.attachPermissions(sst.PermissionType.ALL);
 
@@ -70,6 +79,7 @@ export default class MyStack extends sst.Stack {
       GraphqlUrl: api.graphqlApi.graphqlUrl,
       // @ts-expect-error because some api will not have apiKey
       ApiKey: api.graphqlApi.apiKey,
+      FunctionName: csvFunction.functionName,
     });
   }
 }

@@ -3,6 +3,7 @@ import { getCurrentUser } from '../utils/authentication';
 import { AppSyncEvent } from '../utils/cutomTypes';
 import { Contact, MailingList } from './utils/contactModel';
 import { fileParser } from '../form/utils/readCsvFile';
+import { invokeCsvLambda } from './utils/invokeLambda';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -27,24 +28,22 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       }
 
       case 'createMailingList': {
-        console.log(args);
         const { fileUrl, collectionName, map } = args;
-        const filter: any = Object.values(map);
-        const fields = Object.keys(map);
-        const fileData = await fileParser(fileUrl, filter);
-        const responses: any = [];
+        invokeCsvLambda({ fileUrl, collectionName, map, page: 1 });
+        // const filter: any = Object.values(map);
+        // const fields = Object.keys(map);
+        // const fileData = await fileParser(fileUrl, filter);
+        // const responses: any = [];
 
-        fileData?.map((data) => {
-          const response = {};
-          for (let i = 0; i < fields.length; i++) {
-            response[`${fields[i]}`] = data[map[fields[i]]];
-          }
-          response['groupName'] = collectionName;
-          // console.log(response);
-          responses.push(response);
-        });
-        const responseCreated = await Contact.create(responses);
-        console.log(responseCreated);
+        // fileData?.map((data) => {
+        //   const response = {};
+        //   for (let i = 0; i < fields.length; i++) {
+        //     response[`${fields[i]}`] = data[map[fields[i]]];
+        //   }
+        //   response['groupName'] = collectionName;
+        //   responses.push(response);
+        // });
+        // const responseCreated = await Contact.insertMany(responses);
         return true;
       }
       case 'createMailingListFromContact': {
