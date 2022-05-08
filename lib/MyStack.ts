@@ -63,7 +63,8 @@ export default class MyStack extends sst.Stack {
 
     const csvFunction = new sst.Function(this, 'MyApiLambda', {
       functionName: 'write-csv-to-mongodb',
-      handler: 'src/contact/csvFileLambda.ts',
+      handler: 'src/contact/csvFileLambda.handler',
+      memorySize: 4096,
       timeout: 900,
       environment: {
         DATABASE: `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@codemarket-staging.k16z7.mongodb.net/${scope.stage}?retryWrites=true&w=majority`,
@@ -72,6 +73,7 @@ export default class MyStack extends sst.Stack {
 
     // // Enable the AppSync API to access the DynamoDB table
     api.attachPermissions(sst.PermissionType.ALL);
+    csvFunction.attachPermissions(sst.PermissionType.ALL);
 
     // Show the AppSync API Id in the output
     this.addOutputs({

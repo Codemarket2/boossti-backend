@@ -29,21 +29,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
 
       case 'createMailingList': {
         const { fileUrl, collectionName, map } = args;
-        invokeCsvLambda({ fileUrl, collectionName, map, page: 1 });
-        // const filter: any = Object.values(map);
-        // const fields = Object.keys(map);
-        // const fileData = await fileParser(fileUrl, filter);
-        // const responses: any = [];
-
-        // fileData?.map((data) => {
-        //   const response = {};
-        //   for (let i = 0; i < fields.length; i++) {
-        //     response[`${fields[i]}`] = data[map[fields[i]]];
-        //   }
-        //   response['groupName'] = collectionName;
-        //   responses.push(response);
-        // });
-        // const responseCreated = await Contact.insertMany(responses);
+        await invokeCsvLambda({ fileUrl, collectionName, map, page: 1 });
         return true;
       }
       case 'createMailingListFromContact': {

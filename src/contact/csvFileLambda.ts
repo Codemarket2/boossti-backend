@@ -1,12 +1,13 @@
 import { DB } from '../utils/DB';
-import { AppSyncEvent } from '../utils/cutomTypes';
-import { Contact, MailingList } from './utils/contactModel';
+import { Contact } from './utils/contactModel';
 import { fileParser } from '../form/utils/readCsvFile';
 
-export const handler = async (event: AppSyncEvent): Promise<any> => {
+export const handler = async (event: any): Promise<any> => {
+  console.log('csv lambda Function was invoked');
+  const start = Date.now();
   try {
     await DB();
-    const { fileUrl, collectionName, map, page = 1 } = event.arguments;
+    const { fileUrl, collectionName, map, page = 1 } = event;
     const maxRows = 80000;
     const skipRows = (page - 1) * maxRows;
     const filter: any = Object.values(map);
@@ -22,11 +23,15 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       responses.push(response);
     });
     if (responses.length > 0) {
-      await Contact.insertMany(responses);
+      await Contact.create(responses);
+      const stop = Date.now();
+      console.log(`Time Taken write in mongodb = ${(stop - start) / 1000} seconds`);
       return `${responses?.length} rows written into database`;
     }
     return `no rows found in csv file`;
   } catch (error) {
+    const stop = Date.now();
+    console.log(`In catch block ${(stop - start) / 1000} seconds`);
     if (error.runThis) {
       console.log('error', error);
     }
