@@ -2,7 +2,6 @@ import { DB } from '../utils/DB';
 import { getCurrentUser } from '../utils/authentication';
 import { AppSyncEvent } from '../utils/cutomTypes';
 import { Contact, MailingList } from './utils/contactModel';
-import { fileParser } from '../form/utils/readCsvFile';
 import { invokeCsvLambda } from './utils/invokeLambda';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
@@ -42,15 +41,16 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
 
       case 'getAllContacts': {
         const { page = 1, limit = 50 } = args;
-
+        // debugger;
         const data = await Contact.find()
           .sort({ createdAt: -1 })
           .limit(limit * 1)
           .skip((page - 1) * limit);
         const count = await Contact.countDocuments();
+
         return {
           data,
-          count,
+          count: Number(count),
         };
       }
       case 'getAllMailingList': {
