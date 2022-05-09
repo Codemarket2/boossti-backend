@@ -28,6 +28,7 @@
     "@serverless-stack/resources": "0.50.3",
     "aws-sdk": "^2.863.0",
     "axios": "^0.24.0",
+    "email-validator": "^2.0.4",
     "fast-csv": "^4.3.6",
     "graphql-tag": "^2.12.6",
     "moment": "^2.29.1",

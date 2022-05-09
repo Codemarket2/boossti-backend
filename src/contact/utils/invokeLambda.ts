@@ -7,16 +7,18 @@ export const invokeCsvLambda = async ({
   collectionName,
   map,
   page,
+  createdBy,
 }: {
   fileUrl: string;
   collectionName: string;
   map: any;
   page: number;
+  createdBy: string;
 }) => {
   const params = {
-    FunctionName: 'write-csv-to-mongodb' /* required */,
+    FunctionName: `${process.env.STAGE}-write-csv-to-mongodb` /* required */,
     InvocationType: 'Event', //| RequestResponse | DryRun,
-    Payload: JSON.stringify({ fileUrl, collectionName, map, page }),
+    Payload: JSON.stringify({ fileUrl, collectionName, map, page, createdBy }),
   };
   return lambda.invoke(params).promise();
 };

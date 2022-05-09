@@ -2,6 +2,7 @@ type Query {
   getAllContacts(page: Int, limit: Int): Contacts @aws_api_key @aws_cognito_user_pools
   getContact(_id: ID!): Contact
   getAllMailingList(page: Int, limit: Int): [MailingList]
+  # getBulkUploadLog(page: Int, limit: Int): [MailingList]
 }
 
 type Mutation {
@@ -56,3 +57,20 @@ type MailingList {
   listName: String
   contacts: [ID]
 }
+
+# type BulkUploadLog {
+#   _id: ID
+#   fileName: String
+#   status: String
+#   progress: Int
+#   success: Int
+#   failed: Int
+#   completedOn: AWSDateTime
+#   createdAt: AWSDateTime
+#   updatedAt: AWSDateTime
+# }
+
+# type BulkUploadLogs {
+#   bulkUploadLogs: [BulkUploadLogs]
+#   count: Int
+# }

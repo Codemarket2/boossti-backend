@@ -15,6 +15,10 @@ export default class MyStack extends sst.Stack {
       this,
       '/codemarket/default/senderEmail',
     );
+    const EMAIL_VERIFICATION_API = StringParameter.valueForStringParameter(
+      this,
+      '/boossti/emailverification/apiKey',
+    );
     const SNS_ORIGINAL_NUMBER = StringParameter.valueForStringParameter(
       this,
       '/codemarket/sns/originalNumber',
@@ -55,6 +59,7 @@ export default class MyStack extends sst.Stack {
           GRAPHQL_API_KEY: process.env.GRAPHQL_API_KEY || '',
           ONESIGNAL_API_KEY: process.env.ONESIGNAL_API_KEY || '',
           ONESIGNAL_APP_ID: process.env.ONESIGNAL_APP_ID || '',
+          STAGE: scope.stage,
         },
       },
       dataSources: dataSources,
@@ -62,11 +67,12 @@ export default class MyStack extends sst.Stack {
     });
 
     const csvFunction = new sst.Function(this, 'MyApiLambda', {
-      functionName: 'write-csv-to-mongodb',
+      functionName: `${scope.stage}-write-csv-to-mongodb`,
       handler: 'src/contact/csvFileLambda.handler',
       memorySize: 4096,
       timeout: 900,
       environment: {
+        EMAIL_VERIFICATION_API: EMAIL_VERIFICATION_API,
         DATABASE: `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@codemarket-staging.k16z7.mongodb.net/${scope.stage}?retryWrites=true&w=majority`,
       },
     });

@@ -1,8 +1,7 @@
 import { model, Schema } from 'mongoose';
-import { valueSchema } from '../../form/utils/responseModel';
 import { ISchema } from '../../utils/cutomTypes';
 
-export interface IContact {
+export interface IContact extends ISchema {
   firstName: string;
   lastName: string;
   title: string;
@@ -13,10 +12,12 @@ export interface IContact {
   website: string;
   city: string;
 }
+
 export interface IMailingList {
   listName: string;
   contacts: [Schema.Types.ObjectId];
 }
+
 const contactSchema = new Schema<IContact>(
   {
     firstName: {
@@ -49,6 +50,16 @@ const contactSchema = new Schema<IContact>(
     city: {
       type: String,
     },
+    // bulkUploadId: Schema.Types.ObjectId,
+    createdBy: {
+      required: true,
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    updatedAt: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+    },
   },
   { timestamps: true },
 );
@@ -69,5 +80,8 @@ const MailingListSchema = new Schema<IMailingList>(
   },
   { timestamps: true },
 );
+
 export const Contact = model<IContact>('Contact', contactSchema);
+export const FailedContact = model<IContact>('FailedContact', contactSchema);
+
 export const MailingList = model<IMailingList>('MailingList', MailingListSchema);
