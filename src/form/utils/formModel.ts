@@ -1,6 +1,7 @@
 import { Schema, model } from 'mongoose';
 import { ISchema } from '../../utils/cutomTypes';
 import { userPopulate } from '../../utils/populate';
+import { auditLogPlugin } from '../../auditLog/utils/plugin';
 
 export interface IForm extends ISchema {
   parentId: string;
@@ -69,6 +70,8 @@ const formSchema = new Schema<IForm>(
   },
   { timestamps: true },
 );
+
+// formSchema.plugin(auditLogPlugin);
 
 export const FormModel = model<IForm>('Form', formSchema);
 

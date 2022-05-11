@@ -3,7 +3,6 @@ import { getCurrentUser } from '../utils/authentication';
 import { AppSyncEvent } from '../utils/cutomTypes';
 import { Contact, MailingList } from './utils/contactModel';
 import { invokeCsvLambda } from './utils/invokeLambda';
-// import { BulkUploadLog } from './utils/bulkUploadLog';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -29,8 +28,6 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       case 'createMailingList': {
         const { fileUrl, collectionName, map, createdBy } = args;
         // const fileName = fileUrl?.split('/')?.pop()?.split('name-')?.pop();
-        // const res = await BulkUploadLog.create({ fileName, createdBy });
-        // const bulkUploadId = res._id;
         await invokeCsvLambda({ fileUrl, collectionName, map, page: 1, createdBy });
         return true;
       }
@@ -91,15 +88,6 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       case 'deleteContact': {
         await Contact.findByIdAndDelete(args._id);
         return args._id;
-      }
-      case 'getBulkUploadLog': {
-        // const { page = 1, limit = 50 } = args;
-        // const bulkUploadLogs = await BulkUploadLog.find()
-        //   .sort('-createdAt')
-        //   .limit(limit * 1)
-        //   .skip((page - 1) * limit);
-        // const count = await BulkUploadLog.countDocuments();
-        // return { bulkUploadLogs, count };
       }
       default:
         throw new Error('Something went wrong! Please check your Query or Mutation');

@@ -2,7 +2,6 @@ import { DB } from '../utils/DB';
 import { Contact, FailedContact } from './utils/contactModel';
 import { fileParser } from '../form/utils/readCsvFile';
 import { validateEmail } from '../utils/validateEmail';
-// import { BulkUploadLog } from './utils/bulkUploadLog';
 
 export const handler = async (event: any): Promise<any> => {
   console.log('csv lambda Function was invoked');
