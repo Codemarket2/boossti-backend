@@ -269,7 +269,6 @@ describe('List Lambda Tests', () => {
     await listHandler(createPageEvent);
     const form = await handler(createFormEvent);
     const section = await handler(createMockEvent('getSection', { _id: form._id }));
-    console.log({ section });
     // expect(responseId.toString()).toBe(mockResponse._id);
   });
 
@@ -278,7 +277,6 @@ describe('List Lambda Tests', () => {
     await listHandler(createPageEvent);
     const form = await handler(createFormEvent);
     const section = await handler(createMockEvent('updateSection', { _id: form._id }));
-    console.log({ section });
     // expect(responseId.toString()).toBe(mockResponse._id);
   });
 });

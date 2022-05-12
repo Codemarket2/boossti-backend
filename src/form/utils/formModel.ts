@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose';
 import { ISchema } from '../../utils/cutomTypes';
 import { userPopulate } from '../../utils/populate';
-import { auditLogPlugin } from '../../auditLog/utils/plugin';
+import { extendSchema } from '../../utils/extendSchema';
 
 export interface IForm extends ISchema {
   parentId: string;
@@ -38,40 +38,26 @@ export const fieldSchema = new Schema({
   },
 });
 
-const formSchema = new Schema<IForm>(
-  {
-    parentId: {
-      type: Schema.Types.ObjectId,
-    },
-    name: { type: String, unique: true },
-    slug: { type: String },
-    fields: [fieldSchema],
-    settings: {
-      type: Schema.Types.Mixed,
-      default: { mutipleResponses: false },
-    },
-    published: {
-      type: Boolean,
-      default: false,
-    },
-    createdBy: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-    },
-    updatedBy: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-    },
-    virtualForm: {
-      type: Boolean,
-      default: false,
-    },
+const formSchema = extendSchema({
+  parentId: {
+    type: Schema.Types.ObjectId,
   },
-  { timestamps: true },
-);
-
-// formSchema.plugin(auditLogPlugin);
+  name: { type: String, unique: true },
+  slug: { type: String },
+  fields: [fieldSchema],
+  settings: {
+    type: Schema.Types.Mixed,
+    default: { mutipleResponses: false },
+  },
+  published: {
+    type: Boolean,
+    default: false,
+  },
+  virtualForm: {
+    type: Boolean,
+    default: false,
+  },
+});
 
 export const FormModel = model<IForm>('Form', formSchema);
 

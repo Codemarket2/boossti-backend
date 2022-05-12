@@ -1,6 +1,7 @@
 import { Schema, model } from 'mongoose';
 import { ISchema } from '../../utils/cutomTypes';
 import { userPopulate } from '../../utils/populate';
+import { extendSchema } from '../../utils/extendSchema';
 
 export interface IResponse extends ISchema {
   formId: any;
@@ -24,7 +25,7 @@ export interface IValue {
   options: any;
 }
 
-export const valueSchema = new Schema({
+export const valueSchema = new Schema<IValue>({
   field: {
     type: String,
     required: true,
@@ -60,39 +61,36 @@ export const valueSchema = new Schema({
   options: { type: Schema.Types.Mixed, default: { option: false } },
 });
 
-export const responseSchema = new Schema<IResponse>(
-  {
-    formId: {
-      type: Schema.Types.ObjectId,
-      required: true,
-      ref: 'Form',
-    },
-    count: {
-      type: Number,
-      required: true,
-    },
-    parentId: {
-      // templatePageParentId
-      type: Schema.Types.ObjectId,
-      ref: 'Page',
-    },
-    workFlowFormReponseParentId: {
-      type: Schema.Types.ObjectId,
-      default: null,
-    },
-    values: [valueSchema],
-    options: { type: Schema.Types.Mixed, default: { option: false } },
-    createdBy: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-    },
-    updatedBy: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-    },
+export const responseSchema = extendSchema({
+  formId: {
+    type: Schema.Types.ObjectId,
+    required: true,
+    ref: 'Form',
   },
-  { timestamps: true },
-);
+  count: {
+    type: Number,
+    required: true,
+  },
+  parentId: {
+    // templatePageParentId
+    type: Schema.Types.ObjectId,
+    ref: 'Page',
+  },
+  workFlowFormReponseParentId: {
+    type: Schema.Types.ObjectId,
+    default: null,
+  },
+  values: [valueSchema],
+  options: { type: Schema.Types.Mixed, default: { option: false } },
+  createdBy: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+  },
+  updatedBy: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+  },
+});
 
 responseSchema.index({ formId: 1, count: 1 }, { unique: true });
 

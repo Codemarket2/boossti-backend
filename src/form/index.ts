@@ -18,6 +18,8 @@ import {
   updateCognitoGroup,
 } from './utils/cognitoGroupHandler';
 import { createUser, deleteUser, updateUserAttributes } from '../permissions/utils/cognitoHandlers';
+import { createActionAuditLog } from '../auditLog/utils/auditLog';
+import { runInTransaction } from '../utils/runInTransaction';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -66,6 +68,18 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       case 'createForm': {
         const form = await FormModel.create(args);
         return await form.populate(formPopulate).execPopulate();
+        // let form;
+        // await runInTransaction(async (session) => {
+        //   const res = await FormModel.create([args], { session: session });
+        //   form = res[0];
+        //   await createActionAuditLog({
+        //     documentId: form._id,
+        //     model: 'Form',
+        //     session,
+        //     newDoc: form,
+        //   });
+        // });
+        // return await FormModel.findById(form._id).populate(formPopulate);
       }
       case 'updateForm': {
         const form: any = await FormModel.findByIdAndUpdate(args._id, args, {
