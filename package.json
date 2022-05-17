@@ -13,7 +13,7 @@
     ]
   },
   "devDependencies": {
-    "@shelf/jest-mongodb": "^2.0.1",
+    "@shelf/jest-mongodb": "^2.2.2",
     "@types/aws-lambda": "^8.10.70",
     "husky": "^7.0.1",
     "jest": "^27.0.6",
