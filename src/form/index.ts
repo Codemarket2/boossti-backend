@@ -18,7 +18,6 @@ import {
   updateCognitoGroup,
 } from './utils/cognitoGroupHandler';
 import { createUser, deleteUser, updateUserAttributes } from '../permissions/utils/cognitoHandlers';
-import { createActionAuditLog } from '../auditLog/utils/auditLog';
 import { runInTransaction } from '../utils/runInTransaction';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
@@ -66,53 +65,41 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         };
       }
       case 'createForm': {
-        let form;
-        await runInTransaction(
-          async (session) => {
-            const res = await FormModel.create([args], { session: session });
-            form = res[0];
-            return form;
-          },
-          { action: 'CREATE', model: FormModel },
-        );
-
-        return await FormModel.findById(form._id).populate(formPopulate);
+        return await runInTransaction({
+          action: 'CREATE',
+          Model: FormModel,
+          args,
+          populate: formPopulate,
+        });
       }
       case 'updateForm': {
-        const form: any = await FormModel.findByIdAndUpdate(args._id, args, {
-          new: true,
-          runValidators: true,
+        return await runInTransaction({
+          action: 'UPDATE',
+          Model: FormModel,
+          args,
+          populate: formPopulate,
         });
-        return await form.populate(formPopulate);
-        // let form;
-        // await runInTransaction(
-        //   async (session) => {
-        //     const oldDoc: any = await FormModel.findByIdAndUpdate(args._id, args, {
-        //       runValidators: true,
-        //       session: session,
-        //     });
-        //     form = await FormModel.findById(oldDoc._id).populate(formPopulate).session(session);
-        //     return oldDoc;
-        //   },
-        //   { action: 'UPDATE', model: FormModel },
-        // );
-        // return form;
       }
       case 'deleteForm': {
-        let formId;
-        await runInTransaction(
-          async (session) => {
-            const deletedForm: any = await FormModel.findByIdAndDelete(args._id, {
-              session: session,
-            });
-            await ResponseModel.deleteMany({ formId: args._id }, { session: session });
-            await SectionModel.findByIdAndDelete(args._id, { session: session });
-            formId = deletedForm._id;
-            return deletedForm;
-          },
-          { action: 'DELETE', model: FormModel },
-        );
-        return formId;
+        return await runInTransaction({
+          action: 'DELETE',
+          Model: FormModel,
+          args,
+        });
+        // let formId;
+        // await runInTransaction(
+        //   async (session) => {
+        //     const deletedForm: any = await FormModel.findByIdAndDelete(args._id, {
+        //       session: session,
+        //     });
+        //     await ResponseModel.deleteMany({ formId: args._id }, { session: session });
+        //     await SectionModel.findByIdAndDelete(args._id, { session: session });
+        //     formId = deletedForm._id;
+        //     return deletedForm;
+        //   },
+        //   { action: 'DELETE', model: FormModel },
+        // );
+        // return formId;
       }
       case 'getResponse': {
         return await ResponseModel.findById(args._id).populate(responsePopulate);

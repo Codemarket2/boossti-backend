@@ -1,5 +1,6 @@
 import * as mongoose from 'mongoose';
 import { User } from '../src/user/utils/userModel';
+import { createCollections } from '../src/utils/createCollections';
 import { mockUser } from './defaultArguments';
 
 jest.mock('../src/utils/DB', () => {
@@ -15,9 +16,13 @@ function getMongoUrl() {
   );
 }
 
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 beforeAll(async () => {
   try {
     await mongoose.connect(getMongoUrl());
+    await delay(1000);
+    await createCollections();
   } catch (error) {
     console.log(error);
     process.exit(1);
@@ -25,7 +30,6 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  await User.createCollection();
   await User.create(mockUser);
 });
 

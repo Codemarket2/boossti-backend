@@ -11,6 +11,6 @@ export const createCollections = async () => {
   try {
     await Promise.all(models.map((model) => model.createCollection()));
   } catch (error) {
-    console.log('Error while creating assignment!');
+    console.log(`Error while creating collection ${error.message}`);
   }
 };

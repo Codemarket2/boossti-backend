@@ -35,7 +35,7 @@ export const updateAuctionAuditLog = async ({
   newDoc,
   session,
 }: IUpdatePayload) => {
-  const diff = getDiff(oldDoc, newDoc);
+  const diff = getDiff(oldDoc?.toObject(), newDoc?.toObject());
   await AuditLogModel.create([{ model, documentId, action: 'UPDATE', diff }], { session: session });
 };
 
