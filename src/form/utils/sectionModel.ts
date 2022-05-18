@@ -4,8 +4,8 @@ import { fieldSchema, fieldsPopulate, IField } from '../../form/utils/formModel'
 import { valueSchema, IValue, valuesPopulate } from '../../form/utils/responseModel';
 
 export interface Section extends ISchema {
-  fields: [IField];
-  values: [IValue];
+  fields: IField[];
+  values: IValue[];
   options: any;
 }
 

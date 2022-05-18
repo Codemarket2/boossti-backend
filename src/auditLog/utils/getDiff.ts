@@ -1,4 +1,3 @@
-import { isValidObjectId } from 'mongoose';
 import { transform } from 'lodash';
 import { isEqual } from 'lodash';
 import { isArray } from 'lodash';
@@ -11,14 +10,7 @@ export function getDiff(origObj, newObj) {
     return transform(newObj, function (result: any, value, key) {
       if (!isEqual(value, origObj[key])) {
         const resultKey = isArray(origObj) ? arrayIndexCounter++ : key;
-        // if (
-        //   isObject(value) &&
-        //   isObject(origObj[key]) &&
-        //   isValidObjectId(value) &&
-        //   isValidObjectId(origObj[key])
-        // ) {
-        //   console.log({ [key]: value });
-        // }
+
         result[resultKey] =
           isObject(value) &&
           isObject(origObj[key]) &&

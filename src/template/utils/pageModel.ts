@@ -5,13 +5,16 @@ import { valueSchema, IValue, valuesPopulate } from '../../form/utils/responseMo
 import { userPopulate } from '../../utils/populate';
 
 export interface IPage extends ISchema {
+  template: string;
   title: string;
   slug: string;
   description: string;
-  media: [IMedia];
-  fields: [IField];
+  media: IMedia[];
+  fields: IField[];
   active: boolean;
-  values: [IValue];
+  values: IValue[];
+  authenticateUser: boolean;
+  options: any;
 }
 
 const pageSchema = new Schema<IPage>(

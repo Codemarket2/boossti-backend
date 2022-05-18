@@ -12,15 +12,13 @@ const createLikeEvent = createMockEvent('createLike', mockLike);
 describe('Like Lambda Tests', () => {
   it('getLike test', async () => {
     await handler(createLikeEvent);
-    const like = await handler(
-      createMockEvent('getLike', { _id: mockLike._id })
-    );
+    const like = await handler(createMockEvent('getLike', { _id: mockLike._id }));
     expect(like._id).toBeDefined();
     expect(like.parentId).toBeDefined();
     expect(like.createdAt).toBeDefined();
     expect(like.like).toBeDefined();
     expect(like.like).toBe(true);
-    expect(like.createdBy._id).toStrictEqual(mockUser._id);
+    expect(like.createdBy._id?.toString()).toStrictEqual(mockUser._id);
     expect(like.createdBy.name).toBe(mockUser.name);
   });
 
@@ -29,14 +27,14 @@ describe('Like Lambda Tests', () => {
     const like = await handler(
       createMockEvent('getLikesByParentId', {
         parentId: mockLike.parentId,
-      })
+      }),
     );
     expect(like.data[0]._id).toBeDefined();
     expect(like.data[0].parentId).toBeDefined();
     expect(like.data[0].createdAt).toBeDefined();
     expect(like.data[0].like).toBeDefined();
     expect(like.data[0].like).toBe(true);
-    expect(like.data[0].createdBy._id).toStrictEqual(mockUser._id);
+    expect(like.data[0].createdBy._id?.toString()).toStrictEqual(mockUser._id);
     expect(like.data[0].createdBy.name).toBe(mockUser.name);
   });
   it('createLike test', async () => {
@@ -51,9 +49,7 @@ describe('Like Lambda Tests', () => {
 
   it('updateLike test', async () => {
     await handler(createLikeEvent);
-    const like = await handler(
-      createMockEvent('updateLike', { _id: mockLike._id })
-    );
+    const like = await handler(createMockEvent('updateLike', { _id: mockLike._id }));
     expect(like._id).toBeDefined();
     expect(like.parentId).toBeDefined();
     expect(like.like).toBeDefined();
@@ -64,9 +60,7 @@ describe('Like Lambda Tests', () => {
 
   it('deleteLike test', async () => {
     await handler(createLikeEvent);
-    const res = await handler(
-      createMockEvent('deleteLike', { parentId: mockLike.parentId })
-    );
+    const res = await handler(createMockEvent('deleteLike', { parentId: mockLike.parentId }));
     expect(res).toBe(true);
   });
 });

@@ -32,7 +32,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           ...args,
           starRating: args.starRating,
         });
-        const populated = await rating.populate(userPopulate).execPopulate();
+        const populated = await rating.populate(userPopulate); //.execPopulate();
         return populated;
       }
       case 'updateStarRating': {
@@ -44,7 +44,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
             runValidators: true,
           },
         );
-        return await tempStarRatings.populate(userPopulate).execPopulate();
+        return await tempStarRatings.populate(userPopulate); //.execPopulate();
       }
       case 'getStarRating': {
         const getStarRating = await StarRating.findById(args._id).populate(userPopulate);

@@ -6,9 +6,9 @@ module.exports = {
       skipMD5: true,
     },
     autoStart: false,
-    // replSet: {
-    //   count: 4,
-    //   storageEngine: 'wiredTiger',
-    // },
+    replSet: {
+      count: 3,
+      storageEngine: 'wiredTiger',
+    },
   },
 };

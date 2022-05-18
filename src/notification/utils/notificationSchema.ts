@@ -9,6 +9,7 @@ export interface INotification extends ISchema {
   formId?: string;
   threadId?: string;
   parentId?: string;
+  isClicked?: boolean;
 }
 
 const notificationSchema = new Schema<INotification>(

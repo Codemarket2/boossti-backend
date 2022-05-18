@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose';
-import { ISchema } from '../../utils/cutomTypes';
+import { IMedia, ISchema } from '../../utils/cutomTypes';
 import { userPopulate } from '../../utils/populate';
 import { extendSchema } from '../../utils/extendSchema';
 
@@ -17,12 +17,13 @@ export interface IValue {
   valueNumber: number;
   valueBoolean: boolean;
   valueDate: Date;
-  values: [string];
+  values: string[];
   template: string;
   page: string;
   response: string;
   form: string;
   options: any;
+  media: IMedia[];
 }
 
 export const valueSchema = new Schema<IValue>({

@@ -48,7 +48,7 @@ describe('List Lambda Tests', () => {
     expect(item.title).toBe(mockPage.title);
     expect(item.description).toBe(mockPage.description);
     expect(item.template._id.toString()).toBe(mockTemplate._id);
-    expect(item.createdBy._id).toMatchObject(mockUser._id);
+    expect(item.createdBy._id?.toString()).toStrictEqual(mockUser._id);
     expect(item.createdAt).toBeDefined();
     expect(item.updatedAt).toBeDefined();
   });
@@ -58,7 +58,7 @@ describe('List Lambda Tests', () => {
     const template = await handler(createMockEvent('getTemplate', { _id: mockTemplate._id }));
     expect(template._id).toBeDefined();
     expect(template.title).toBe(mockTemplate.title);
-    expect(template.createdBy._id).toMatchObject(mockUser._id);
+    expect(template.createdBy._id?.toString()).toStrictEqual(mockUser._id);
     expect(template.createdAt).toBeDefined();
     expect(template.updatedAt).toBeDefined();
   });
@@ -71,7 +71,7 @@ describe('List Lambda Tests', () => {
     expect(page.title).toBe(mockPage.title);
     expect(page.description).toBe(mockPage.description);
     expect(page.template._id.toString()).toBe(mockTemplate._id);
-    expect(page.createdBy._id).toMatchObject(mockUser._id);
+    expect(page.createdBy._id?.toString()).toStrictEqual(mockUser._id);
     expect(page.createdAt).toBeDefined();
     expect(page.updatedAt).toBeDefined();
   });
@@ -85,7 +85,7 @@ describe('List Lambda Tests', () => {
     );
     expect(template._id).toBeDefined();
     expect(template.title).toBe(mockTemplate.title);
-    expect(template.createdBy._id).toMatchObject(mockUser._id);
+    expect(template.createdBy._id?.toString()).toStrictEqual(mockUser._id);
     expect(template.createdAt).toBeDefined();
     expect(template.updatedAt).toBeDefined();
   });
@@ -103,7 +103,7 @@ describe('List Lambda Tests', () => {
     expect(page.title).toBe(mockPage.title);
     expect(page.description).toBe(mockPage.description);
     expect(page.template._id.toString()).toBe(mockTemplate._id);
-    expect(page.createdBy._id).toMatchObject(mockUser._id);
+    expect(page.createdBy._id?.toString()).toStrictEqual(mockUser._id);
     expect(page.createdAt).toBeDefined();
     expect(page.updatedAt).toBeDefined();
   });
@@ -112,7 +112,7 @@ describe('List Lambda Tests', () => {
     const template = await handler(createTemplateEvent);
     expect(template._id).toBeDefined();
     expect(template.title).toBe(mockTemplate.title);
-    expect(template.createdBy._id).toMatchObject(mockUser._id);
+    expect(template.createdBy._id?.toString()).toStrictEqual(mockUser._id);
     expect(template.createdAt).toBeDefined();
     expect(template.updatedAt).toBeDefined();
   });
@@ -125,7 +125,7 @@ describe('List Lambda Tests', () => {
     expect(page.title).toBe(mockPage.title);
     expect(page.description).toBe(mockPage.description);
     expect(page.template._id.toString()).toBe(mockTemplate._id);
-    expect(page.createdBy._id).toMatchObject(mockUser._id);
+    expect(page.createdBy._id?.toString()).toStrictEqual(mockUser._id);
     expect(page.createdAt).toBeDefined();
     expect(page.updatedAt).toBeDefined();
   });
@@ -135,7 +135,7 @@ describe('List Lambda Tests', () => {
     const template = await handler(createMockEvent('updateTemplate', updatedMockTemplate));
     expect(template._id).toBeDefined();
     expect(template.title).toBe(updatedMockTemplate.title);
-    expect(template.createdBy._id).toMatchObject(mockUser._id);
+    expect(template.createdBy._id?.toString()).toStrictEqual(mockUser._id);
     expect(template.createdAt).toBeDefined();
     expect(template.updatedAt).toBeDefined();
   });
@@ -148,7 +148,7 @@ describe('List Lambda Tests', () => {
     expect(page.title).toBe(updatedMockPage.title);
     expect(page.description).toBe(updatedMockPage.description);
     expect(page.template._id.toString()).toBe(mockTemplate._id);
-    expect(page.createdBy._id).toMatchObject(mockUser._id);
+    expect(page.createdBy._id?.toString()).toStrictEqual(mockUser._id);
     expect(page.createdAt).toBeDefined();
     expect(page.updatedAt).toBeDefined();
   });

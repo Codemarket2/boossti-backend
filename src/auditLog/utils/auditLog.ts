@@ -18,7 +18,6 @@ export const createActionAuditLog = async ({
   session,
   newDoc,
 }: ICreatePayload) => {
-  // throw new Error('something went wrong');
   await AuditLogModel.create([{ model, documentId, action: 'CREATE', diff: newDoc }], {
     session: session,
   });
@@ -36,7 +35,6 @@ export const updateAuctionAuditLog = async ({
   newDoc,
   session,
 }: IUpdatePayload) => {
-  // throw new Error('something went wrong');
   const diff = getDiff(oldDoc, newDoc);
   await AuditLogModel.create([{ model, documentId, action: 'UPDATE', diff }], { session: session });
 };
@@ -51,8 +49,11 @@ export const deleteActionAuditLog = async ({
   oldDoc,
   session,
 }: IDeletePayload) => {
-  // throw new Error('something went wrong');
   await AuditLogModel.create([{ model, documentId, action: 'DELETE', diff: oldDoc }], {
     session: session,
   });
+};
+
+export const getAuditLog = async (documentId) => {
+  return await AuditLogModel.findOne({ documentId }).sort('-createdAt');
 };

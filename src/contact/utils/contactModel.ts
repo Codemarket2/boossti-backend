@@ -7,7 +7,7 @@ export interface IContact extends ISchema {
   title: string;
   businessName: string;
   email: string;
-  phone: number;
+  phone: string;
   groupName: string;
   website: string;
   city: string;

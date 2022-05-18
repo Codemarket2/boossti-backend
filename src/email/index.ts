@@ -47,7 +47,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
             body,
             subject,
           });
-          response = await response.populate(userPopulate).execPopulate();
+          response = await response.populate(userPopulate); //.execPopulate();
           if (sendIndividual === true) {
             await Promise.all(
               findReceiverEmail.map(async (contact) => {

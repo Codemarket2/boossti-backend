@@ -32,7 +32,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           ...args,
           like: true,
         });
-        return await like.populate(userPopulate).execPopulate();
+        return await like.populate(userPopulate); //.execPopulate();
       }
       case 'updateLike': {
         tempLikes = await Like.findOneAndUpdate(
@@ -43,7 +43,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
             runValidators: true,
           },
         );
-        return await tempLikes.populate(userPopulate).execPopulate();
+        return await tempLikes.populate(userPopulate); //.execPopulate();
       }
       case 'getLike': {
         const getLike = await Like.findById(args._id).populate(userPopulate);

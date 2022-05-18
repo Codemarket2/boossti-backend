@@ -56,14 +56,14 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       }
       case 'createRole': {
         const role = await RoleModel.create(args);
-        return await role.populate(rolePopulate).execPopulate();
+        return await role.populate(rolePopulate); //.execPopulate();
       }
       case 'updateRole': {
         const data: any = await RoleModel.findByIdAndUpdate(args._id, args, {
           new: true,
           runValidators: true,
         });
-        return await data.populate(rolePopulate).execPopulate();
+        return await data.populate(rolePopulate); //.execPopulate();
       }
       case 'deleteRole': {
         await RoleModel.findByIdAndDelete(args._id);

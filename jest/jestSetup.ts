@@ -17,19 +17,15 @@ function getMongoUrl() {
 
 beforeAll(async () => {
   try {
-    await mongoose.connect(getMongoUrl(), {
-      useNewUrlParser: true,
-      useCreateIndex: true,
-      useFindAndModify: false,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(getMongoUrl());
   } catch (error) {
-    console.error(error);
+    console.log(error);
     process.exit(1);
   }
 });
 
 beforeEach(async () => {
+  await User.createCollection();
   await User.create(mockUser);
 });
 

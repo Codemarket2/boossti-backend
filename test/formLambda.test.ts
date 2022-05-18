@@ -98,7 +98,7 @@ describe('List Lambda Tests', () => {
     expect(form.fields[0].fieldType).toBe(mockForm.fields[0].fieldType);
     expect(form.fields[0].template._id.toString()).toBe(mockForm.fields[0].template);
     expect(form.published).toBe(false);
-    expect(form.createdBy._id).toMatchObject(mockUser._id);
+    expect(form.createdBy._id?.toString()).toStrictEqual(mockUser._id);
     expect(form.createdAt).toBeDefined();
     expect(form.updatedAt).toBeDefined();
   });
@@ -114,7 +114,7 @@ describe('List Lambda Tests', () => {
     expect(form.fields[0].fieldType).toBe(updatedMockForm.fields[0].fieldType);
     expect(form.fields[0].template._id.toString()).toBe(updatedMockForm.fields[0].template);
     expect(form.published).toBe(updatedMockForm.published);
-    expect(form.createdBy._id).toMatchObject(mockUser._id);
+    expect(form.createdBy._id?.toString()).toStrictEqual(mockUser._id);
     expect(form.createdAt).toBeDefined();
     expect(form.updatedAt).toBeDefined();
   });
@@ -130,7 +130,7 @@ describe('List Lambda Tests', () => {
     expect(form.fields[0].fieldType).toBe(mockForm.fields[0].fieldType);
     expect(form.fields[0].template._id.toString()).toBe(mockForm.fields[0].template);
     expect(form.published).toBe(false);
-    expect(form.createdBy._id).toMatchObject(mockUser._id);
+    expect(form.createdBy._id?.toString()).toStrictEqual(mockUser._id);
     expect(form.createdAt).toBeDefined();
     expect(form.updatedAt).toBeDefined();
   });
@@ -149,7 +149,7 @@ describe('List Lambda Tests', () => {
     expect(form.fields[0].fieldType).toBe(mockForm.fields[0].fieldType);
     expect(form.fields[0].template._id.toString()).toBe(mockForm.fields[0].template);
     expect(form.published).toBe(false);
-    expect(form.createdBy._id).toMatchObject(mockUser._id);
+    expect(form.createdBy._id?.toString()).toStrictEqual(mockUser._id);
     expect(form.createdAt).toBeDefined();
     expect(form.updatedAt).toBeDefined();
   });
@@ -175,7 +175,7 @@ describe('List Lambda Tests', () => {
     expect(response.values.length).toBe(mockResponse.values.length);
     expect(response.values[0].field).toBe(mockResponse.values[0].field);
     expect(response.values[0].page._id.toString()).toBe(mockResponse.values[0].page);
-    expect(response.createdBy._id).toMatchObject(mockUser._id);
+    expect(response.createdBy._id?.toString()).toStrictEqual(mockUser._id);
     expect(response.createdAt).toBeDefined();
     expect(response.updatedAt).toBeDefined();
   });
@@ -192,7 +192,7 @@ describe('List Lambda Tests', () => {
     expect(response.values.length).toBe(updatedMockResponse.values.length);
     expect(response.values[0].field).toBe(updatedMockResponse.values[0].field);
     expect(response.values[0].page._id.toString()).toBe(updatedMockResponse.values[0].page);
-    expect(response.createdBy._id).toMatchObject(mockUser._id);
+    expect(response.createdBy._id?.toString()).toStrictEqual(mockUser._id);
     expect(response.createdAt).toBeDefined();
     expect(response.updatedAt).toBeDefined();
   });
@@ -209,7 +209,7 @@ describe('List Lambda Tests', () => {
     expect(response.values.length).toBe(mockResponse.values.length);
     expect(response.values[0].field).toBe(mockResponse.values[0].field);
     expect(response.values[0].page._id.toString()).toBe(mockResponse.values[0].page);
-    expect(response.createdBy._id).toMatchObject(mockUser._id);
+    expect(response.createdBy._id?.toString()).toStrictEqual(mockUser._id);
     expect(response.createdAt).toBeDefined();
     expect(response.updatedAt).toBeDefined();
   });
@@ -231,7 +231,7 @@ describe('List Lambda Tests', () => {
     expect(response.values.length).toBe(mockResponse.values.length);
     expect(response.values[0].field).toBe(mockResponse.values[0].field);
     expect(response.values[0].page._id.toString()).toBe(mockResponse.values[0].page);
-    expect(response.createdBy._id).toMatchObject(mockUser._id);
+    expect(response.createdBy._id?.toString()).toStrictEqual(mockUser._id);
     expect(response.createdAt).toBeDefined();
     expect(response.updatedAt).toBeDefined();
   });
@@ -250,7 +250,7 @@ describe('List Lambda Tests', () => {
     expect(response.values.length).toBe(mockResponse.values.length);
     expect(response.values[0].field).toBe(mockResponse.values[0].field);
     expect(response.values[0].page._id.toString()).toBe(mockResponse.values[0].page);
-    expect(response.createdBy._id).toMatchObject(mockUser._id);
+    expect(response.createdBy._id?.toString()).toStrictEqual(mockUser._id);
     expect(response.createdAt).toBeDefined();
     expect(response.updatedAt).toBeDefined();
   });
