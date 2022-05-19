@@ -6,6 +6,7 @@ interface IPayload {
   documentId: string;
   model: string;
   session: ClientSession;
+  createdBy: ClientSession;
 }
 
 interface ICreatePayload extends IPayload {
@@ -17,8 +18,9 @@ export const createActionAuditLog = async ({
   documentId,
   session,
   newDoc,
+  createdBy,
 }: ICreatePayload) => {
-  await AuditLogModel.create([{ model, documentId, action: 'CREATE', diff: newDoc }], {
+  await AuditLogModel.create([{ model, documentId, createdBy, action: 'CREATE', diff: newDoc }], {
     session: session,
   });
 };
@@ -34,9 +36,12 @@ export const updateAuctionAuditLog = async ({
   oldDoc,
   newDoc,
   session,
+  createdBy,
 }: IUpdatePayload) => {
   const diff = getDiff(oldDoc?.toObject(), newDoc?.toObject());
-  await AuditLogModel.create([{ model, documentId, action: 'UPDATE', diff }], { session: session });
+  await AuditLogModel.create([{ model, documentId, createdBy, action: 'UPDATE', diff }], {
+    session: session,
+  });
 };
 
 interface IDeletePayload extends IPayload {
@@ -48,8 +53,9 @@ export const deleteActionAuditLog = async ({
   documentId,
   oldDoc,
   session,
+  createdBy,
 }: IDeletePayload) => {
-  await AuditLogModel.create([{ model, documentId, action: 'DELETE', diff: oldDoc }], {
+  await AuditLogModel.create([{ model, documentId, createdBy, action: 'DELETE', diff: oldDoc }], {
     session: session,
   });
 };

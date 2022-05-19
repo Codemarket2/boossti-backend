@@ -13,6 +13,7 @@ interface IOperation {
   Model: mongoose.Model<any>;
   args: any;
   populate?: any;
+  user: any;
 }
 
 // callback: TransactionCallback,
@@ -23,7 +24,7 @@ export const runInTransaction = async (operation: IOperation) => {
   session.startTransaction();
   let data;
   try {
-    const { action, Model, args, populate } = operation;
+    const { action, Model, args, populate, user } = operation;
     const modelName = Model.modelName;
     switch (action) {
       case 'CREATE': {
@@ -34,6 +35,7 @@ export const runInTransaction = async (operation: IOperation) => {
           documentId: data._id,
           model: modelName,
           newDoc: data,
+          createdBy: user?._id,
         });
         if (populate) {
           data = await Model.findById(data._id).populate(populate).session(session);
@@ -52,6 +54,7 @@ export const runInTransaction = async (operation: IOperation) => {
           model: modelName,
           oldDoc,
           newDoc: data,
+          createdBy: user?._id,
         });
         if (populate) {
           data = await Model.findById(data._id).populate(populate).session(session);
@@ -67,8 +70,8 @@ export const runInTransaction = async (operation: IOperation) => {
           documentId: data._id,
           model: modelName,
           oldDoc: data,
+          createdBy: user?._id,
         });
-        data = data._id;
         break;
       }
     }

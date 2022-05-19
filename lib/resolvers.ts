@@ -10,6 +10,7 @@ import { notificationResolvers } from '../src/notification/resolvers';
 import { emailResolvers } from '../src/email/resolvers';
 import { contactResolvers } from '../src/contact/resolvers';
 import { roleResolvers } from '../src/role/resolvers';
+import { auditLogResolvers } from '../src/auditLog/resolvers';
 
 export default {
   ...userResolvers,
@@ -24,4 +25,5 @@ export default {
   ...emailResolvers,
   ...contactResolvers,
   ...roleResolvers,
+  ...auditLogResolvers,
 };

@@ -11,4 +11,5 @@ export default [
   'src/email/email.graphql',
   'src/contact/contact.graphql',
   'src/role/role.graphql',
+  'src/auditLog/auditLog.graphql',
 ];

@@ -32,9 +32,9 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     if (Object.prototype.hasOwnProperty.call(args, 'name')) {
       args = { ...args, slug: slugify(args.name, { lower: true }) };
     }
-    if (fieldName.toLocaleLowerCase().includes('create') && user && user._id) {
+    if (fieldName.toLocaleLowerCase().includes('create') && user?._id) {
       args = { ...args, createdBy: user._id };
-    } else if (fieldName.toLocaleLowerCase().includes('update') && user && user._id) {
+    } else if (fieldName.toLocaleLowerCase().includes('update') && user?._id) {
       args = { ...args, updatedBy: user._id };
     }
 
@@ -70,6 +70,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           Model: FormModel,
           args,
           populate: formPopulate,
+          user,
         });
       }
       case 'updateForm': {
@@ -78,14 +79,17 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           Model: FormModel,
           args,
           populate: formPopulate,
+          user,
         });
       }
       case 'deleteForm': {
-        return await runInTransaction({
+        const form = await runInTransaction({
           action: 'DELETE',
           Model: FormModel,
           args,
+          user,
         });
+        return form._id;
         // let formId;
         // await runInTransaction(
         //   async (session) => {
@@ -234,8 +238,15 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           };
           await createUser(payload);
         }
-        let response = await ResponseModel.create(args);
-        response = await response.populate(responsePopulate); //.execPopulate();
+        // let response = await ResponseModel.create(args);
+        // response = await response.populate(responsePopulate);
+        const response = await runInTransaction({
+          action: 'CREATE',
+          Model: ResponseModel,
+          args,
+          populate: responsePopulate,
+          user,
+        });
         // Run Actions
         const createGroupActionType = form?.settings?.actions?.filter(
           (e) => e.actionType === 'createCognitoGroup',
@@ -286,11 +297,13 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         return response;
       }
       case 'updateResponse': {
-        const response: any = await ResponseModel.findByIdAndUpdate(args._id, args, {
-          new: true,
-          runValidators: true,
+        const response = await runInTransaction({
+          action: 'UPDATE',
+          Model: ResponseModel,
+          args,
+          populate: responsePopulate,
+          user,
         });
-
         const oldOptions = { ...args.options };
         const res: any = await FormModel.findById(response.formId).populate(formPopulate);
         const form = { ...res.toObject() };
@@ -376,10 +389,15 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
             }
           }
         }
-        return await response.populate(responsePopulate); //.execPopulate();
+        return response;
       }
       case 'deleteResponse': {
-        const response: any = await ResponseModel.findByIdAndDelete(args._id);
+        const response = await runInTransaction({
+          action: 'DELETE',
+          Model: ResponseModel,
+          args,
+          user,
+        });
         const oldOptions = { ...args.options };
 
         const res: any = await FormModel.findById(response.formId).populate(formPopulate);
