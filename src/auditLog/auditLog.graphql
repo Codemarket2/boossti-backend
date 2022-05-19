@@ -12,7 +12,7 @@ type AuditLog {
   action: String
   model: String
   documentId: String
-  diff: String
+  diff: AWSJSON
   message: String
   createdBy: User
   createdAt: AWSDateTime
