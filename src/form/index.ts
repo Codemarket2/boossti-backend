@@ -19,6 +19,13 @@ import {
 } from './utils/cognitoGroupHandler';
 import { createUser, deleteUser, updateUserAttributes } from '../permissions/utils/cognitoHandlers';
 import { runInTransaction } from '../utils/runInTransaction';
+import {
+  addUserToGroup,
+  createUser,
+  deleteUser,
+  removeUserFromGroup,
+  updateUserAttributes,
+} from '../permissions/utils/cognitoHandlers';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -207,6 +214,17 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           (e) => e?.actionType === 'createCognitoUser',
         )[0];
 
+        const selectItemInForm = args?.values?.filter((e) => e?.response !== null)[0]?.response;
+        const selectItemResponse = await ResponseModel.findById(selectItemInForm);
+        const selectForm = await FormModel.findById(selectItemResponse?.formId);
+        const selectItemField = selectForm?.fields
+          ?.filter((e) => e?.fieldType === 'text' && e?.label?.toUpperCase().includes('ROLE'))
+          .map((e) => e._id);
+        const RoleName =
+          selectItemResponse?.values
+            ?.filter((e) => selectItemField?.includes(e.field))
+            .map((e) => e.value) || [];
+
         if (createUserActionType?.actionType === 'createCognitoUser') {
           const fName = args?.values
             ?.filter((e) => e?.field === createUserActionType?.firstName)[0]
@@ -236,7 +254,19 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
               },
             ],
           };
-          await createUser(payload);
+          try {
+            for (let i = 0; i < RoleName?.length; i++) {
+              const Cpayload = {
+                GroupName: RoleName[i],
+                UserPoolId: createUserActionType?.userPoolId,
+                Username: uEmail,
+              };
+              await createUser(payload);
+              await addUserToGroup(Cpayload);
+            }
+          } catch (error) {
+            return error.message;
+          }
         }
         // let response = await ResponseModel.create(args);
         // response = await response.populate(responsePopulate);
@@ -406,14 +436,20 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         const deleteUserActionType = form?.settings?.actions?.filter(
           (e) => e?.actionType === 'deleteCognitoUser',
         )[0];
+        const selectItemInForm = response?.values?.filter((e) => e?.response !== null)[0]?.response;
+        const selectItemResponse = await ResponseModel.findById(selectItemInForm);
+        const selectForm = await FormModel.findById(selectItemResponse?.formId);
+        const selectItemField = selectForm?.fields
+          ?.filter((e) => e?.fieldType === 'text' && e?.label?.toUpperCase().includes('ROLE'))
+          .map((e) => e._id);
+        const RoleName =
+          selectItemResponse?.values
+            ?.filter((e) => selectItemField?.includes(e.field))
+            .map((e) => e.value) || [];
+
+        console.log(RoleName);
 
         if (deleteUserActionType?.actionType === 'deleteCognitoUser') {
-          const fName = response?.values
-            ?.filter((e) => e?.field === deleteUserActionType?.firstName)[0]
-            ?.value.trim();
-          const lName = response?.values
-            ?.filter((e) => e?.field === deleteUserActionType?.lastName)[0]
-            ?.value.trim();
           const uEmail = response?.values
             ?.filter((e) => e?.field === deleteUserActionType?.userEmail)[0]
             ?.value.trim();
@@ -422,7 +458,19 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
             UserPoolId: deleteUserActionType?.userPoolId,
             Username: uEmail,
           };
-          await deleteUser(payload);
+          try {
+            for (let i = 0; i < RoleName?.length; i++) {
+              const Dpayload = {
+                GroupName: RoleName[i],
+                UserPoolId: deleteUserActionType?.userPoolId,
+                Username: uEmail,
+              };
+              await removeUserFromGroup(Dpayload);
+              await deleteUser(payload);
+            }
+          } catch (error) {
+            return error.message;
+          }
         }
 
         const createGroupActionType = form?.settings?.actions?.filter(
