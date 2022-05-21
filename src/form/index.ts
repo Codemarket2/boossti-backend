@@ -17,7 +17,6 @@ import {
   deleteCognitoGroup,
   updateCognitoGroup,
 } from './utils/cognitoGroupHandler';
-import { createUser, deleteUser, updateUserAttributes } from '../permissions/utils/cognitoHandlers';
 import { runInTransaction } from '../utils/runInTransaction';
 import {
   addUserToGroup,
