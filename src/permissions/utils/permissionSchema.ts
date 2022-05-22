@@ -10,6 +10,7 @@ export interface IPermissionGroup extends ISchema {
   create?: string;
   update?: string;
   delete?: string;
+  viewAll: boolean;
 }
 const permissionGroupSchema = new Schema<IPermissionGroup>(
   {

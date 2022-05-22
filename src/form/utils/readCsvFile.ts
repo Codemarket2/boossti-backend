@@ -4,7 +4,7 @@ import * as AWS from 'aws-sdk';
 import * as csv from '@fast-csv/parse';
 
 const S3 = new AWS.S3();
-export const fileParser = async (fileUrl, filter) => {
+export const fileParser = async (fileUrl, filter, maxRows = 0, skipRows = 0) => {
   const splitUrl = fileUrl.split('.s3.us-east-1.amazonaws.com/');
   const bucketName = splitUrl[0].split('://').pop();
 
@@ -14,16 +14,16 @@ export const fileParser = async (fileUrl, filter) => {
   };
 
   const csvFile = S3.getObject(params).createReadStream();
-  const Data: any = [];
+  const data: any = [];
   const parserFcn = new Promise((resolve, reject) => {
     const parser = csv
-      .parseStream(csvFile, { headers: true })
+      .parseStream(csvFile, { headers: true, ignoreEmpty: true, maxRows, skipRows })
       .on('data', function (d) {
         const res: any = {};
-        filter.map((fv: any) => {
+        filter.forEach((fv: any) => {
           res[fv] = d[fv];
         });
-        Data.push(res);
+        data.push(res);
       })
       .on('end', function () {
         resolve('csv parse process finished');
@@ -39,7 +39,7 @@ export const fileParser = async (fileUrl, filter) => {
     console.log('Get Error: ', error);
   }
 
-  return Data;
+  return data;
 };
 
 //'https://vijaa-content-bucket202938-dev.s3.us-east-1.amazonaws.com/public/media/csvDataFile/text-5e770856-3272-4043-8fc9-9c42f11237881642092564326.csv

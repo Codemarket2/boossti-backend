@@ -1,0 +1,19 @@
+type Query {
+  getAuditLogs(page: Int, limit: Int, sortBy: String, documentId: ID, formId: ID): AuditLogs
+}
+
+type AuditLogs {
+  count: Int
+  data: [AuditLog]
+}
+
+type AuditLog {
+  _id: ID
+  action: String
+  model: String
+  documentId: String
+  diff: AWSJSON
+  message: String
+  createdBy: User
+  createdAt: AWSDateTime
+}

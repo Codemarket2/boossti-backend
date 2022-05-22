@@ -1,5 +1,6 @@
 import * as mongoose from 'mongoose';
 import { User } from '../src/user/utils/userModel';
+import { createCollections } from '../src/utils/createCollections';
 import { mockUser } from './defaultArguments';
 
 jest.mock('../src/utils/DB', () => {
@@ -11,26 +12,21 @@ function getMongoUrl() {
   // Replace the db name to use a unique db name for each test
   return (
     global.__MONGO_URI__.split('/').slice(0, -1).join('/') +
-    `/${global.__MONGO_DB_NAME__}`
+    `/${global.__MONGO_DB_NAME__}?retryWrites=false&w=majority`
   );
 }
 
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 beforeAll(async () => {
-  await mongoose.connect(
-    getMongoUrl(),
-    {
-      useNewUrlParser: true,
-      useCreateIndex: true,
-      useFindAndModify: false,
-      useUnifiedTopology: true,
-    },
-    (err) => {
-      if (err) {
-        console.error(err);
-        process.exit(1);
-      }
-    }
-  );
+  try {
+    await mongoose.connect(getMongoUrl());
+    await delay(1000);
+    await createCollections();
+  } catch (error) {
+    console.log(error);
+    process.exit(1);
+  }
 });
 
 beforeEach(async () => {

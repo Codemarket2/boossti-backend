@@ -1,6 +1,7 @@
 import { Schema, model } from 'mongoose';
+import { ISchema } from '../../utils/cutomTypes';
 
-interface IEmail {
+interface IEmail extends ISchema {
   senderEmail: string;
   receiverEmail: string[];
   subject: string;

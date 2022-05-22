@@ -2,7 +2,7 @@ import { DB } from '../utils/DB';
 import { getCurrentUser } from '../utils/authentication';
 import { AppSyncEvent } from '../utils/cutomTypes';
 import { Contact, MailingList } from './utils/contactModel';
-import { fileParser } from '../form/utils/readCsvFile';
+import { invokeCsvLambda } from './utils/invokeLambda';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -25,44 +25,32 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         const response = await Contact.create(args);
         return response;
       }
-
       case 'createMailingList': {
-        console.log(args);
-        const { fileUrl, collectionName, map } = args;
-        const filter: any = Object.values(map);
-        const fields = Object.keys(map);
-        const fileData = await fileParser(fileUrl, filter);
-        const responses: any = [];
-
-        fileData?.map((data) => {
-          const response = {};
-          for (let i = 0; i < fields.length; i++) {
-            response[`${fields[i]}`] = data[map[fields[i]]];
-          }
-          response['groupName'] = collectionName;
-          // console.log(response);
-          responses.push(response);
-        });
-        const responseCreated = await Contact.create(responses);
-        console.log(responseCreated);
+        const { fileUrl, collectionName, map, createdBy } = args;
+        // const fileName = fileUrl?.split('/')?.pop()?.split('name-')?.pop();
+        await invokeCsvLambda({ fileUrl, collectionName, map, page: 1, createdBy });
         return true;
       }
       case 'createMailingListFromContact': {
-        const { listName, selectedContact } = args;
+        const { listName, selectedContact, createdBy } = args;
         console.log(args);
-        const createdList = await MailingList.create({ listName, contacts: selectedContact });
+        const createdList = await MailingList.create({
+          listName,
+          contacts: selectedContact,
+          createdBy,
+        });
         console.log(createdList);
         return true;
       }
-
       case 'getAllContacts': {
         const { page = 1, limit = 50 } = args;
-
+        // debugger;
         const data = await Contact.find()
           .sort({ createdAt: -1 })
           .limit(limit * 1)
           .skip((page - 1) * limit);
         const count = await Contact.countDocuments();
+
         return {
           data,
           count,

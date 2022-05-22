@@ -134,14 +134,14 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           args = { ...args, count, slug: count };
         }
         const template = await Template.create(args);
-        return await template.populate(templatePopulate).execPopulate();
+        return await template.populate(templatePopulate); //.execPopulate();
       }
       case 'updateTemplate': {
         const template: any = await Template.findByIdAndUpdate(args._id, args, {
           new: true,
           runValidators: true,
         });
-        return await template.populate(templatePopulate).execPopulate();
+        return await template.populate(templatePopulate); //.execPopulate();
       }
       case 'deleteTemplate': {
         const count = await Page.countDocuments({
@@ -195,14 +195,14 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       }
       case 'createPage': {
         const page = await Page.create(args);
-        return await page.populate(pagePopulate).execPopulate();
+        return await page.populate(pagePopulate); //.execPopulate();
       }
       case 'updatePage': {
         const page: any = await Page.findByIdAndUpdate(args._id, args, {
           new: true,
           runValidators: true,
         });
-        return await page.populate(pagePopulate).execPopulate();
+        return await page.populate(pagePopulate); //.execPopulate();
       }
       case 'deletePage': {
         await Page.findByIdAndDelete(args._id);

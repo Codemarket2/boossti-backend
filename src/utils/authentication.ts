@@ -1,4 +1,4 @@
-import * as mongoose from 'mongoose';
+// import * as mongoose from 'mongoose';
 import { User } from '../user/utils/userModel';
 import { IIdentity } from './cutomTypes';
 
@@ -6,7 +6,7 @@ export const getCurrentUser = async (identity: IIdentity) => {
   let user;
   if (identity && identity.claims && identity.claims.sub && identity.claims['custom:_id']) {
     user = {
-      _id: mongoose.Types.ObjectId(identity.claims['custom:_id']),
+      _id: identity.claims['custom:_id'],
       name: identity.claims.name,
       picture: identity.claims.picture,
     };

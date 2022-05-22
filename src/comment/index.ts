@@ -31,7 +31,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           ...args,
           createdBy: user._id,
         });
-        comment = await comment.populate(userPopulate).execPopulate();
+        comment = await comment.populate(userPopulate); //.execPopulate();
         if (!(process.env.NODE_ENV === 'test')) {
           await sendCommentNotification(comment);
         }
@@ -89,7 +89,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
             runValidators: true,
           },
         );
-        return await tempComment.populate(userPopulate).execPopulate();
+        return await tempComment.populate(userPopulate); //.execPopulate();
       }
       case 'deleteComment': {
         await Comment.findOneAndDelete({ _id: args._id, createdBy: user._id });

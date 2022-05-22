@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "test": "jest --runInBand",
+    "clear": "jest --clearCache",
+    "test:runInBand": "jest --runInBand",
     "sst:test": "sst test",
     "prepare": "husky install"
   },
@@ -13,7 +15,7 @@
     ]
   },
   "devDependencies": {
-    "@shelf/jest-mongodb": "^2.0.1",
+    "@shelf/jest-mongodb": "^2.2.2",
     "@types/aws-lambda": "^8.10.70",
     "husky": "^7.0.1",
     "jest": "^27.0.6",
@@ -26,13 +28,15 @@
     "@aws-cdk/core": "1.126.0",
     "@serverless-stack/cli": "0.50.3",
     "@serverless-stack/resources": "0.50.3",
+    "@types/lodash": "^4.14.182",
     "aws-sdk": "^2.863.0",
     "axios": "^0.24.0",
+    "email-validator": "^2.0.4",
     "fast-csv": "^4.3.6",
     "graphql-tag": "^2.12.6",
+    "lodash": "^4.17.21",
     "moment": "^2.29.1",
-    "mongodb-client-encryption": "^1.2.6",
-    "mongoose": "^5.13.2",
+    "mongoose": "^6.3.3",
     "slugify": "^1.6.0"
   }
 }

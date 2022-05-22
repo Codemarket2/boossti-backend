@@ -18,7 +18,7 @@ const importUsersFromFile = async () => {
     }
     await db();
     // Run your function here
-    // await importUsersFromFile();
+    await importUsersFromFile();
     process.exit();
   } catch (error) {
     console.log('Error', error);

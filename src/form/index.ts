@@ -17,6 +17,7 @@ import {
   deleteCognitoGroup,
   updateCognitoGroup,
 } from './utils/cognitoGroupHandler';
+import { runInTransaction } from '../utils/runInTransaction';
 import {
   addUserToGroup,
   createUser,
@@ -37,9 +38,9 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     if (Object.prototype.hasOwnProperty.call(args, 'name')) {
       args = { ...args, slug: slugify(args.name, { lower: true }) };
     }
-    if (fieldName.toLocaleLowerCase().includes('create') && user && user._id) {
+    if (fieldName.toLocaleLowerCase().includes('create') && user?._id) {
       args = { ...args, createdBy: user._id };
-    } else if (fieldName.toLocaleLowerCase().includes('update') && user && user._id) {
+    } else if (fieldName.toLocaleLowerCase().includes('update') && user?._id) {
       args = { ...args, updatedBy: user._id };
     }
 
@@ -70,21 +71,45 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         };
       }
       case 'createForm': {
-        const form = await FormModel.create(args);
-        return await form.populate(formPopulate).execPopulate();
+        return await runInTransaction({
+          action: 'CREATE',
+          Model: FormModel,
+          args,
+          populate: formPopulate,
+          user,
+        });
       }
       case 'updateForm': {
-        const form: any = await FormModel.findByIdAndUpdate(args._id, args, {
-          new: true,
-          runValidators: true,
+        return await runInTransaction({
+          action: 'UPDATE',
+          Model: FormModel,
+          args,
+          populate: formPopulate,
+          user,
         });
-        return await form.populate(formPopulate).execPopulate();
       }
       case 'deleteForm': {
-        await FormModel.findByIdAndDelete(args._id);
-        await ResponseModel.deleteMany({ formId: args._id });
-        await SectionModel.findByIdAndDelete(args._id);
-        return args._id;
+        const form = await runInTransaction({
+          action: 'DELETE',
+          Model: FormModel,
+          args,
+          user,
+        });
+        return form._id;
+        // let formId;
+        // await runInTransaction(
+        //   async (session) => {
+        //     const deletedForm: any = await FormModel.findByIdAndDelete(args._id, {
+        //       session: session,
+        //     });
+        //     await ResponseModel.deleteMany({ formId: args._id }, { session: session });
+        //     await SectionModel.findByIdAndDelete(args._id, { session: session });
+        //     formId = deletedForm._id;
+        //     return deletedForm;
+        //   },
+        //   { action: 'DELETE', model: FormModel },
+        // );
+        // return formId;
       }
       case 'getResponse': {
         return await ResponseModel.findById(args._id).populate(responsePopulate);
@@ -242,8 +267,15 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
             return error.message;
           }
         }
-        let response = await ResponseModel.create(args);
-        response = await response.populate(responsePopulate).execPopulate();
+        // let response = await ResponseModel.create(args);
+        // response = await response.populate(responsePopulate);
+        const response = await runInTransaction({
+          action: 'CREATE',
+          Model: ResponseModel,
+          args,
+          populate: responsePopulate,
+          user,
+        });
         // Run Actions
         const createGroupActionType = form?.settings?.actions?.filter(
           (e) => e.actionType === 'createCognitoGroup',
@@ -294,11 +326,13 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         return response;
       }
       case 'updateResponse': {
-        const response: any = await ResponseModel.findByIdAndUpdate(args._id, args, {
-          new: true,
-          runValidators: true,
+        const response = await runInTransaction({
+          action: 'UPDATE',
+          Model: ResponseModel,
+          args,
+          populate: responsePopulate,
+          user,
         });
-
         const oldOptions = { ...args.options };
         const res: any = await FormModel.findById(response.formId).populate(formPopulate);
         const form = { ...res.toObject() };
@@ -384,10 +418,15 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
             }
           }
         }
-        return await response.populate(responsePopulate).execPopulate();
+        return response;
       }
       case 'deleteResponse': {
-        const response: any = await ResponseModel.findByIdAndDelete(args._id);
+        const response = await runInTransaction({
+          action: 'DELETE',
+          Model: ResponseModel,
+          args,
+          user,
+        });
         const oldOptions = { ...args.options };
 
         const res: any = await FormModel.findById(response.formId).populate(formPopulate);
@@ -523,7 +562,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         });
 
         const responseCreated = await ResponseModel.create(responses);
-        // responseCreated = await responseCreated.populate(responsePopulate).execPopulate();
+        // responseCreated = await responseCreated.populate(responsePopulate) //.execPopulate();
         // Run Actions
         // const form = await FormModel.findById(responseCreated.formId);
         // await runFormActions(responseCreated, form);
@@ -538,7 +577,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           return section;
         } else if (user?._id) {
           section = await SectionModel.create({ _id: args._id, createdBy: user._id });
-          return await section.populate(sectionPopulate).execPopulate();
+          return await section.populate(sectionPopulate); //.execPopulate();
         }
         return null;
       }
@@ -551,7 +590,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           runValidators: true,
         });
         if (section) {
-          return await section.populate(sectionPopulate).execPopulate();
+          return await section.populate(sectionPopulate); //.execPopulate();
         }
         return null;
       }

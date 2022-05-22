@@ -34,6 +34,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           path: 'types',
           model: 'Template',
           select: 'slug',
+          strictPopulate: false,
         },
       },
     ];
@@ -108,7 +109,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           createdBy: user._id,
           tags,
         });
-        return await post.populate(postPopulate).execPopulate();
+        return await post.populate(postPopulate); //.execPopulate();
       }
       case 'updatePost': {
         const tags = await getTags(args.body);
@@ -120,7 +121,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
             runValidators: true,
           },
         );
-        return await post.populate(postPopulate).execPopulate();
+        return await post.populate(postPopulate); //.execPopulate();
       }
       case 'deletePost': {
         await Post.findOneAndDelete({ _id: args._id, createdBy: user._id });

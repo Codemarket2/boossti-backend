@@ -15,6 +15,10 @@ export default class MyStack extends sst.Stack {
       this,
       '/codemarket/default/senderEmail',
     );
+    const EMAIL_VERIFICATION_API = StringParameter.valueForStringParameter(
+      this,
+      '/boossti/emailverification/apiKey',
+    );
     const SNS_ORIGINAL_NUMBER = StringParameter.valueForStringParameter(
       this,
       '/codemarket/sns/originalNumber',
@@ -55,14 +59,27 @@ export default class MyStack extends sst.Stack {
           GRAPHQL_API_KEY: process.env.GRAPHQL_API_KEY || '',
           ONESIGNAL_API_KEY: process.env.ONESIGNAL_API_KEY || '',
           ONESIGNAL_APP_ID: process.env.ONESIGNAL_APP_ID || '',
+          STAGE: scope.stage,
         },
       },
       dataSources: dataSources,
       resolvers: { ...resolvers },
     });
 
+    const csvFunction = new sst.Function(this, 'MyApiLambda', {
+      functionName: `${scope.stage}-write-csv-to-mongodb`,
+      handler: 'src/contact/csvFileLambda.handler',
+      memorySize: 4096,
+      timeout: 900,
+      environment: {
+        EMAIL_VERIFICATION_API: EMAIL_VERIFICATION_API,
+        DATABASE: `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@codemarket-staging.k16z7.mongodb.net/${scope.stage}?retryWrites=false&w=majority`,
+      },
+    });
+
     // // Enable the AppSync API to access the DynamoDB table
     api.attachPermissions(sst.PermissionType.ALL);
+    csvFunction.attachPermissions(sst.PermissionType.ALL);
 
     // Show the AppSync API Id in the output
     this.addOutputs({
@@ -70,6 +87,7 @@ export default class MyStack extends sst.Stack {
       GraphqlUrl: api.graphqlApi.graphqlUrl,
       // @ts-expect-error because some api will not have apiKey
       ApiKey: api.graphqlApi.apiKey,
+      FunctionName: csvFunction.functionName,
     });
   }
 }

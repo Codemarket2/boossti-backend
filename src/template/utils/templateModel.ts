@@ -5,13 +5,15 @@ import { userPopulate } from '../../utils/populate';
 
 export interface ITemplate extends ISchema {
   title: string;
+  slug: string;
   description: string;
-  media: [IMedia];
+  media: IMedia[];
   active: boolean;
   inUse: boolean;
   showInMenu: boolean;
   count: number;
   fields: IField[];
+  options: any;
 }
 
 const templateSchema = new Schema<ITemplate>(
