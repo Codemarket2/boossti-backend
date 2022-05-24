@@ -12,6 +12,7 @@ type Query {
     onlyMy: Boolean
   ): Responses @aws_api_key @aws_cognito_user_pools
   getMyResponses(page: Int, limit: Int): Responses2
+  getCheckUnique(formId: ID!, responseId: ID, value: ValueInput): Boolean
 }
 
 type Mutation {

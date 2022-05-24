@@ -595,16 +595,19 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         return null;
       }
       case 'getCheckUnique': {
-        const latestResponse = await ResponseModel.find({ formId: args._id });
-        let finalRes = { res: false, fieldId: '' };
-        latestResponse.map((response, i) => {
-          response?.values?.map((val, j) => {
-            if (val.value === args.values[0].value) {
-              finalRes = { res: true, fieldId: val.field };
-            }
-          });
-        });
-        return finalRes;
+        const { formId, responseId, value } = args;
+        let filter: any = {
+          formId,
+          values: { $elemMatch: { value: value.value, field: value.field } },
+        };
+        if (responseId) {
+          filter = {
+            ...filter,
+            _id: { $ne: responseId },
+          };
+        }
+        const response = await ResponseModel.findOne(filter);
+        return Boolean(response?._id);
       }
       default:
         throw new Error('Something went wrong! Please check your Query or Mutation');
