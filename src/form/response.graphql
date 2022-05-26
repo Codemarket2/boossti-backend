@@ -4,6 +4,7 @@ type Query {
   getResponses(
     formId: ID!
     parentId: ID
+    templateId: ID
     workFlowFormReponseParentId: ID
     page: Int
     limit: Int
@@ -18,6 +19,7 @@ type Query {
 type Mutation {
   createResponse(
     formId: ID!
+    templateId: ID
     parentId: ID
     workFlowFormReponseParentId: ID
     values: [ValueInput]
@@ -76,6 +78,7 @@ type Response @aws_api_key @aws_cognito_user_pools {
   _id: ID
   count: Int
   formId: ID
+  templateId: ID
   parentId: Page
   workFlowFormReponseParentId: ID
   values: [Value]
@@ -90,6 +93,7 @@ type Response2 @aws_api_key @aws_cognito_user_pools {
   _id: ID
   count: Int
   formId: Form
+  templateId: ID
   parentId: Page
   workFlowFormReponseParentId: ID
   values: [Value]

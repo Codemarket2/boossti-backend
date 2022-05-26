@@ -68,6 +68,10 @@ export const responseSchema = extendSchema({
     required: true,
     ref: 'Form',
   },
+  templateId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Template',
+  },
   count: {
     type: Number,
     required: true,

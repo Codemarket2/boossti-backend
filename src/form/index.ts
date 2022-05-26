@@ -148,10 +148,14 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           formField,
           onlyMy = false,
           workFlowFormReponseParentId = null,
+          templateId,
         } = args;
         let filter: any = { formId };
         if (parentId) {
           filter = { ...filter, parentId };
+        }
+        if (templateId) {
+          filter = { ...filter, templateId };
         }
         if (workFlowFormReponseParentId) {
           filter = { ...filter, workFlowFormReponseParentId };
