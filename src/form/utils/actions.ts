@@ -7,10 +7,33 @@ import { sendSms } from '../../utils/sms';
 import { responsePopulate } from './responseModel';
 import { getValue } from './variables';
 import moment from 'moment';
+import { getFieldValue } from './actionHelper';
+import { createDistribution } from '../../utils/cloudfront';
+import { createCognitoGroup, deleteCognitoGroup, updateCognitoGroup } from './cognitoGroupHandler';
+import {
+  addUserToGroup,
+  createUser,
+  deleteUser,
+  removeUserFromGroup,
+  updateUserAttributes,
+} from '../../permissions/utils/cognitoHandlers';
+import { ClientSession } from 'mongoose';
 
-export const runFormActions = async (response, form, pageId: any = null) => {
-  if (form?.settings?.actions?.length > 0) {
-    const actions = form?.settings?.actions?.filter((a) => a.active);
+interface IPayload {
+  triggerType: 'onCreate' | 'onUpdate' | 'onDelete' | 'onView';
+  response: any;
+  form: any;
+  args?: any;
+  session: ClientSession;
+}
+
+export const runFormActions = async ({ triggerType, response, form, args, session }: IPayload) => {
+  const actions = form?.settings?.actions?.filter(
+    (action) => action.active && action.triggerType === triggerType,
+  );
+  const pageId = response?.pageId?._id || response?.pageId || null;
+  // debugger;
+  if (actions?.length > 0 && response?._id && form?._id && !(process.env.NODE_ENV === 'test')) {
     for (const action of actions) {
       if (
         action?.actionType === 'sendEmail' &&
@@ -98,12 +121,20 @@ export const runFormActions = async (response, form, pageId: any = null) => {
         action?.receiverType === 'emailField' &&
         action?.emailFieldId
       ) {
+        const action = form.settings?.actions?.filter((a) => a.actionType === 'generateNewUser')[0];
+        const email = getFieldValue(action?.emailFieldId, response.values)?.value;
+        if (email) {
+          const tempUser = await User.findOne({ email: email });
+          if (tempUser) {
+            await ResponseModel.findByIdAndUpdate(response._id, { createdBy: tempUser._id });
+          }
+        }
         const payload: any = {
           from: action?.senderEmail,
           body: variableParser(action, form, response),
           subject: action?.subject,
         };
-        payload.body = payload.body.split(`{{password}}`).join(response.options.password || '');
+        payload.body = payload.body.split(`{{password}}`).join(response.options?.password || '');
         if (action?.variables?.length > 0) {
           const { subject, body } = await replaceVariables(
             payload?.subject,
@@ -194,6 +225,212 @@ export const runFormActions = async (response, form, pageId: any = null) => {
           }
           await ResponseModel.create(responsePayload);
         }
+      } else if (
+        action?.actionType === 'createSubDomainRoute53' &&
+        action.domain &&
+        action.distributionId
+      ) {
+        const domain = getFieldValue(action.domain, response.values);
+        if (!domain?.value) {
+          throw new Error('Account domain name not found');
+        }
+        const res = await createDistribution(domain.value);
+        const distributionId = { value: res?.Distribution?.Id, field: action.distributionId };
+        await ResponseModel.findByIdAndUpdate(
+          response._id,
+          { $push: { values: distributionId } },
+          { session },
+        );
+      } else if (
+        action?.actionType === 'updateSubDomainRoute53' &&
+        action.domain &&
+        action.distributionId
+      ) {
+        const domain = getFieldValue(action.domain, response.values);
+        const distributionId = getFieldValue(action.distributionId, response.values);
+        if (!domain?.value || !distributionId.value) {
+          throw new Error('Account domain name, distributionId not found');
+        }
+        // update cloudfront distribution
+      } else if (
+        action?.actionType === 'deleteSubDomainRoute53' &&
+        action.domain &&
+        action.distributionId
+      ) {
+        const domain = getFieldValue(action.domain, response.values);
+        const distributionId = getFieldValue(action.distributionId, response.values);
+        if (!domain?.value || !distributionId.value) {
+          throw new Error('Account domain name, distributionId not found');
+        }
+        // delete cloudfront distribution
+      } else if (action?.actionType === 'createCognitoUser') {
+        const selectItemInForm = args?.values?.filter((e) => e?.response !== null)[0]?.response;
+        const selectItemResponse = await ResponseModel.findById(selectItemInForm);
+        const selectForm = await FormModel.findById(selectItemResponse?.formId);
+        const selectItemField = selectForm?.fields
+          ?.filter((e) => e?.fieldType === 'text' && e?.label?.toUpperCase().includes('ROLE'))
+          .map((e) => e._id);
+        const RoleName =
+          selectItemResponse?.values
+            ?.filter((e) => selectItemField?.includes(e.field))
+            .map((e) => e.value) || [];
+
+        const fName = args?.values?.filter((e) => e?.field === action?.firstName)[0]?.value.trim();
+        const lName = args?.values?.filter((e) => e?.field === action?.lastName)[0]?.value.trim();
+        const uEmail = args?.values?.filter((e) => e?.field === action?.userEmail)[0]?.value.trim();
+
+        const payload = {
+          UserPoolId: action?.userPoolId,
+          Username: uEmail,
+          UserAttributes: [
+            {
+              Name: 'email',
+              Value: uEmail,
+            },
+            {
+              Name: 'email_verified',
+              Value: 'True',
+            },
+            {
+              Name: 'name',
+              Value: `${fName} ${lName}`,
+            },
+          ],
+        };
+        try {
+          for (let i = 0; i < RoleName?.length; i++) {
+            const Cpayload = {
+              GroupName: RoleName[i],
+              UserPoolId: action?.userPoolId,
+              Username: uEmail,
+            };
+            await createUser(payload);
+            await addUserToGroup(Cpayload);
+          }
+        } catch (error) {
+          return error.message;
+        }
+      } else if (action?.actionType === 'createCognitoGroup') {
+        const ResponseValue = args?.values
+          ?.filter((e) => e.field === action?.cognitoGroupName)[0]
+          ?.value.trim();
+        const Desc = args?.values
+          ?.filter((e) => e?.field === action?.cognitoGroupDesc)[0]
+          ?.value.trim();
+        const payload = {
+          GroupName: ResponseValue,
+          UserPoolId: action?.userPoolId,
+          Description: Desc,
+        };
+        const highPriorityGroup = [
+          'superadmin',
+          'us-east-1_eBnsz43bl_Facebook',
+          'us-east-1_eBnsz43bl_Google',
+        ];
+        if (!highPriorityGroup.includes(payload.GroupName)) await createCognitoGroup(payload);
+        else
+          return {
+            message: 'you are not allowd for this action',
+          };
+      } else if (action?.actionType === 'deleteCognitoUser') {
+        const selectItemInForm = response?.values?.filter((e) => e?.response !== null)[0]?.response;
+        const selectItemResponse = await ResponseModel.findById(selectItemInForm);
+        const selectForm = await FormModel.findById(selectItemResponse?.formId);
+        const selectItemField = selectForm?.fields
+          ?.filter((e) => e?.fieldType === 'text' && e?.label?.toUpperCase().includes('ROLE'))
+          .map((e) => e._id);
+        const RoleName =
+          selectItemResponse?.values
+            ?.filter((e) => selectItemField?.includes(e.field))
+            .map((e) => e.value) || [];
+
+        const uEmail = response?.values
+          ?.filter((e) => e?.field === action?.userEmail)[0]
+          ?.value.trim();
+
+        const payload = {
+          UserPoolId: action?.userPoolId,
+          Username: uEmail,
+        };
+        try {
+          for (let i = 0; i < RoleName?.length; i++) {
+            const Dpayload = {
+              GroupName: RoleName[i],
+              UserPoolId: action?.userPoolId,
+              Username: uEmail,
+            };
+            await removeUserFromGroup(Dpayload);
+            await deleteUser(payload);
+          }
+        } catch (error) {
+          return error.message;
+        }
+      } else if (action.actionType === 'deleteCognitoGroup') {
+        const ResponseValue = response?.values
+          ?.filter((e) => e.field === action?.cognitoGroupName)[0]
+          ?.value.trim();
+        const payload = {
+          GroupName: ResponseValue,
+          UserPoolId: action?.userPoolId,
+        };
+        const highPriorityGroup = [
+          'superadmin',
+          'us-east-1_eBnsz43bl_Facebook',
+          'us-east-1_eBnsz43bl_Google',
+        ];
+        if (!highPriorityGroup.includes(payload.GroupName)) {
+          await deleteCognitoGroup(payload);
+        } else {
+          throw new Error('you are not allowd for this action');
+        }
+      } else if (action.actionType === 'updateCognitoUser') {
+        const fName = args?.values?.filter((e) => e?.field === action?.firstName)[0]?.value.trim();
+        const lName = args?.values?.filter((e) => e?.field === action?.lastName)[0]?.value.trim();
+        const uEmail = args?.values?.filter((e) => e?.field === action?.userEmail)[0]?.value.trim();
+
+        const payload = {
+          UserPoolId: action?.userPoolId,
+          Username: uEmail,
+          UserAttributes: [
+            {
+              Name: 'email',
+              Value: uEmail,
+            },
+            {
+              Name: 'email_verified',
+              Value: 'True',
+            },
+            {
+              Name: 'name',
+              Value: `${fName} ${lName}`,
+            },
+          ],
+        };
+
+        await updateUserAttributes(payload);
+      } else if (action.actionType === 'updateCognitoGroup') {
+        const ResponseValue = args?.values
+          ?.filter((e) => e.field === action?.cognitoGroupName)[0]
+          ?.value.trim();
+        const Desc = args?.values
+          ?.filter((e) => e?.field === action?.cognitoGroupDesc)[0]
+          ?.value.trim();
+        const payload = {
+          GroupName: ResponseValue,
+          UserPoolId: action?.userPoolId,
+          Description: Desc,
+        };
+
+        const highPriorityGroup = [
+          'superadmin',
+          'us-east-1_eBnsz43bl_Facebook',
+          'us-east-1_eBnsz43bl_Google',
+        ];
+        if (!highPriorityGroup.includes(payload.GroupName)) await updateCognitoGroup(payload);
+        else
+          return {
+            message: 'you are not allowd for this action',
+          };
       }
     }
   }
