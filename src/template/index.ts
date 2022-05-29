@@ -14,6 +14,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     const { identity } = event;
     const user = await getCurrentUser(identity);
     let args = { ...event.arguments };
+
     if (fieldName.toLocaleLowerCase().includes('create') && user && user._id) {
       args = { ...args, createdBy: user._id };
     } else if (fieldName.toLocaleLowerCase().includes('update') && user && user._id) {
@@ -21,15 +22,15 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     }
 
     if (
-      Object.prototype.hasOwnProperty.call(args, 'title') &&
-      fieldName.toLocaleLowerCase().includes('create')
+      (fieldName.toLocaleLowerCase().includes('create') ||
+        fieldName.toLocaleLowerCase().includes('update')) &&
+      Object.prototype.hasOwnProperty.call(args, 'title')
     ) {
       args = { ...args, slug: slugify(args.title, { lower: true }) };
-    }
-
-    if (
-      Object.prototype.hasOwnProperty.call(args, 'slug') &&
-      fieldName.toLocaleLowerCase().includes('update')
+    } else if (
+      (fieldName.toLocaleLowerCase().includes('create') ||
+        fieldName.toLocaleLowerCase().includes('update')) &&
+      Object.prototype.hasOwnProperty.call(args, 'slug')
     ) {
       args = { ...args, slug: slugify(args.slug, { lower: true }) };
     }
@@ -127,11 +128,11 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       }
       case 'createTemplate': {
         let count = 1;
-        args = { ...args, count, slug: count };
+        args = { ...args, count };
         const lastTemplate = await Template.findOne().sort('-count');
         if (lastTemplate) {
           count = lastTemplate?.count + 1;
-          args = { ...args, count, slug: count };
+          args = { ...args, count };
         }
         const template = await Template.create(args);
         return await template.populate(templatePopulate); //.execPopulate();

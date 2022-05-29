@@ -32,7 +32,7 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
     (action) => action.active && action.triggerType === triggerType,
   );
   const pageId = response?.pageId?._id || response?.pageId || null;
-  // debugger;
+
   if (actions?.length > 0 && response?._id && form?._id && !(process.env.NODE_ENV === 'test')) {
     for (const action of actions) {
       if (
@@ -263,21 +263,27 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
           throw new Error('Account domain name, distributionId not found');
         }
         // delete cloudfront distribution
-      } else if (action?.actionType === 'createCognitoUser') {
-        const selectItemInForm = args?.values?.filter((e) => e?.response !== null)[0]?.response;
-        const selectItemResponse = await ResponseModel.findById(selectItemInForm);
-        const selectForm = await FormModel.findById(selectItemResponse?.formId);
-        const selectItemField = selectForm?.fields
-          ?.filter((e) => e?.fieldType === 'text' && e?.label?.toUpperCase().includes('ROLE'))
-          .map((e) => e._id);
-        const RoleName =
-          selectItemResponse?.values
-            ?.filter((e) => selectItemField?.includes(e.field))
-            .map((e) => e.value) || [];
+      } else if (
+        action?.actionType === 'createCognitoUser' &&
+        action?.userPoolId &&
+        action?.firstName &&
+        action?.lastName &&
+        action?.userEmail
+      ) {
+        // const selectItemInForm = args?.values?.filter((e) => e?.response !== null)[0]?.response;
+        // const selectItemResponse = await ResponseModel.findById(selectItemInForm);
+        // const selectForm = await FormModel.findById(selectItemResponse?.formId);
+        // const selectItemField = selectForm?.fields
+        //   ?.filter((e) => e?.fieldType === 'text' && e?.label?.toUpperCase().includes('ROLE'))
+        //   .map((e) => e._id);
+        // const RoleName =
+        //   selectItemResponse?.values
+        //     ?.filter((e) => selectItemField?.includes(e.field))
+        //     .map((e) => e.value) || [];
 
-        const fName = args?.values?.filter((e) => e?.field === action?.firstName)[0]?.value.trim();
-        const lName = args?.values?.filter((e) => e?.field === action?.lastName)[0]?.value.trim();
-        const uEmail = args?.values?.filter((e) => e?.field === action?.userEmail)[0]?.value.trim();
+        const fName = getFieldValue(action?.firstName, response.values)?.value?.trim();
+        const lName = getFieldValue(action?.lastName, response.values)?.value?.trim();
+        const uEmail = getFieldValue(action?.userEmail, response.values)?.value?.trim();
 
         const payload = {
           UserPoolId: action?.userPoolId,
@@ -297,19 +303,16 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
             },
           ],
         };
-        try {
-          for (let i = 0; i < RoleName?.length; i++) {
-            const Cpayload = {
-              GroupName: RoleName[i],
-              UserPoolId: action?.userPoolId,
-              Username: uEmail,
-            };
-            await createUser(payload);
-            await addUserToGroup(Cpayload);
-          }
-        } catch (error) {
-          return error.message;
-        }
+        await createUser(payload);
+        // for (let i = 0; i < RoleName?.length; i++) {
+        //   const Cpayload = {
+        //     GroupName: RoleName[i],
+        //     UserPoolId: action?.userPoolId,
+        //     Username: uEmail,
+        //   };
+        //   await createUser(payload);
+        //   await addUserToGroup(Cpayload);
+        // }
       } else if (action?.actionType === 'createCognitoGroup') {
         const ResponseValue = args?.values
           ?.filter((e) => e.field === action?.cognitoGroupName)[0]
