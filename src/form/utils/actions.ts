@@ -34,7 +34,7 @@ export const runFormActions = async (response, form, pageId: any = null) => {
             payload?.body,
             action?.variables,
             form?.fields,
-            response?.values,
+            response,
             pageId,
             payload.from,
           );
@@ -78,7 +78,7 @@ export const runFormActions = async (response, form, pageId: any = null) => {
             payload.body,
             action?.variables,
             form?.fields,
-            response?.values,
+            response,
             pageId,
           );
           payload.body = body;
@@ -110,7 +110,7 @@ export const runFormActions = async (response, form, pageId: any = null) => {
             payload?.body,
             action?.variables,
             form?.fields,
-            response?.values,
+            response,
             pageId,
           );
 
@@ -145,7 +145,7 @@ export const runFormActions = async (response, form, pageId: any = null) => {
             body,
             action?.variables,
             form?.fields,
-            response?.values,
+            response,
             pageId,
           );
           const payload = { description: '', link: '', responseId: '' };
@@ -217,13 +217,14 @@ const replaceVariables = async (
   oldBody,
   oldVariables,
   fields,
-  values,
+  response,
   pageId,
   oldSenderEmail = '',
 ) => {
   let subject = oldSubject;
   let senderEmail = oldSenderEmail;
   let body = oldBody;
+  const values = response?.values;
   const formIds: any = [];
   const forms: any = [];
 
@@ -268,7 +269,19 @@ const replaceVariables = async (
     return variable;
   });
   variables.forEach((variable) => {
-    body = body.split(`{{${variable.name}}}`).join(variable.value || '');
+    if (variable.name === 'report') {
+      const tempBody = JSON.parse(variable.value);
+      const emailMessageTitle = tempBody.audits['first-contentful-paint']?.title;
+      const emailMessageRowValue = tempBody.audits['first-contentful-paint']?.rawValue;
+      const message = `
+      title: ${emailMessageTitle} value: ${emailMessageRowValue}
+
+      visit here to see complete report: https://sonuk.boossti.com/forms/website-performance-report/response/${response.count}
+      `;
+      body = body.split(`{{${variable.name}}}`).join(message || '');
+    } else {
+      body = body.split(`{{${variable.name}}}`).join(variable.value || '');
+    }
     subject = subject.split(`{{${variable.name}}}`).join(variable.value || '');
     senderEmail = senderEmail.split(`{{${variable.name}}}`).join(variable.value || '');
   });
