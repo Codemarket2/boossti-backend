@@ -234,37 +234,39 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           const uEmail = args?.values
             ?.filter((e) => e?.field === createUserActionType?.userEmail)[0]
             ?.value.trim();
-
-          const payload = {
-            UserPoolId: createUserActionType?.userPoolId,
-            Username: uEmail,
-            UserAttributes: [
-              {
-                Name: 'email',
-                Value: uEmail,
-              },
-              {
-                Name: 'email_verified',
-                Value: 'True',
-              },
-              {
-                Name: 'name',
-                Value: `${fName} ${lName}`,
-              },
-            ],
-          };
-          try {
-            for (let i = 0; i < RoleName?.length; i++) {
-              const Cpayload = {
-                GroupName: RoleName[i],
-                UserPoolId: createUserActionType?.userPoolId,
-                Username: uEmail,
-              };
-              await createUser(payload);
-              await addUserToGroup(Cpayload);
+          const userAlreadyExist = await User.findOne({ email: uEmail });
+          if (!userAlreadyExist) {
+            const payload = {
+              UserPoolId: createUserActionType?.userPoolId,
+              Username: uEmail,
+              UserAttributes: [
+                {
+                  Name: 'email',
+                  Value: uEmail,
+                },
+                {
+                  Name: 'email_verified',
+                  Value: 'True',
+                },
+                {
+                  Name: 'name',
+                  Value: `${fName} ${lName}`,
+                },
+              ],
+            };
+            try {
+              for (let i = 0; i < RoleName?.length; i++) {
+                const Cpayload = {
+                  GroupName: RoleName[i],
+                  UserPoolId: createUserActionType?.userPoolId,
+                  Username: uEmail,
+                };
+                await createUser(payload);
+                await addUserToGroup(Cpayload);
+              }
+            } catch (error) {
+              return error.message;
             }
-          } catch (error) {
-            return error.message;
           }
         }
         // let response = await ResponseModel.create(args);
