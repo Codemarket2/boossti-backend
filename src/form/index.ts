@@ -178,6 +178,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
             .populate(formPopulate)
             .session(session);
           const form: any = { ...res.toObject() };
+          form.settings = form.settings || {};
           form.settings.actions = args?.options?.actions || form.settings?.actions;
           response.options = args.options;
           await runFormActions({
@@ -207,6 +208,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         const callback = async (session, response) => {
           const res: any = await FormModel.findById(response.formId).populate(formPopulate);
           const form = { ...res.toObject() };
+          form.settings = form.settings || {};
           form.settings.actions = args?.options?.actions || form.settings?.actions;
           response.options = args.options;
           await runFormActions({
@@ -236,6 +238,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         const callback = async (session, response) => {
           const res: any = await FormModel.findById(response.formId).populate(formPopulate);
           const form = { ...res?.toObject() };
+          form.settings = form.settings || {};
           form.settings.actions = args?.options?.actions || form.settings?.actions;
           response.options = args.options;
           await runFormActions({
@@ -339,11 +342,19 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         return null;
       }
       case 'getCheckUnique': {
-        const { formId, responseId, value } = args;
+        const { formId, responseId, value, caseInsensitiveUnique = false } = args;
         let filter: any = {
           formId,
           values: { $elemMatch: { value: value.value, field: value.field } },
         };
+        if (caseInsensitiveUnique) {
+          filter = {
+            ...filter,
+            values: {
+              $elemMatch: { value: { $regex: new RegExp(`^${value?.value}$`), $options: 'i' } },
+            },
+          };
+        }
         if (responseId) {
           filter = {
             ...filter,
