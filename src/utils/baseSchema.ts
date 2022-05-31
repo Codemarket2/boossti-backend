@@ -8,10 +8,6 @@ export const baseSchema = new Schema<ISchema>(
       ref: 'User',
       required: true,
     },
-    updatedBy: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-    },
   },
   { timestamps: true },
 );
