@@ -1,6 +1,6 @@
 import { sendEmail } from '../../utils/email';
 import { User } from '../../user/utils/userModel';
-import { FormModel } from './formModel';
+import { FormModel, IForm } from './formModel';
 import PageModel from '../../template/utils/pageModel';
 import { ResponseModel } from './responseModel';
 import { sendSms } from '../../utils/sms';
@@ -14,6 +14,7 @@ import {
   addUserToGroup,
   createUser,
   deleteUser,
+  isUserAlreadyExist,
   removeUserFromGroup,
   updateUserAttributes,
 } from '../../permissions/utils/cognitoHandlers';
@@ -266,23 +267,25 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
       } else if (
         action?.actionType === 'createCognitoUser' &&
         action?.userPoolId &&
-        action?.firstName &&
-        action?.lastName &&
+        // action?.firstName &&
+        // action?.lastName &&
         action?.userEmail
       ) {
-        // const selectItemInForm = args?.values?.filter((e) => e?.response !== null)[0]?.response;
-        // const selectItemResponse = await ResponseModel.findById(selectItemInForm);
-        // const selectForm = await FormModel.findById(selectItemResponse?.formId);
-        // const selectItemField = selectForm?.fields
-        //   ?.filter((e) => e?.fieldType === 'text' && e?.label?.toUpperCase().includes('ROLE'))
-        //   .map((e) => e._id);
-        // const RoleName =
-        //   selectItemResponse?.values
-        //     ?.filter((e) => selectItemField?.includes(e.field))
-        //     .map((e) => e.value) || [];
+        const selectItemInForm = args?.values?.filter((e) => e?.response !== null)[0]?.response;
+        const selectItemResponse = await ResponseModel.findById(selectItemInForm);
+        const selectForm = await FormModel.findById(selectItemResponse?.formId);
+        const selectItemField = selectForm?.fields
+          ?.filter((e) => e?.fieldType === 'text' && e?.label?.toUpperCase().includes('ROLE'))
+          .map((e) => e._id);
+        const RoleName =
+          selectItemResponse?.values
+            ?.filter((e) => selectItemField?.includes(e.field))
+            .map((e) => e.value) || [];
 
-        const fName = getFieldValue(action?.firstName, response.values)?.value?.trim();
-        const lName = getFieldValue(action?.lastName, response.values)?.value?.trim();
+        const fName =
+          getFieldValue(action?.firstName, response.values)?.value?.trim() || 'First Name';
+        const lName =
+          getFieldValue(action?.lastName, response.values)?.value?.trim() || 'Last Name';
         const uEmail = getFieldValue(action?.userEmail, response.values)?.value?.trim();
 
         const payload = {
@@ -303,16 +306,70 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
             },
           ],
         };
-        await createUser(payload);
-        // for (let i = 0; i < RoleName?.length; i++) {
-        //   const Cpayload = {
-        //     GroupName: RoleName[i],
-        //     UserPoolId: action?.userPoolId,
-        //     Username: uEmail,
-        //   };
-        //   await createUser(payload);
-        //   await addUserToGroup(Cpayload);
-        // }
+        const checkUser = await isUserAlreadyExist({
+          Username: payload?.Username,
+          UserPoolId: payload.UserPoolId,
+        });
+        if (!checkUser?.message && checkUser.error === null) {
+          const createdUser = await createUser(payload);
+          // create response in users form before creating new user
+          // requirement: formid of users form
+          // formId: ID!;
+          // count: Int;
+          // values: [ValueInput]; field, value
+          // options: AWSJSON;
+          // cretedBy : can be null
+          if (form.slug !== 'users' && createdUser) {
+            const usersForm = await FormModel.findOne({ slug: 'users' });
+            const fNameField = usersForm?.fields?.find(
+              (field) => field?.label === 'First Name',
+            )?._id;
+            const lNameField = usersForm?.fields?.find(
+              (field) => field?.label === 'Last Name',
+            )?._id;
+            const emailField = usersForm?.fields?.find(
+              (field) => field?.fieldType === 'email',
+            )?._id;
+            const lastResponse = await ResponseModel.findOne({ formId: usersForm?._id }).sort(
+              '-count',
+            );
+            let responseCount;
+            if (lastResponse) {
+              responseCount = lastResponse?.count + 1;
+            } else {
+              responseCount = 1;
+            }
+            const cretatePayload = {
+              formId: usersForm?._id,
+              values: [
+                {
+                  field: fNameField, // for first name
+                  value: fName,
+                },
+                {
+                  field: lNameField, // for last name
+                  value: lName,
+                },
+                {
+                  field: emailField, // for email
+                  value: uEmail,
+                },
+              ],
+              count: responseCount,
+            };
+
+            await ResponseModel.create(cretatePayload);
+          }
+        }
+        // add user to group
+        for (let i = 0; i < RoleName?.length; i++) {
+          const Cpayload = {
+            GroupName: RoleName[i],
+            UserPoolId: action?.userPoolId,
+            Username: uEmail,
+          };
+          await addUserToGroup(Cpayload);
+        }
       } else if (action?.actionType === 'createCognitoGroup') {
         const ResponseValue = args?.values
           ?.filter((e) => e.field === action?.cognitoGroupName)[0]
