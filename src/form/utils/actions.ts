@@ -419,8 +419,8 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
               Username: uEmail,
             };
             await removeUserFromGroup(Dpayload);
-            await deleteUser(payload);
           }
+          await deleteUser(payload);
         } catch (error) {
           return error.message;
         }
