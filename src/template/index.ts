@@ -6,12 +6,14 @@ import { getCurrentUser } from '../utils/authentication';
 import { AppSyncEvent } from '../utils/cutomTypes';
 // import getAdminFilter from '../utils/adminFilter';
 import { User } from '../user/utils/userModel';
+import { runInTransaction } from '../utils/runInTransaction';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
     await DB();
     const { fieldName } = event.info;
     const { identity } = event;
+    // debugger;
     const user = await getCurrentUser(identity);
     let args = { ...event.arguments };
 
@@ -134,25 +136,32 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           count = lastTemplate?.count + 1;
           args = { ...args, count };
         }
-        const template = await Template.create(args);
-        return await template.populate(templatePopulate); //.execPopulate();
+        return await runInTransaction({
+          action: 'CREATE',
+          Model: Template,
+          args,
+          populate: templatePopulate,
+          user,
+        });
       }
       case 'updateTemplate': {
-        const template: any = await Template.findByIdAndUpdate(args._id, args, {
-          new: true,
-          runValidators: true,
+        return await runInTransaction({
+          action: 'UPDATE',
+          Model: Template,
+          args,
+          populate: templatePopulate,
+          user,
         });
-        return await template.populate(templatePopulate); //.execPopulate();
       }
       case 'deleteTemplate': {
-        const count = await Page.countDocuments({
-          template: args._id,
+        await runInTransaction({
+          action: 'DELETE',
+          Model: Template,
+          args,
+          populate: templatePopulate,
+          user,
         });
-        if (count > 0) {
-          throw new Error('First delete the items under this type');
-        }
-        await Template.findByIdAndDelete(args._id);
-        return args._id;
+        return args?._id;
       }
       case 'getPages': {
         const { page = 1, limit = 20, search = '', active = null, template = null } = args;

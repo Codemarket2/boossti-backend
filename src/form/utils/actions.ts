@@ -1,13 +1,10 @@
 import { sendEmail } from '../../utils/email';
 import { User } from '../../user/utils/userModel';
-import { FormModel, IForm } from './formModel';
+import { FormModel } from './formModel';
 import PageModel from '../../template/utils/pageModel';
 import { ResponseModel } from './responseModel';
 import { sendSms } from '../../utils/sms';
-import { responsePopulate } from './responseModel';
-import { getValue } from './variables';
-import moment from 'moment';
-import { getFieldValue } from './actionHelper';
+import { getFieldValue, replaceVariables, variableParser } from './actionHelper';
 import { createDistribution } from '../../utils/cloudfront';
 import { createCognitoGroup, deleteCognitoGroup, updateCognitoGroup } from './cognitoGroupHandler';
 import {
@@ -53,15 +50,16 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
         };
 
         if (action?.variables?.length > 0) {
-          const { subject, body, senderEmail } = await replaceVariables(
-            payload?.subject,
-            payload?.body,
-            action?.variables,
-            form?.fields,
-            response?.values,
+          const { subject, body, senderEmail } = await replaceVariables({
+            subject: payload?.subject,
+            body: payload?.body,
+            variables: action?.variables,
+            fields: form?.fields,
+            values: response?.values,
             pageId,
-            payload.from,
-          );
+            senderEmail: payload.from,
+            session,
+          });
 
           payload.subject = subject;
           payload.body = body;
@@ -97,14 +95,14 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
           phoneNumber: '',
         };
         if (action?.variables?.length > 0) {
-          const { body } = await replaceVariables(
-            '',
-            payload.body,
-            action?.variables,
-            form?.fields,
-            response?.values,
+          const { body } = await replaceVariables({
+            body: payload.body,
+            variables: action?.variables,
+            fields: form?.fields,
+            values: response?.values,
             pageId,
-          );
+            session,
+          });
           payload.body = body;
         }
         const phoneField = response?.values?.filter(
@@ -137,14 +135,15 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
         };
         payload.body = payload.body.split(`{{password}}`).join(response.options?.password || '');
         if (action?.variables?.length > 0) {
-          const { subject, body } = await replaceVariables(
-            payload?.subject,
-            payload?.body,
-            action?.variables,
-            form?.fields,
-            response?.values,
+          const { subject, body } = await replaceVariables({
+            subject: payload?.subject,
+            body: payload?.body,
+            variables: action?.variables,
+            fields: form?.fields,
+            values: response?.values,
             pageId,
-          );
+            session,
+          });
 
           payload.subject = subject;
           payload.body = body;
@@ -172,14 +171,14 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
 
         if (notificationForm && feedPage) {
           const body = variableParser(action, form, response);
-          const { body: newBody } = await replaceVariables(
-            '',
+          const { body: newBody } = await replaceVariables({
             body,
-            action?.variables,
-            form?.fields,
-            response?.values,
+            variables: action?.variables,
+            fields: form?.fields,
+            values: response?.values,
             pageId,
-          );
+            session,
+          });
           const payload = { description: '', link: '', responseId: '' };
           payload.description = newBody;
           payload.link = `/forms/${form.slug}/response/${response.count}`;
@@ -494,80 +493,4 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
       }
     }
   }
-};
-
-//  variable parser function
-
-const variableParser = (action: any, form: any, response: any) => {
-  let body = action?.body;
-  body = body.split('{{formName}}').join(`${form?.name}`);
-  body = body.split('{{createdBy}}').join(`${response?.createdBy?.name || ''}`);
-  body = body.split('{{updatedBy}}').join(`${response?.updatedBy?.name || ''}`);
-  body = body.split('{{createdAt}}').join(`${moment(response?.createdAt).format('llll')}`);
-  body = body.split('{{updatedAt}}').join(`${moment(response?.updatedAt).format('llll')}`);
-  body = body.split('{{pageName}}').join(`${response?.parentId?.title || ''}`);
-  return body;
-};
-
-const replaceVariables = async (
-  oldSubject,
-  oldBody,
-  oldVariables,
-  fields,
-  values,
-  pageId,
-  oldSenderEmail = '',
-) => {
-  let subject = oldSubject;
-  let senderEmail = oldSenderEmail;
-  let body = oldBody;
-  const formIds: any = [];
-  const forms: any = [];
-
-  oldVariables?.forEach((variable: any) => {
-    if (variable.formId && !formIds.includes(variable.formId)) {
-      formIds.push(variable.formId);
-    }
-  });
-
-  for (const formId of formIds) {
-    const form = await FormModel.findById(formId);
-    const response = await ResponseModel.findOne({
-      formId,
-      parentId: pageId,
-    })
-      .sort({
-        createdAt: -1,
-      })
-      .populate(responsePopulate);
-    if (form && response) {
-      forms.push({ ...form?.toObject(), response });
-    }
-  }
-
-  const variables = oldVariables?.map((oneVariable) => {
-    const variable = { ...oneVariable, value: '' };
-    let field = null;
-    let value = null;
-    field = fields.find((f) => f._id?.toString() === variable?.field);
-    value = values.find((v) => v.field === variable?.field);
-
-    if (variable.formId) {
-      const form = forms.find((f) => f._id?.toString() === variable.formId);
-      if (form) {
-        field = form?.fields?.find((f) => f._id?.toString() === variable?.field);
-        value = form?.response?.values?.find((v) => v.field === variable?.field);
-      }
-    }
-    if (field && value) {
-      variable.value = getValue(field, value);
-    }
-    return variable;
-  });
-  variables.forEach((variable) => {
-    body = body.split(`{{${variable.name}}}`).join(variable.value || '');
-    subject = subject.split(`{{${variable.name}}}`).join(variable.value || '');
-    senderEmail = senderEmail.split(`{{${variable.name}}}`).join(variable.value || '');
-  });
-  return { subject, body, senderEmail };
 };

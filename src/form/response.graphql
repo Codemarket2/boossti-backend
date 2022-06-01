@@ -88,7 +88,7 @@ type Response @aws_api_key @aws_cognito_user_pools {
   workFlowFormReponseParentId: ID
   values: [Value]
   options: AWSJSON
-  createdBy: User
+  createdBy: Response
   updatedBy: ID
   createdAt: AWSDateTime
   updatedAt: AWSDateTime
@@ -102,7 +102,7 @@ type Response2 @aws_api_key @aws_cognito_user_pools {
   parentId: Page
   workFlowFormReponseParentId: ID
   values: [Value]
-  createdBy: User
+  createdBy: Response
   updatedBy: ID
   createdAt: AWSDateTime
   updatedAt: AWSDateTime

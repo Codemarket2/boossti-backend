@@ -87,14 +87,6 @@ export const responseSchema = extendSchema({
   },
   values: [valueSchema],
   options: { type: Schema.Types.Mixed, default: { option: false } },
-  createdBy: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-  },
-  updatedBy: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-  },
 });
 
 responseSchema.index({ formId: 1, count: 1 }, { unique: true });

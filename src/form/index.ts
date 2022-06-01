@@ -103,7 +103,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       }
       case 'getResponseByCount': {
         const response: any = await ResponseModel.findOne(args).populate(responsePopulate);
-        const oldOptions = { ...args.options };
+        // const oldOptions = { ...args.options };
         // if (!(process.env.NODE_ENV === 'test')) {
         //   const res: any = await FormModel.findById(response?.formId).populate(formPopulate);
         //   const form = { ...res.toObject() };
@@ -161,6 +161,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           .limit(limit * 1)
           .skip((page - 1) * limit);
         const count = await ResponseModel.countDocuments(filter);
+        // debugger;
         return {
           data,
           count,

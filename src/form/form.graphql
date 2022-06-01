@@ -60,7 +60,7 @@ type Form @aws_api_key @aws_cognito_user_pools {
   fields: [Field2]
   settings: AWSJSON
   published: Boolean
-  createdBy: User
+  createdBy: Response
   updatedBy: ID
   createdAt: AWSDateTime
   updatedAt: AWSDateTime

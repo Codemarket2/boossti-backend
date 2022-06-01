@@ -17,6 +17,7 @@ export const mockEvent = {
       name: 'Mr Robot',
       picture:
         'https://codemarket-common-bucket.s3.amazonaws.com/public/defaults/pictures/default.jpg',
+      email: 'mrrobot@domain.com',
     },
   },
 };

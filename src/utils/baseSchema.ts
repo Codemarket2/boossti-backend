@@ -5,8 +5,8 @@ export const baseSchema = new Schema<ISchema>(
   {
     createdBy: {
       type: Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
+      ref: 'Response',
+      // required: true,
     },
   },
   { timestamps: true },
