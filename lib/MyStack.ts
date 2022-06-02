@@ -23,6 +23,10 @@ export default class MyStack extends sst.Stack {
       this,
       '/codemarket/sns/originalNumber',
     );
+    const USERS_FORM_SLUG = StringParameter.valueForStringParameter(
+      this,
+      '/boossti/form-slug/users',
+    );
     const USER_POOL_ID = StringParameter.valueForStringParameter(this, '/vijaa/userpoolId');
     const userPol = UserPool.fromUserPoolId(this, 'UserPool', USER_POOL_ID);
 
@@ -60,6 +64,7 @@ export default class MyStack extends sst.Stack {
           ONESIGNAL_API_KEY: process.env.ONESIGNAL_API_KEY || '',
           ONESIGNAL_APP_ID: process.env.ONESIGNAL_APP_ID || '',
           STAGE: scope.stage,
+          USERS_FORM_SLUG,
         },
       },
       dataSources: dataSources,

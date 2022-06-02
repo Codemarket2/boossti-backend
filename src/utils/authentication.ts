@@ -1,7 +1,6 @@
 // import * as mongoose from 'mongoose';
 import { FormModel } from '../form/utils/formModel';
 import { ResponseModel } from '../form/utils/responseModel';
-import { User } from '../user/utils/userModel';
 import { IIdentity } from './cutomTypes';
 
 export const getCurrentUser = async (identity: IIdentity) => {
@@ -13,7 +12,7 @@ export const getCurrentUser = async (identity: IIdentity) => {
       picture: identity.claims.picture,
     };
   } else if (identity && identity.claims && identity.claims.sub) {
-    const userForm = await FormModel.findOne({ slug: 'users' });
+    const userForm = await FormModel.findOne({ slug: process.env.USERS_FORM_SLUG });
     if (!userForm?._id) {
       throw new Error('Users form not found in database');
     }
@@ -22,7 +21,6 @@ export const getCurrentUser = async (identity: IIdentity) => {
       formId: userForm?._id,
       values: { $elemMatch: { value: identity.claims.email, field: emailFieldId } },
     });
-    // user = await User.findOne({ userId: identity.claims.sub }).select('_id name picture');
   }
   return user;
 };

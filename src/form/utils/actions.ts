@@ -31,8 +31,8 @@ interface IPayload {
 }
 
 export const runFormActions = async ({ triggerType, response, form, args, session }: IPayload) => {
-  const userForm = await FormModel.findOne({ slug: 'users' }).session(session);
-  // debugger;
+  const userForm = await FormModel.findOne({ slug: process.env.USERS_FORM_SLUG }).session(session);
+
   const actions = form?.settings?.actions?.filter(
     (action) => action.active && action.triggerType === triggerType,
   );
@@ -76,7 +76,7 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
         }
 
         if (action?.receiverType === 'formOwner') {
-          const user = await User.findById(form?.createdBy?._id);
+          const user = getUserAttributes(userForm, form?.createdBy);
           if (user?.email) {
             payload.to = [user?.email];
           }
@@ -322,7 +322,7 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
             },
             {
               Name: 'custom:_id',
-              Value: response._id,
+              Value: `${response._id}`,
             },
           ],
         };
