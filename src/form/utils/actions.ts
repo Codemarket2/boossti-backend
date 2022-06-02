@@ -4,7 +4,12 @@ import { FormModel } from './formModel';
 import PageModel from '../../template/utils/pageModel';
 import { ResponseModel } from './responseModel';
 import { sendSms } from '../../utils/sms';
-import { getFieldValue, replaceVariables, variableParser } from './actionHelper';
+import {
+  getFieldValue,
+  replaceVariables,
+  replaceSchemaVariables,
+  getUserAttributes,
+} from './actionHelper';
 import { createDistribution } from '../../utils/cloudfront';
 import { createCognitoGroup, deleteCognitoGroup, updateCognitoGroup } from './cognitoGroupHandler';
 import {
@@ -26,6 +31,8 @@ interface IPayload {
 }
 
 export const runFormActions = async ({ triggerType, response, form, args, session }: IPayload) => {
+  const userForm = await FormModel.findOne({ slug: 'users' }).session(session);
+  // debugger;
   const actions = form?.settings?.actions?.filter(
     (action) => action.active && action.triggerType === triggerType,
   );
@@ -45,7 +52,7 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
       ) {
         const payload: any = {
           from: action?.senderEmail,
-          body: variableParser(action, form, response),
+          body: replaceSchemaVariables({ variable: action?.body, form, response, userForm }),
           subject: action?.subject,
         };
 
@@ -59,6 +66,8 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
             pageId,
             senderEmail: payload.from,
             session,
+            form,
+            response,
           });
 
           payload.subject = subject;
@@ -72,26 +81,28 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
             payload.to = [user?.email];
           }
         } else if (action?.receiverType === 'responseSubmitter') {
-          const user = await User.findById(response?.createdBy?._id);
-          if (user?.email) {
-            payload.to = [user?.email];
+          const user = getUserAttributes(userForm, response?.createdBy);
+          if (!user.email) {
+            throw new Error('Response submitter email not found in send email action');
           }
+          payload.to = [user?.email];
         } else if (action?.receiverType === 'customEmail') {
           payload.to = action?.receiverEmails;
         } else if (action?.receiverType === 'emailField') {
-          const emailField = response?.values?.filter(
-            (value) => value.field === action?.emailFieldId,
-          )[0];
+          const emailField = response?.values?.find(
+            (value) => value.field?.toString() === action?.emailFieldId?.toString(),
+          );
           if (emailField) {
             payload.to = [emailField?.value];
           }
         }
-        if (payload?.to?.length > 0) {
-          await sendEmail(payload);
+        if (!(payload?.to?.length > 0)) {
+          throw new Error('Receiver email not found in send email action');
         }
+        await sendEmail(payload);
       } else if (action?.actionType === 'sendSms' && action?.phoneFieldId && action?.body) {
         const payload = {
-          body: variableParser(action, form, response),
+          body: replaceSchemaVariables({ variable: action.body, form, response, userForm }),
           phoneNumber: '',
         };
         if (action?.variables?.length > 0) {
@@ -102,6 +113,8 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
             values: response?.values,
             pageId,
             session,
+            form,
+            response,
           });
           payload.body = body;
         }
@@ -130,7 +143,7 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
         }
         const payload: any = {
           from: action?.senderEmail,
-          body: variableParser(action, form, response),
+          body: replaceSchemaVariables({ variable: action?.body, form, response, userForm }),
           subject: action?.subject,
         };
         payload.body = payload.body.split(`{{password}}`).join(response.options?.password || '');
@@ -143,6 +156,8 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
             values: response?.values,
             pageId,
             session,
+            form,
+            response,
           });
 
           payload.subject = subject;
@@ -170,7 +185,7 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
         const feedPage = await PageModel.findOne({ slug: 'my' });
 
         if (notificationForm && feedPage) {
-          const body = variableParser(action, form, response);
+          const body = replaceSchemaVariables({ variable: action?.body, form, response, userForm });
           const { body: newBody } = await replaceVariables({
             body,
             variables: action?.variables,
@@ -178,6 +193,8 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
             values: response?.values,
             pageId,
             session,
+            form,
+            response,
           });
           const payload = { description: '', link: '', responseId: '' };
           payload.description = newBody;

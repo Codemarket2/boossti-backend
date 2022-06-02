@@ -189,9 +189,9 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
             args,
             session,
           });
-          if (!(process.env.NODE_ENV === 'test')) {
-            await sendResponseNotification(form, response);
-          }
+          // if (!(process.env.NODE_ENV === 'test')) {
+          //   await sendResponseNotification(form, response);
+          // }
         };
         const response = await runInTransaction(
           {
