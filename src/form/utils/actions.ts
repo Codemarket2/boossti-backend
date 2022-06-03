@@ -292,7 +292,7 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
         const selectForm = await FormModel.findById(selectItemResponse?.formId);
         const selectItemField = selectForm?.fields
           ?.filter((e) => e?.fieldType === 'text' && e?.label?.toUpperCase().includes('ROLE'))
-          .map((e) => e._id);
+          .map((e) => e._id?.toString());
         const RoleName =
           selectItemResponse?.values
             ?.filter((e) => selectItemField?.includes(e.field))
