@@ -67,6 +67,11 @@ interface IGetUsers {
   UserPoolId: string;
 }
 
+interface IGetGroupListOfUser {
+  UserPoolId: string;
+  Username: string;
+}
+
 export const createCognitoGroup = async (payload: ICreateCognitoGroup) => {
   const params = {
     GroupName: payload.GroupName,
@@ -202,4 +207,12 @@ export const isUserAlreadyExist = async (payload: IGetUsers) => {
       };
     }
   }
+};
+
+export const getGroupListOfUser = async (payload: IGetGroupListOfUser) => {
+  const params = {
+    UserPoolId: payload.UserPoolId,
+    Username: payload.Username,
+  };
+  return cognitoidentityserviceprovider.adminListGroupsForUser(params).promise();
 };

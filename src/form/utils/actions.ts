@@ -19,6 +19,7 @@ import {
   isUserAlreadyExist,
   removeUserFromGroup,
   updateUserAttributes,
+  getGroupListOfUser,
 } from '../../permissions/utils/cognitoHandlers';
 import { ClientSession } from 'mongoose';
 
@@ -287,16 +288,20 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
         // action?.lastName &&
         action?.userEmail
       ) {
-        const selectItemInForm = args?.values?.filter((e) => e?.response !== null)[0]?.response;
-        const selectItemResponse = await ResponseModel.findById(selectItemInForm);
-        const selectForm = await FormModel.findById(selectItemResponse?.formId);
-        const selectItemField = selectForm?.fields
-          ?.filter((e) => e?.fieldType === 'text' && e?.label?.toUpperCase().includes('ROLE'))
-          .map((e) => e._id?.toString());
-        const RoleName =
-          selectItemResponse?.values
-            ?.filter((e) => selectItemField?.includes(e.field))
-            .map((e) => e.value) || [];
+        const rolesField = form?.fields?.find(
+          (e) => e.fieldType === 'select' && e.label.toUpperCase().includes('ROLE'),
+        );
+        const rolesFieldId = rolesField?._id.toString();
+        const selectedFieldId = rolesField?.options?.formField;
+        const updatedRolesID = args?.values
+          ?.filter((e) => e.field === rolesFieldId)
+          ?.map((e) => e.response);
+        const RoleName: string[] = [];
+        for (let i = 0; i < updatedRolesID.length; i++) {
+          const tempResponse = await ResponseModel.findById(updatedRolesID[i]).lean();
+          const value = tempResponse?.values?.find((e) => e.field === selectedFieldId)?.value;
+          value && RoleName.push(value);
+        }
 
         const fName =
           getFieldValue(action?.firstName, response.values)?.value?.trim() || 'First Name';
@@ -463,11 +468,61 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
         } else {
           throw new Error('you are not allowd for this action');
         }
-      } else if (action.actionType === 'updateCognitoUser') {
+      } else if (
+        action.actionType === 'updateCognitoUser' &&
+        action?.userPoolId &&
+        action?.userEmail
+      ) {
         const fName = args?.values?.filter((e) => e?.field === action?.firstName)[0]?.value.trim();
         const lName = args?.values?.filter((e) => e?.field === action?.lastName)[0]?.value.trim();
         const uEmail = args?.values?.filter((e) => e?.field === action?.userEmail)[0]?.value.trim();
+        const rolesField = form?.fields?.find(
+          (e) => e.fieldType === 'select' && e.label.toUpperCase().includes('ROLE'),
+        );
+        const rolesFieldId = rolesField?._id.toString();
+        const selectedFieldId = rolesField?.options?.formField;
+        const updatedRolesID = args?.values
+          ?.filter((e) => e.field === rolesFieldId)
+          ?.map((e) => e.response);
+        const selectedResponse: string[] = [];
+        for (let i = 0; i < updatedRolesID.length; i++) {
+          const tempResponse = await ResponseModel.findById(updatedRolesID[i]).lean();
+          const value = tempResponse?.values?.find((e) => e.field === selectedFieldId)?.value;
+          value && selectedResponse.push(value);
+        }
+        const cognitoGroupList =
+          (
+            await getGroupListOfUser({
+              UserPoolId: action?.userPoolId,
+              Username: uEmail,
+            })
+          )?.Groups || [];
 
+        const cognitoGroupListName: string[] = cognitoGroupList?.map((e) => e.GroupName || '');
+
+        for (let i = 0; i < selectedResponse.length; i++) {
+          if (!cognitoGroupListName?.includes(selectedResponse[i])) {
+            const Cpayload = {
+              GroupName: selectedResponse[i],
+              UserPoolId: action?.userPoolId,
+              Username: uEmail,
+            };
+            await addUserToGroup(Cpayload);
+          }
+        }
+        for (let i = 0; i < cognitoGroupListName?.length; i++) {
+          if (
+            cognitoGroupListName[i] !== '' &&
+            !selectedResponse?.includes(cognitoGroupListName[i])
+          ) {
+            const Dpayload = {
+              GroupName: cognitoGroupListName[i],
+              UserPoolId: action?.userPoolId,
+              Username: uEmail,
+            };
+            await removeUserFromGroup(Dpayload);
+          }
+        }
         const payload = {
           UserPoolId: action?.userPoolId,
           Username: uEmail,
