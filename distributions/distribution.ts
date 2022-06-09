@@ -1,0 +1,371 @@
+import { v4 as uuidv4 } from 'uuid';
+
+export const getCreateDistributionPayload = (domainName, lambdaFunctionARN) => {
+  const newId = uuidv4();
+  const payload = {
+    DistributionConfig: {
+      CallerReference: newId, //'8e9e7afa-ade4-4488-810c-fbf3eab36f98',
+      Aliases: { Quantity: 1, Items: [`${domainName}.boossti.com`] },
+      DefaultRootObject: '',
+      Origins: {
+        Quantity: 1,
+        Items: [
+          {
+            Id: newId,
+            DomainName: 'j1ca2j2-5v4vbgo.s3.us-east-1.amazonaws.com',
+            OriginPath: '',
+            CustomHeaders: { Quantity: 0, Items: [] },
+            S3OriginConfig: {
+              OriginAccessIdentity: 'origin-access-identity/cloudfront/E1SV5SWC92J65D',
+            },
+            ConnectionAttempts: 3,
+            ConnectionTimeout: 10,
+            OriginShield: { Enabled: false },
+          },
+        ],
+      },
+      OriginGroups: { Quantity: 0, Items: [] },
+      DefaultCacheBehavior: {
+        TargetOriginId: newId,
+        TrustedSigners: { Enabled: false, Quantity: 0, Items: [] },
+        TrustedKeyGroups: { Enabled: false, Quantity: 0, Items: [] },
+        ViewerProtocolPolicy: 'redirect-to-https',
+        AllowedMethods: {
+          Quantity: 7,
+          Items: ['HEAD', 'DELETE', 'POST', 'GET', 'OPTIONS', 'PUT', 'PATCH'],
+          CachedMethods: { Quantity: 2, Items: ['HEAD', 'GET'] },
+        },
+        SmoothStreaming: false,
+        Compress: true,
+        LambdaFunctionAssociations: {
+          Quantity: 2,
+          Items: [
+            {
+              LambdaFunctionARN: lambdaFunctionARN,
+              EventType: 'origin-request',
+              IncludeBody: true,
+            },
+            {
+              LambdaFunctionARN: lambdaFunctionARN,
+              EventType: 'origin-response',
+              IncludeBody: false,
+            },
+          ],
+        },
+        FunctionAssociations: { Quantity: 0, Items: [] },
+        FieldLevelEncryptionId: '',
+        ForwardedValues: {
+          QueryString: true,
+          Cookies: { Forward: 'all' },
+          Headers: { Quantity: 2, Items: ['Authorization', 'Host'] },
+          QueryStringCacheKeys: { Quantity: 0, Items: [] },
+        },
+        MinTTL: 0,
+        DefaultTTL: 0,
+        MaxTTL: 31536000,
+      },
+      CacheBehaviors: {
+        Quantity: 3,
+        Items: [
+          {
+            PathPattern: '_next/static/*',
+            TargetOriginId: newId,
+            TrustedSigners: { Enabled: false, Quantity: 0, Items: [] },
+            TrustedKeyGroups: { Enabled: false, Quantity: 0, Items: [] },
+            ViewerProtocolPolicy: 'https-only',
+            AllowedMethods: {
+              Quantity: 2,
+              Items: ['HEAD', 'GET'],
+              CachedMethods: { Quantity: 2, Items: ['HEAD', 'GET'] },
+            },
+            SmoothStreaming: false,
+            Compress: true,
+            LambdaFunctionAssociations: { Quantity: 0, Items: [] },
+            FunctionAssociations: { Quantity: 0, Items: [] },
+            FieldLevelEncryptionId: '',
+            ForwardedValues: {
+              QueryString: false,
+              Cookies: { Forward: 'none' },
+              Headers: { Quantity: 0, Items: [] },
+              QueryStringCacheKeys: { Quantity: 0, Items: [] },
+            },
+            MinTTL: 0,
+            DefaultTTL: 86400,
+            MaxTTL: 31536000,
+          },
+          {
+            PathPattern: 'static/*',
+            TargetOriginId: newId,
+            TrustedSigners: { Enabled: false, Quantity: 0, Items: [] },
+            TrustedKeyGroups: { Enabled: false, Quantity: 0, Items: [] },
+            ViewerProtocolPolicy: 'https-only',
+            AllowedMethods: {
+              Quantity: 2,
+              Items: ['HEAD', 'GET'],
+              CachedMethods: { Quantity: 2, Items: ['HEAD', 'GET'] },
+            },
+            SmoothStreaming: false,
+            Compress: true,
+            LambdaFunctionAssociations: { Quantity: 0, Items: [] },
+            FunctionAssociations: { Quantity: 0, Items: [] },
+            FieldLevelEncryptionId: '',
+            ForwardedValues: {
+              QueryString: false,
+              Cookies: { Forward: 'none' },
+              Headers: { Quantity: 0, Items: [] },
+              QueryStringCacheKeys: { Quantity: 0, Items: [] },
+            },
+            MinTTL: 0,
+            DefaultTTL: 86400,
+            MaxTTL: 31536000,
+          },
+          {
+            PathPattern: '_next/data/*',
+            TargetOriginId: newId,
+            TrustedSigners: { Enabled: false, Quantity: 0, Items: [] },
+            TrustedKeyGroups: { Enabled: false, Quantity: 0, Items: [] },
+            ViewerProtocolPolicy: 'https-only',
+            AllowedMethods: {
+              Quantity: 2,
+              Items: ['HEAD', 'GET'],
+              CachedMethods: { Quantity: 2, Items: ['HEAD', 'GET'] },
+            },
+            SmoothStreaming: false,
+            Compress: true,
+            LambdaFunctionAssociations: {
+              Quantity: 2,
+              Items: [
+                {
+                  LambdaFunctionARN: lambdaFunctionARN,
+                  EventType: 'origin-response',
+                  IncludeBody: false,
+                },
+                {
+                  LambdaFunctionARN: lambdaFunctionARN,
+                  EventType: 'origin-request',
+                  IncludeBody: true,
+                },
+              ],
+            },
+            FunctionAssociations: { Quantity: 0, Items: [] },
+            FieldLevelEncryptionId: '',
+            ForwardedValues: {
+              QueryString: true,
+              Cookies: { Forward: 'all' },
+              Headers: { Quantity: 2, Items: ['Authorization', 'Host'] },
+              QueryStringCacheKeys: { Quantity: 0, Items: [] },
+            },
+            MinTTL: 0,
+            DefaultTTL: 0,
+            MaxTTL: 31536000,
+          },
+        ],
+      },
+      CustomErrorResponses: { Quantity: 0, Items: [] },
+      Comment: '',
+      Logging: { Enabled: false, IncludeCookies: false, Bucket: '', Prefix: '' },
+      PriceClass: 'PriceClass_All',
+      Enabled: true,
+      ViewerCertificate: {
+        CloudFrontDefaultCertificate: false,
+        ACMCertificateArn:
+          'arn:aws:acm:us-east-1:858116908646:certificate/0d96f851-4ac9-49a8-a9d5-d692ac47d1d8',
+        SSLSupportMethod: 'sni-only',
+        MinimumProtocolVersion: 'TLSv1.2_2021',
+        Certificate:
+          'arn:aws:acm:us-east-1:858116908646:certificate/0d96f851-4ac9-49a8-a9d5-d692ac47d1d8',
+        CertificateSource: 'acm',
+      },
+      Restrictions: { GeoRestriction: { RestrictionType: 'none', Quantity: 0, Items: [] } },
+      WebACLId: '',
+      HttpVersion: 'http2',
+      IsIPV6Enabled: true,
+    },
+  };
+  return payload;
+};
+
+export const updateDistributionPayload = {
+  Id: 'E1FP5B20NHNEKQ',
+  IfMatch: 'EUHEK737IF6FM',
+  DistributionConfig: {
+    CallerReference: '8e9e7afa-ade4-4488-810c-fbf3eab36f98',
+    Aliases: { Quantity: 1, Items: ['vivekt-account.boossti.com'] },
+    DefaultRootObject: '',
+    Origins: {
+      Quantity: 1,
+      Items: [
+        {
+          Id: 'vivekt-account',
+          DomainName: 'j1ca2j2-5v4vbgo.s3.us-east-1.amazonaws.com',
+          OriginPath: '',
+          CustomHeaders: { Quantity: 0, Items: [] },
+          S3OriginConfig: {
+            OriginAccessIdentity: 'origin-access-identity/cloudfront/E1SV5SWC92J65D',
+          },
+          ConnectionAttempts: 3,
+          ConnectionTimeout: 10,
+          OriginShield: { Enabled: false },
+        },
+      ],
+    },
+    OriginGroups: { Quantity: 0, Items: [] },
+    DefaultCacheBehavior: {
+      TargetOriginId: 'vivekt-account',
+      TrustedSigners: { Enabled: false, Quantity: 0, Items: [] },
+      TrustedKeyGroups: { Enabled: false, Quantity: 0, Items: [] },
+      ViewerProtocolPolicy: 'redirect-to-https',
+      AllowedMethods: {
+        Quantity: 7,
+        Items: ['HEAD', 'DELETE', 'POST', 'GET', 'OPTIONS', 'PUT', 'PATCH'],
+        CachedMethods: { Quantity: 2, Items: ['HEAD', 'GET'] },
+      },
+      SmoothStreaming: false,
+      Compress: true,
+      LambdaFunctionAssociations: {
+        Quantity: 2,
+        Items: [
+          {
+            LambdaFunctionARN: 'arn:aws:lambda:us-east-1:858116908646:function:j1ca2j2-8pjl4ss:132',
+            EventType: 'origin-request',
+            IncludeBody: true,
+          },
+          {
+            LambdaFunctionARN: 'arn:aws:lambda:us-east-1:858116908646:function:j1ca2j2-8pjl4ss:132',
+            EventType: 'origin-response',
+            IncludeBody: false,
+          },
+        ],
+      },
+      FunctionAssociations: { Quantity: 0, Items: [] },
+      FieldLevelEncryptionId: '',
+      ForwardedValues: {
+        QueryString: true,
+        Cookies: { Forward: 'all' },
+        Headers: { Quantity: 2, Items: ['Authorization', 'Host'] },
+        QueryStringCacheKeys: { Quantity: 0, Items: [] },
+      },
+      MinTTL: 0,
+      DefaultTTL: 0,
+      MaxTTL: 31536000,
+    },
+    CacheBehaviors: {
+      Quantity: 3,
+      Items: [
+        {
+          PathPattern: '_next/static/*',
+          TargetOriginId: 'vivekt-account',
+          TrustedSigners: { Enabled: false, Quantity: 0, Items: [] },
+          TrustedKeyGroups: { Enabled: false, Quantity: 0, Items: [] },
+          ViewerProtocolPolicy: 'https-only',
+          AllowedMethods: {
+            Quantity: 2,
+            Items: ['HEAD', 'GET'],
+            CachedMethods: { Quantity: 2, Items: ['HEAD', 'GET'] },
+          },
+          SmoothStreaming: false,
+          Compress: true,
+          LambdaFunctionAssociations: { Quantity: 0, Items: [] },
+          FunctionAssociations: { Quantity: 0, Items: [] },
+          FieldLevelEncryptionId: '',
+          ForwardedValues: {
+            QueryString: false,
+            Cookies: { Forward: 'none' },
+            Headers: { Quantity: 0, Items: [] },
+            QueryStringCacheKeys: { Quantity: 0, Items: [] },
+          },
+          MinTTL: 0,
+          DefaultTTL: 86400,
+          MaxTTL: 31536000,
+        },
+        {
+          PathPattern: 'static/*',
+          TargetOriginId: 'vivekt-account',
+          TrustedSigners: { Enabled: false, Quantity: 0, Items: [] },
+          TrustedKeyGroups: { Enabled: false, Quantity: 0, Items: [] },
+          ViewerProtocolPolicy: 'https-only',
+          AllowedMethods: {
+            Quantity: 2,
+            Items: ['HEAD', 'GET'],
+            CachedMethods: { Quantity: 2, Items: ['HEAD', 'GET'] },
+          },
+          SmoothStreaming: false,
+          Compress: true,
+          LambdaFunctionAssociations: { Quantity: 0, Items: [] },
+          FunctionAssociations: { Quantity: 0, Items: [] },
+          FieldLevelEncryptionId: '',
+          ForwardedValues: {
+            QueryString: false,
+            Cookies: { Forward: 'none' },
+            Headers: { Quantity: 0, Items: [] },
+            QueryStringCacheKeys: { Quantity: 0, Items: [] },
+          },
+          MinTTL: 0,
+          DefaultTTL: 86400,
+          MaxTTL: 31536000,
+        },
+        {
+          PathPattern: '_next/data/*',
+          TargetOriginId: 'vivekt-account',
+          TrustedSigners: { Enabled: false, Quantity: 0, Items: [] },
+          TrustedKeyGroups: { Enabled: false, Quantity: 0, Items: [] },
+          ViewerProtocolPolicy: 'https-only',
+          AllowedMethods: {
+            Quantity: 2,
+            Items: ['HEAD', 'GET'],
+            CachedMethods: { Quantity: 2, Items: ['HEAD', 'GET'] },
+          },
+          SmoothStreaming: false,
+          Compress: true,
+          LambdaFunctionAssociations: {
+            Quantity: 2,
+            Items: [
+              {
+                LambdaFunctionARN:
+                  'arn:aws:lambda:us-east-1:858116908646:function:j1ca2j2-8pjl4ss:132',
+                EventType: 'origin-response',
+                IncludeBody: false,
+              },
+              {
+                LambdaFunctionARN:
+                  'arn:aws:lambda:us-east-1:858116908646:function:j1ca2j2-8pjl4ss:132',
+                EventType: 'origin-request',
+                IncludeBody: true,
+              },
+            ],
+          },
+          FunctionAssociations: { Quantity: 0, Items: [] },
+          FieldLevelEncryptionId: '',
+          ForwardedValues: {
+            QueryString: true,
+            Cookies: { Forward: 'all' },
+            Headers: { Quantity: 2, Items: ['Authorization', 'Host'] },
+            QueryStringCacheKeys: { Quantity: 0, Items: [] },
+          },
+          MinTTL: 0,
+          DefaultTTL: 0,
+          MaxTTL: 31536000,
+        },
+      ],
+    },
+    CustomErrorResponses: { Quantity: 0, Items: [] },
+    Comment: '',
+    Logging: { Enabled: false, IncludeCookies: false, Bucket: '', Prefix: '' },
+    PriceClass: 'PriceClass_All',
+    Enabled: true,
+    ViewerCertificate: {
+      CloudFrontDefaultCertificate: false,
+      ACMCertificateArn:
+        'arn:aws:acm:us-east-1:858116908646:certificate/0d96f851-4ac9-49a8-a9d5-d692ac47d1d8',
+      SSLSupportMethod: 'sni-only',
+      MinimumProtocolVersion: 'TLSv1.2_2021',
+      Certificate:
+        'arn:aws:acm:us-east-1:858116908646:certificate/0d96f851-4ac9-49a8-a9d5-d692ac47d1d8',
+      CertificateSource: 'acm',
+    },
+    Restrictions: { GeoRestriction: { RestrictionType: 'none', Quantity: 0, Items: [] } },
+    WebACLId: '',
+    HttpVersion: 'http2',
+    IsIPV6Enabled: true,
+  },
+};

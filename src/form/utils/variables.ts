@@ -12,8 +12,8 @@ export const getValue = (field, value) => {
     case 'dateTime': {
       return value?.valueDate && moment(value?.valueDate).format('lll');
     }
-    case 'checkbox': {
-      return value.valueBoolean?.toString();
+    case 'boolean': {
+      return value.valueBoolean ? 'Yes' : 'No';
     }
     case 'select': {
       if (field?.options?.optionsTemplate === 'type') {

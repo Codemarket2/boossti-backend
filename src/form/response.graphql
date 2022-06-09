@@ -4,6 +4,7 @@ type Query {
   getResponses(
     formId: ID!
     parentId: ID
+    templateId: ID
     workFlowFormReponseParentId: ID
     page: Int
     limit: Int
@@ -12,11 +13,18 @@ type Query {
     onlyMy: Boolean
   ): Responses @aws_api_key @aws_cognito_user_pools
   getMyResponses(page: Int, limit: Int): Responses2
+  getCheckUnique(
+    formId: ID!
+    responseId: ID
+    value: ValueInput
+    caseInsensitiveUnique: Boolean
+  ): Boolean @aws_api_key @aws_cognito_user_pools
 }
 
 type Mutation {
   createResponse(
     formId: ID!
+    templateId: ID
     parentId: ID
     workFlowFormReponseParentId: ID
     values: [ValueInput]
@@ -75,11 +83,12 @@ type Response @aws_api_key @aws_cognito_user_pools {
   _id: ID
   count: Int
   formId: ID
+  templateId: ID
   parentId: Page
   workFlowFormReponseParentId: ID
   values: [Value]
   options: AWSJSON
-  createdBy: User
+  createdBy: Response
   updatedBy: ID
   createdAt: AWSDateTime
   updatedAt: AWSDateTime
@@ -89,10 +98,11 @@ type Response2 @aws_api_key @aws_cognito_user_pools {
   _id: ID
   count: Int
   formId: Form
+  templateId: ID
   parentId: Page
   workFlowFormReponseParentId: ID
   values: [Value]
-  createdBy: User
+  createdBy: Response
   updatedBy: ID
   createdAt: AWSDateTime
   updatedAt: AWSDateTime

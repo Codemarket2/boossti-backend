@@ -1,0 +1,214 @@
+{
+  "ETag": "EFADQBFOCRFVY",
+  "DistributionConfig": {
+    "CallerReference": "1630490365445",
+    "Aliases": { "Quantity": 1, "Items": ["www.boossti.com"] },
+    "DefaultRootObject": "",
+    "Origins": {
+      "Quantity": 1,
+      "Items": [
+        {
+          "Id": "n8w06s-8ahdpi",
+          "DomainName": "n8w06s-8ahdpi.s3.us-east-1.amazonaws.com",
+          "OriginPath": "",
+          "CustomHeaders": { "Quantity": 0, "Items": [] },
+          "S3OriginConfig": {
+            "OriginAccessIdentity": "origin-access-identity/cloudfront/E1SV5SWC92J65D"
+          },
+          "ConnectionAttempts": 3,
+          "ConnectionTimeout": 10,
+          "OriginShield": { "Enabled": false }
+        }
+      ]
+    },
+    "OriginGroups": { "Quantity": 0, "Items": [] },
+    "DefaultCacheBehavior": {
+      "TargetOriginId": "n8w06s-8ahdpi",
+      "TrustedSigners": { "Enabled": false, "Quantity": 0, "Items": [] },
+      "TrustedKeyGroups": { "Enabled": false, "Quantity": 0, "Items": [] },
+      "ViewerProtocolPolicy": "redirect-to-https",
+      "AllowedMethods": {
+        "Quantity": 7,
+        "Items": ["HEAD", "DELETE", "POST", "GET", "OPTIONS", "PUT", "PATCH"],
+        "CachedMethods": { "Quantity": 2, "Items": ["HEAD", "GET"] }
+      },
+      "SmoothStreaming": false,
+      "Compress": true,
+      "LambdaFunctionAssociations": {
+        "Quantity": 2,
+        "Items": [
+          {
+            "LambdaFunctionARN": "arn:aws:lambda:us-east-1:858116908646:function:n8w06s-vu7vhoj:470",
+            "EventType": "origin-request",
+            "IncludeBody": true
+          },
+          {
+            "LambdaFunctionARN": "arn:aws:lambda:us-east-1:858116908646:function:n8w06s-vu7vhoj:470",
+            "EventType": "origin-response",
+            "IncludeBody": false
+          }
+        ]
+      },
+      "FunctionAssociations": { "Quantity": 0, "Items": [] },
+      "FieldLevelEncryptionId": "",
+      "ForwardedValues": {
+        "QueryString": true,
+        "Cookies": { "Forward": "all" },
+        "Headers": { "Quantity": 2, "Items": ["Authorization", "Host"] },
+        "QueryStringCacheKeys": { "Quantity": 0, "Items": [] }
+      },
+      "MinTTL": 0,
+      "DefaultTTL": 0,
+      "MaxTTL": 31536000
+    },
+    "CacheBehaviors": {
+      "Quantity": 4,
+      "Items": [
+        {
+          "PathPattern": "_next/static/*",
+          "TargetOriginId": "n8w06s-8ahdpi",
+          "TrustedSigners": { "Enabled": false, "Quantity": 0, "Items": [] },
+          "TrustedKeyGroups": { "Enabled": false, "Quantity": 0, "Items": [] },
+          "ViewerProtocolPolicy": "https-only",
+          "AllowedMethods": {
+            "Quantity": 2,
+            "Items": ["HEAD", "GET"],
+            "CachedMethods": { "Quantity": 2, "Items": ["HEAD", "GET"] }
+          },
+          "SmoothStreaming": false,
+          "Compress": true,
+          "LambdaFunctionAssociations": { "Quantity": 0, "Items": [] },
+          "FunctionAssociations": { "Quantity": 0, "Items": [] },
+          "FieldLevelEncryptionId": "",
+          "ForwardedValues": {
+            "QueryString": false,
+            "Cookies": { "Forward": "none" },
+            "Headers": { "Quantity": 0, "Items": [] },
+            "QueryStringCacheKeys": { "Quantity": 0, "Items": [] }
+          },
+          "MinTTL": 0,
+          "DefaultTTL": 86400,
+          "MaxTTL": 31536000
+        },
+        {
+          "PathPattern": "static/*",
+          "TargetOriginId": "n8w06s-8ahdpi",
+          "TrustedSigners": { "Enabled": false, "Quantity": 0, "Items": [] },
+          "TrustedKeyGroups": { "Enabled": false, "Quantity": 0, "Items": [] },
+          "ViewerProtocolPolicy": "https-only",
+          "AllowedMethods": {
+            "Quantity": 2,
+            "Items": ["HEAD", "GET"],
+            "CachedMethods": { "Quantity": 2, "Items": ["HEAD", "GET"] }
+          },
+          "SmoothStreaming": false,
+          "Compress": true,
+          "LambdaFunctionAssociations": { "Quantity": 0, "Items": [] },
+          "FunctionAssociations": { "Quantity": 0, "Items": [] },
+          "FieldLevelEncryptionId": "",
+          "ForwardedValues": {
+            "QueryString": false,
+            "Cookies": { "Forward": "none" },
+            "Headers": { "Quantity": 0, "Items": [] },
+            "QueryStringCacheKeys": { "Quantity": 0, "Items": [] }
+          },
+          "MinTTL": 0,
+          "DefaultTTL": 86400,
+          "MaxTTL": 31536000
+        },
+        {
+          "PathPattern": "api/*",
+          "TargetOriginId": "n8w06s-8ahdpi",
+          "TrustedSigners": { "Enabled": false, "Quantity": 0, "Items": [] },
+          "TrustedKeyGroups": { "Enabled": false, "Quantity": 0, "Items": [] },
+          "ViewerProtocolPolicy": "https-only",
+          "AllowedMethods": {
+            "Quantity": 7,
+            "Items": ["HEAD", "DELETE", "POST", "GET", "OPTIONS", "PUT", "PATCH"],
+            "CachedMethods": { "Quantity": 2, "Items": ["HEAD", "GET"] }
+          },
+          "SmoothStreaming": false,
+          "Compress": true,
+          "LambdaFunctionAssociations": {
+            "Quantity": 1,
+            "Items": [
+              {
+                "LambdaFunctionARN": "arn:aws:lambda:us-east-1:858116908646:function:n8w06s-8l8cxoq:42",
+                "EventType": "origin-request",
+                "IncludeBody": true
+              }
+            ]
+          },
+          "FunctionAssociations": { "Quantity": 0, "Items": [] },
+          "FieldLevelEncryptionId": "",
+          "ForwardedValues": {
+            "QueryString": true,
+            "Cookies": { "Forward": "all" },
+            "Headers": { "Quantity": 2, "Items": ["Authorization", "Host"] },
+            "QueryStringCacheKeys": { "Quantity": 0, "Items": [] }
+          },
+          "MinTTL": 0,
+          "DefaultTTL": 0,
+          "MaxTTL": 31536000
+        },
+        {
+          "PathPattern": "_next/data/*",
+          "TargetOriginId": "n8w06s-8ahdpi",
+          "TrustedSigners": { "Enabled": false, "Quantity": 0, "Items": [] },
+          "TrustedKeyGroups": { "Enabled": false, "Quantity": 0, "Items": [] },
+          "ViewerProtocolPolicy": "https-only",
+          "AllowedMethods": {
+            "Quantity": 2,
+            "Items": ["HEAD", "GET"],
+            "CachedMethods": { "Quantity": 2, "Items": ["HEAD", "GET"] }
+          },
+          "SmoothStreaming": false,
+          "Compress": true,
+          "LambdaFunctionAssociations": {
+            "Quantity": 2,
+            "Items": [
+              {
+                "LambdaFunctionARN": "arn:aws:lambda:us-east-1:858116908646:function:n8w06s-vu7vhoj:470",
+                "EventType": "origin-response",
+                "IncludeBody": false
+              },
+              {
+                "LambdaFunctionARN": "arn:aws:lambda:us-east-1:858116908646:function:n8w06s-vu7vhoj:470",
+                "EventType": "origin-request",
+                "IncludeBody": true
+              }
+            ]
+          },
+          "FunctionAssociations": { "Quantity": 0, "Items": [] },
+          "FieldLevelEncryptionId": "",
+          "ForwardedValues": {
+            "QueryString": true,
+            "Cookies": { "Forward": "all" },
+            "Headers": { "Quantity": 2, "Items": ["Authorization", "Host"] },
+            "QueryStringCacheKeys": { "Quantity": 0, "Items": [] }
+          },
+          "MinTTL": 0,
+          "DefaultTTL": 0,
+          "MaxTTL": 31536000
+        }
+      ]
+    },
+    "CustomErrorResponses": { "Quantity": 0, "Items": [] },
+    "Comment": "",
+    "Logging": { "Enabled": false, "IncludeCookies": false, "Bucket": "", "Prefix": "" },
+    "PriceClass": "PriceClass_All",
+    "Enabled": true,
+    "ViewerCertificate": {
+      "CloudFrontDefaultCertificate": false,
+      "ACMCertificateArn": "arn:aws:acm:us-east-1:858116908646:certificate/0d96f851-4ac9-49a8-a9d5-d692ac47d1d8",
+      "SSLSupportMethod": "sni-only",
+      "MinimumProtocolVersion": "TLSv1.2_2021",
+      "Certificate": "arn:aws:acm:us-east-1:858116908646:certificate/0d96f851-4ac9-49a8-a9d5-d692ac47d1d8",
+      "CertificateSource": "acm"
+    },
+    "Restrictions": { "GeoRestriction": { "RestrictionType": "none", "Quantity": 0, "Items": [] } },
+    "WebACLId": "",
+    "HttpVersion": "http2",
+    "IsIPV6Enabled": true
+  }
+}

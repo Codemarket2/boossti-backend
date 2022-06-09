@@ -1,7 +1,9 @@
 import * as mongoose from 'mongoose';
+import { ResponseModel } from '../src/form/utils/responseModel';
 import { User } from '../src/user/utils/userModel';
 import { createCollections } from '../src/utils/createCollections';
 import { mockUser } from './defaultArguments';
+import { userResponse } from './initialData';
 
 jest.mock('../src/utils/DB', () => {
   const DB = () => {};
@@ -31,6 +33,7 @@ beforeAll(async () => {
 
 beforeEach(async () => {
   await User.create(mockUser);
+  await ResponseModel.create(userResponse);
 });
 
 afterEach(async () => {

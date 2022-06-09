@@ -43,6 +43,35 @@ interface IAddRemoveUserToGroup {
   Username: string;
 }
 
+interface ICreateUser {
+  UserPoolId: string;
+  Username: string;
+  DesiredDeliveryMediums?: any;
+  UserAttributes?: { Name: string; value?: string }[];
+  TemporaryPassword?: string;
+}
+
+interface IUpdateUserAttributes {
+  UserPoolId: string;
+  Username: string;
+  UserAttributes: { Name: string; value?: string }[];
+}
+
+interface IDeleteUser {
+  UserPoolId: string;
+  Username: string;
+}
+
+interface IGetUsers {
+  Username: string;
+  UserPoolId: string;
+}
+
+interface IGetGroupListOfUser {
+  UserPoolId: string;
+  Username: string;
+}
+
 export const createCognitoGroup = async (payload: ICreateCognitoGroup) => {
   const params = {
     GroupName: payload.GroupName,
@@ -117,19 +146,6 @@ export const removeUserFromGroup = async (payload: IAddRemoveUserToGroup) => {
   return cognitoidentityserviceprovider.adminRemoveUserFromGroup(params).promise();
 };
 
-interface ICreateUser {
-  UserPoolId: string;
-  Username: string;
-  DesiredDeliveryMediums?: any;
-  UserAttributes?: { Name: string; value?: string }[];
-  TemporaryPassword?: string;
-}
-
-interface IDeleteUser {
-  UserPoolId: string;
-  Username: string;
-}
-
 export const createUser = async (payload: ICreateUser) => {
   const params = {
     UserPoolId: payload.UserPoolId,
@@ -150,12 +166,6 @@ export const deleteUser = async (payload: IDeleteUser) => {
   return cognitoidentityserviceprovider.adminDeleteUser(params).promise();
 };
 
-interface IUpdateUserAttributes {
-  UserPoolId: string;
-  Username: string;
-  UserAttributes: { Name: string; value?: string }[];
-}
-
 export const updateUserAttributes = async (payload: IUpdateUserAttributes) => {
   const params = {
     UserPoolId: payload.UserPoolId,
@@ -163,4 +173,46 @@ export const updateUserAttributes = async (payload: IUpdateUserAttributes) => {
     UserAttributes: payload.UserAttributes,
   };
   return cognitoidentityserviceprovider.adminUpdateUserAttributes(params).promise();
+};
+
+export const getUserByEmail = async (payload: IGetUsers) => {
+  const params = {
+    UserPoolId: payload.UserPoolId,
+    Username: payload.Username,
+  };
+  return cognitoidentityserviceprovider.adminGetUser(params).promise();
+};
+
+export const isUserAlreadyExist = async (payload: IGetUsers) => {
+  try {
+    const user = await getUserByEmail({
+      UserPoolId: payload.UserPoolId,
+      Username: payload.Username,
+    });
+    return {
+      message: true,
+      data: user,
+      error: null,
+    };
+  } catch (error) {
+    if (error.code === 'UserNotFoundException') {
+      return {
+        message: false,
+        error: null,
+      };
+    } else {
+      return {
+        message: false,
+        error: error.message,
+      };
+    }
+  }
+};
+
+export const getGroupListOfUser = async (payload: IGetGroupListOfUser) => {
+  const params = {
+    UserPoolId: payload.UserPoolId,
+    Username: payload.Username,
+  };
+  return cognitoidentityserviceprovider.adminListGroupsForUser(params).promise();
 };

@@ -11,6 +11,7 @@ interface AppSyncIdentityCognito {
   'custom:_id': string;
   name: string;
   picture: string;
+  email: string;
 }
 
 export interface IIdentity {
