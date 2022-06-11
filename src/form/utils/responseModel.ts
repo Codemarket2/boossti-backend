@@ -76,8 +76,7 @@ export const responseSchema = extendSchema({
     type: Number,
     required: true,
   },
-  parentId: {
-    // templatePageParentId
+  templateInstanceId: {
     type: Schema.Types.ObjectId,
     ref: 'Page',
   },
@@ -114,10 +113,10 @@ export const valuesPopulate = [
 
 export const responsePopulate = [
   userPopulate,
-  {
-    path: 'parentId',
-    select: 'types title media slug',
-  },
+  // {
+  //   path: 'parentId',
+  //   select: 'types title media slug',
+  // },
   ...valuesPopulate,
 ];
 

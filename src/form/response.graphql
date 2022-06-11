@@ -3,8 +3,8 @@ type Query {
   getResponseByCount(formId: ID!, count: Int!): Response @aws_api_key @aws_cognito_user_pools
   getResponses(
     formId: ID!
-    parentId: ID
     templateId: ID
+    templateInstanceId: ID
     workFlowFormReponseParentId: ID
     page: Int
     limit: Int
@@ -25,13 +25,15 @@ type Mutation {
   createResponse(
     formId: ID!
     templateId: ID
-    parentId: ID
+    templateInstanceId: ID
     workFlowFormReponseParentId: ID
     values: [ValueInput]
     options: AWSJSON
   ): Response @aws_api_key @aws_cognito_user_pools
   updateResponse(_id: ID!, formId: ID, values: [ValueInput]): Response
-  deleteResponse(_id: ID!): ID!
+    @aws_api_key
+    @aws_cognito_user_pools
+  deleteResponse(_id: ID!): ID! @aws_api_key @aws_cognito_user_pools
   createBulkResponses(
     formId: ID!
     fileUrl: String!
@@ -84,7 +86,7 @@ type Response @aws_api_key @aws_cognito_user_pools {
   count: Int
   formId: ID
   templateId: ID
-  parentId: Page
+  templateInstanceId: ID
   workFlowFormReponseParentId: ID
   values: [Value]
   options: AWSJSON
@@ -99,7 +101,7 @@ type Response2 @aws_api_key @aws_cognito_user_pools {
   count: Int
   formId: Form
   templateId: ID
-  parentId: Page
+  templateInstanceId: ID
   workFlowFormReponseParentId: ID
   values: [Value]
   createdBy: Response
