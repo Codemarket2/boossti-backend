@@ -72,15 +72,15 @@ export const responseSchema = extendSchema({
     type: Schema.Types.ObjectId,
     ref: 'Template',
   },
+  templateDefaultWidgetResponseId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Response',
+  },
   count: {
     type: Number,
     required: true,
   },
-  templateInstanceId: {
-    type: Schema.Types.ObjectId,
-    ref: 'Page',
-  },
-  workFlowFormReponseParentId: {
+  workFlowFormResponseParentId: {
     type: Schema.Types.ObjectId,
     default: null,
   },

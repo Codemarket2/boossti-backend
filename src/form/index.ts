@@ -129,19 +129,19 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           search = '',
           formField,
           onlyMy = false,
-          workFlowFormReponseParentId = null,
+          workFlowFormResponseParentId = null,
           templateId,
-          templateInstanceId,
+          templateDefaultWidgetResponseId,
         } = args;
         let filter: any = { formId };
-        if (templateInstanceId) {
-          filter = { ...filter, templateInstanceId };
+        if (templateDefaultWidgetResponseId) {
+          filter = { ...filter, templateDefaultWidgetResponseId };
         }
         if (templateId) {
           filter = { ...filter, templateId };
         }
-        if (workFlowFormReponseParentId) {
-          filter = { ...filter, workFlowFormReponseParentId };
+        if (workFlowFormResponseParentId) {
+          filter = { ...filter, workFlowFormResponseParentId };
         }
         if (onlyMy && user?._id) {
           filter.createdBy = user?._id;
