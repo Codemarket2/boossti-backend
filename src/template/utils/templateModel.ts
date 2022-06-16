@@ -1,8 +1,9 @@
 import { Schema, model } from 'mongoose';
 import { ISchema, IMedia } from '../../utils/cutomTypes';
-import { fieldSchema, fieldsPopulate, IField } from '../../form/utils/formModel';
+import { fieldSchema, fieldsPopulate } from '../../form/utils/formModel';
 import { userPopulate } from '../../utils/populate';
 import { extendSchema } from '../../utils/extendSchema';
+import { IField } from '../../form/utils/formType';
 
 export interface ITemplate extends ISchema {
   title: string;

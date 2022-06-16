@@ -3,9 +3,9 @@ import { User } from '../user/utils/userModel';
 import { FormModel } from '../form/utils/formModel';
 import { ResponseModel } from '../form/utils/responseModel';
 import TemplateModel from '../template/utils/templateModel';
-import PageModel from '../template/utils/pageModel';
+// import PageModel from '../template/utils/pageModel';
 
-const models = [AuditLogModel, User, FormModel, ResponseModel, TemplateModel, PageModel];
+const models = [AuditLogModel, User, FormModel, ResponseModel, TemplateModel];
 
 export const createCollections = async () => {
   try {

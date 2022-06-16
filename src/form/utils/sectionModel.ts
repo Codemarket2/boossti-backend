@@ -1,7 +1,9 @@
 import { Schema, model } from 'mongoose';
 import { ISchema } from '../../utils/cutomTypes';
-import { fieldSchema, fieldsPopulate, IField } from '../../form/utils/formModel';
-import { valueSchema, IValue, valuesPopulate } from '../../form/utils/responseModel';
+import { fieldSchema, fieldsPopulate } from '../../form/utils/formModel';
+import { valueSchema, valuesPopulate } from '../../form/utils/responseModel';
+import { IValue } from './responseType';
+import { IField } from './formType';
 
 export interface Section extends ISchema {
   fields: IField[];

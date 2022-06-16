@@ -5,16 +5,9 @@ type Query {
 }
 
 type Mutation {
-  createForm(
-    parentId: ID
-    name: String!
-    fields: [FieldInput]
-    settings: AWSJSON
-    virtualForm: Boolean
-  ): Form
+  createForm(name: String!, fields: [FieldInput], settings: AWSJSON, virtualForm: Boolean): Form
   updateForm(
     _id: ID!
-    parentId: ID
     name: String
     fields: [FieldInput]
     settings: AWSJSON
@@ -54,7 +47,6 @@ type ValueInput {
 
 type Form @aws_api_key @aws_cognito_user_pools {
   _id: ID!
-  parentId: ID
   name: String
   slug: String
   fields: [Field2]

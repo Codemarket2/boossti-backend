@@ -8,10 +8,11 @@ import Page from '../template/utils/pageModel';
 import { getCurrentUser } from '../utils/authentication';
 import { AppSyncEvent } from '../utils/cutomTypes';
 import { runFormActions } from './utils/actions';
-import { sendResponseNotification } from './utils/responseNotification';
+// import { sendResponseNotification } from './utils/responseNotification';
 import getAdminFilter from '../utils/adminFilter';
 import { fileParser } from './utils/readCsvFile';
 import { runInTransaction } from '../utils/runInTransaction';
+import { IForm } from './utils/formType';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -76,27 +77,19 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         });
       }
       case 'deleteForm': {
-        const form = await runInTransaction({
-          action: 'DELETE',
-          Model: FormModel,
-          args,
-          user,
-        });
+        const callback = async (session, form) => {
+          await ResponseModel.deleteMany({ formId: form?._id });
+        };
+        const form = await runInTransaction(
+          {
+            action: 'DELETE',
+            Model: FormModel,
+            args,
+            user,
+          },
+          callback,
+        );
         return form._id;
-        // let formId;
-        // await runInTransaction(
-        //   async (session) => {
-        //     const deletedForm: any = await FormModel.findByIdAndDelete(args._id, {
-        //       session: session,
-        //     });
-        //     await ResponseModel.deleteMany({ formId: args._id }, { session: session });
-        //     await SectionModel.findByIdAndDelete(args._id, { session: session });
-        //     formId = deletedForm._id;
-        //     return deletedForm;
-        //   },
-        //   { action: 'DELETE', model: FormModel },
-        // );
-        // return formId;
       }
       case 'getResponse': {
         return await ResponseModel.findById(args._id).populate(responsePopulate);
@@ -149,10 +142,14 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         if (search && formField) {
           filter = {
             ...filter,
-            $and: [
+            $or: [
               { 'values.value': { $regex: search, $options: 'i' } },
-              { 'values.field': formField },
+              // { 'values.valueNumber': search },
             ],
+            // $and: [
+            //   { 'values.value': { $regex: search, $options: 'i' } },
+            //   { 'values.field': '62aa6fc482f74b21f3496a34' },
+            // ],
           };
         }
         const data = await ResponseModel.find(filter)
@@ -189,9 +186,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
             args,
             session,
           });
-          // if (!(process.env.NODE_ENV === 'test')) {
           //   await sendResponseNotification(form, response);
-          // }
         };
         const response = await runInTransaction(
           {
@@ -219,9 +214,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
             args,
             session,
           });
-          if (!(process.env.NODE_ENV === 'test')) {
-            await sendResponseNotification(form, response);
-          }
+          // await sendResponseNotification(form, response);
         };
         const response = await runInTransaction(
           {
@@ -238,10 +231,31 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       case 'deleteResponse': {
         const callback = async (session, response) => {
           const res: any = await FormModel.findById(response.formId).populate(formPopulate);
-          const form = { ...res?.toObject() };
+          const form: IForm = { ...res?.toObject() };
           form.settings = form.settings || {};
           form.settings.actions = args?.options?.actions || form.settings?.actions;
           response.options = args.options;
+
+          const relationFieldIds: string[] = [];
+          form?.fields?.forEach((field) => {
+            if (field?.fieldType === 'existingForm' && !field?.options?.selectItem) {
+              relationFieldIds.push(field?._id?.toString());
+            }
+          });
+          if (relationFieldIds?.length > 0) {
+            const responseIds: string[] = [];
+            response?.values?.forEach((value) => {
+              if (
+                relationFieldIds?.includes(value?.field?.toString()) &&
+                (value?.response?._id || value?.response)
+              ) {
+                responseIds?.push(value?.response?._id || value?.response);
+              }
+            });
+            if (responseIds?.length > 0) {
+              await ResponseModel.deleteMany({ _id: { $in: responseIds } });
+            }
+          }
           await runFormActions({
             triggerType: 'onDelete',
             form,
@@ -249,9 +263,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
             args,
             session,
           });
-          if (!(process.env.NODE_ENV === 'test')) {
-            await sendResponseNotification(form, response);
-          }
+          // await sendResponseNotification(form, response);
         };
         const response = await runInTransaction(
           {
@@ -262,7 +274,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           },
           callback,
         );
-        return args._id;
+        return response._id;
       }
       case 'getMyResponses': {
         const { page = 1, limit = 20 } = args;
