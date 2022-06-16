@@ -1,7 +1,7 @@
 import { DB } from '../utils/DB';
 import { Bookmark } from './utils/bookmarkModel';
 // import { User } from '../user/utils/userModel';
-import { AppSyncEvent } from '../utils/cutomTypes';
+import { AppSyncEvent } from '../utils/customTypes';
 import { getCurrentUser } from '../utils/authentication';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {

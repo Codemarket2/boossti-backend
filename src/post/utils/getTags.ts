@@ -1,4 +1,4 @@
-import Page from '../../template/utils/pageModel';
+import { TemplateInstanceModel } from '../../template/utils/templateInstanceModel';
 import Template from '../../template/utils/templateModel';
 
 export const getTags = async (body) => {
@@ -20,12 +20,12 @@ export const getTags = async (body) => {
     });
     typeTags = typeTags.map((l) => ({ tag: l._id, tagModel: 'Template' }));
     let itemTags: any = [];
-    itemTags = await Page.find({
+    itemTags = await TemplateInstanceModel.find({
       _id: {
         $in: tags,
       },
     });
-    itemTags = itemTags.map((l) => ({ tag: l._id, tagModel: 'Page' }));
+    itemTags = itemTags.map((l) => ({ tag: l._id, tagModel: 'TemplateInstance' }));
     tags = [...typeTags, ...itemTags];
   }
   // console.log('tags', tags);

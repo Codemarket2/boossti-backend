@@ -1,4 +1,4 @@
-import { IMedia, ISchema } from '../../utils/cutomTypes';
+import { IMedia, ISchema } from '../../utils/customTypes';
 
 export interface IResponse extends ISchema {
   formId: any;
@@ -16,7 +16,7 @@ export interface IValue {
   valueDate: Date;
   values: string[];
   template: string;
-  page: string;
+  templateInstance: string;
   response: string;
   form: string;
   options: any;

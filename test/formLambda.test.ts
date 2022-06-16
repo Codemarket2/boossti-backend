@@ -11,9 +11,9 @@ export const mockTemplate = {
   media: [],
 };
 
-const mockPage = {
+const mockTemplateInstance = {
   _id: '60fc4d29f11b170008d9ec46',
-  template: [mockTemplate._id],
+  template: mockTemplate._id,
   title: 'Dr John',
   description: 'NYC',
   media: [],
@@ -48,7 +48,7 @@ const mockValues = [
     valueNumber: null,
     valueBoolean: null,
     valueDate: null,
-    page: mockPage._id,
+    templateInstance: mockTemplateInstance._id,
   },
   {
     field: 'Email',
@@ -56,13 +56,13 @@ const mockValues = [
     valueNumber: null,
     valueBoolean: null,
     valueDate: null,
-    page: null,
+    templateInstance: null,
   },
 ];
 
 const mockResponse = {
   _id: '60fc4d29f11b170008d9ec99',
-  // parentId: mockPage._id,
+  // parentId: mockTemplateInstance._id,
   formId: mockForm._id,
   values: mockValues,
 };
@@ -77,7 +77,7 @@ const updatedMockResponse = {
       valueNumber: null,
       valueBoolean: null,
       valueDate: null,
-      page: null,
+      templateInstance: null,
     },
   ],
 };
@@ -85,7 +85,7 @@ const updatedMockResponse = {
 const createFormEvent = createMockEvent('createForm', mockForm);
 const createResponseEvent = createMockEvent('createResponse', mockResponse);
 const createTemplateEvent = createMockEvent('createTemplate', mockTemplate);
-const createPageEvent = createMockEvent('createPage', mockPage);
+const createTemplateInstanceEvent = createMockEvent('createTemplateInstance', mockTemplateInstance);
 
 describe('List Lambda Tests', () => {
   it('createForm test', async () => {
@@ -163,7 +163,7 @@ describe('List Lambda Tests', () => {
 
   it('createResponse test', async () => {
     await listHandler(createTemplateEvent);
-    await listHandler(createPageEvent);
+    await listHandler(createTemplateInstanceEvent);
     await handler(createFormEvent);
     const response = await handler(createResponseEvent);
     const response2 = await handler(
@@ -174,7 +174,9 @@ describe('List Lambda Tests', () => {
     // expect(response.parentId._id.toString()).toBe(mockResponse.parentId);
     expect(response.values.length).toBe(mockResponse.values.length);
     expect(response.values[0].field).toBe(mockResponse.values[0].field);
-    expect(response.values[0].page._id.toString()).toBe(mockResponse.values[0].page);
+    expect(response.values[0].templateInstance._id.toString()).toBe(
+      mockResponse.values[0].templateInstance,
+    );
     expect(response.createdBy._id?.toString()).toStrictEqual(mockUser._id);
     expect(response.createdAt).toBeDefined();
     expect(response.updatedAt).toBeDefined();
@@ -182,7 +184,7 @@ describe('List Lambda Tests', () => {
 
   it('updateResponse test', async () => {
     await listHandler(createTemplateEvent);
-    await listHandler(createPageEvent);
+    await listHandler(createTemplateInstanceEvent);
     await handler(createFormEvent);
     await handler(createResponseEvent);
     const response = await handler(createMockEvent('updateResponse', updatedMockResponse));
@@ -191,7 +193,9 @@ describe('List Lambda Tests', () => {
     // expect(response.parentId._id.toString()).toBe(updatedMockResponse.parentId);
     expect(response.values.length).toBe(updatedMockResponse.values.length);
     expect(response.values[0].field).toBe(updatedMockResponse.values[0].field);
-    expect(response.values[0].page._id.toString()).toBe(updatedMockResponse.values[0].page);
+    expect(response.values[0].templateInstance._id.toString()).toBe(
+      updatedMockResponse.values[0].templateInstance,
+    );
     expect(response.createdBy._id?.toString()).toStrictEqual(mockUser._id);
     expect(response.createdAt).toBeDefined();
     expect(response.updatedAt).toBeDefined();
@@ -199,7 +203,7 @@ describe('List Lambda Tests', () => {
 
   it('getResponse test', async () => {
     await listHandler(createTemplateEvent);
-    await listHandler(createPageEvent);
+    await listHandler(createTemplateInstanceEvent);
     await handler(createFormEvent);
     await handler(createResponseEvent);
     const response = await handler(createMockEvent('getResponse', { _id: mockResponse._id }));
@@ -208,7 +212,9 @@ describe('List Lambda Tests', () => {
     // expect(response.parentId._id.toString()).toBe(mockResponse.parentId);
     expect(response.values.length).toBe(mockResponse.values.length);
     expect(response.values[0].field).toBe(mockResponse.values[0].field);
-    expect(response.values[0].page._id.toString()).toBe(mockResponse.values[0].page);
+    expect(response.values[0].templateInstance._id.toString()).toBe(
+      mockResponse.values[0].templateInstance,
+    );
     expect(response.createdBy._id?.toString()).toStrictEqual(mockUser._id);
     expect(response.createdAt).toBeDefined();
     expect(response.updatedAt).toBeDefined();
@@ -216,7 +222,7 @@ describe('List Lambda Tests', () => {
 
   it('getResponses test', async () => {
     await listHandler(createTemplateEvent);
-    await listHandler(createPageEvent);
+    await listHandler(createTemplateInstanceEvent);
     await handler(createFormEvent);
     await handler(createResponseEvent);
     const responses = await handler(
@@ -230,7 +236,9 @@ describe('List Lambda Tests', () => {
     // expect(response.parentId._id.toString()).toBe(mockResponse.parentId);
     expect(response.values.length).toBe(mockResponse.values.length);
     expect(response.values[0].field).toBe(mockResponse.values[0].field);
-    expect(response.values[0].page._id.toString()).toBe(mockResponse.values[0].page);
+    expect(response.values[0].templateInstance._id.toString()).toBe(
+      mockResponse.values[0].templateInstance,
+    );
     expect(response.createdBy._id?.toString()).toStrictEqual(mockUser._id);
     expect(response.createdAt).toBeDefined();
     expect(response.updatedAt).toBeDefined();
@@ -238,7 +246,7 @@ describe('List Lambda Tests', () => {
 
   it('getMyResponses test', async () => {
     await listHandler(createTemplateEvent);
-    await listHandler(createPageEvent);
+    await listHandler(createTemplateInstanceEvent);
     await handler(createFormEvent);
     await handler(createResponseEvent);
     const responses = await handler(createMockEvent('getMyResponses'));
@@ -249,7 +257,9 @@ describe('List Lambda Tests', () => {
     // expect(response.parentId._id.toString()).toBe(mockResponse.parentId);
     expect(response.values.length).toBe(mockResponse.values.length);
     expect(response.values[0].field).toBe(mockResponse.values[0].field);
-    expect(response.values[0].page._id.toString()).toBe(mockResponse.values[0].page);
+    expect(response.values[0].templateInstance._id.toString()).toBe(
+      mockResponse.values[0].templateInstance,
+    );
     expect(response.createdBy._id?.toString()).toStrictEqual(mockUser._id);
     expect(response.createdAt).toBeDefined();
     expect(response.updatedAt).toBeDefined();
@@ -257,7 +267,7 @@ describe('List Lambda Tests', () => {
 
   it('deleteResponse test', async () => {
     await listHandler(createTemplateEvent);
-    await listHandler(createPageEvent);
+    await listHandler(createTemplateInstanceEvent);
     await handler(createFormEvent);
     await handler(createResponseEvent);
     const responseId = await handler(createMockEvent('deleteResponse', { _id: mockResponse._id }));
@@ -266,7 +276,7 @@ describe('List Lambda Tests', () => {
 
   it('getSection test', async () => {
     await listHandler(createTemplateEvent);
-    await listHandler(createPageEvent);
+    await listHandler(createTemplateInstanceEvent);
     const form = await handler(createFormEvent);
     const section = await handler(createMockEvent('getSection', { _id: form._id }));
     // expect(responseId.toString()).toBe(mockResponse._id);
@@ -274,7 +284,7 @@ describe('List Lambda Tests', () => {
 
   it('updateSection test', async () => {
     await listHandler(createTemplateEvent);
-    await listHandler(createPageEvent);
+    await listHandler(createTemplateInstanceEvent);
     const form = await handler(createFormEvent);
     const section = await handler(createMockEvent('updateSection', { _id: form._id }));
     // expect(responseId.toString()).toBe(mockResponse._id);

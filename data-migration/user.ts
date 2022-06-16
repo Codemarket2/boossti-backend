@@ -1,7 +1,7 @@
 import slugify from 'slugify';
 import { User } from '../src/user/utils/userModel';
-import Page from '../src/template/utils/pageModel';
-import { DB } from './db';
+import { TemplateInstanceModel } from '../src/template/utils/templateInstanceModel';
+// import { DB } from './db';
 
 const userTypeId = '6119695c580ba8000904f06b';
 
@@ -18,7 +18,7 @@ const addUserToType = async () => {
     };
   });
   console.log('users', users);
-  const res = await Page.create(users);
+  const res = await TemplateInstanceModel.create(users);
 };
 
 // (async () => {

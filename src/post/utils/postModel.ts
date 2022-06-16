@@ -9,7 +9,7 @@ const tagSchema = new mongoose.Schema({
   tagModel: {
     type: String,
     required: true,
-    enum: ['Template', 'Page'],
+    enum: ['Template', 'TemplateInstance'],
   },
 });
 

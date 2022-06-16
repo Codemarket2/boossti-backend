@@ -4,9 +4,9 @@ import { FormModel, formPopulate } from './utils/formModel';
 import { ResponseModel, responsePopulate, myResponsePopulate } from './utils/responseModel';
 import { SectionModel, sectionPopulate } from './utils/sectionModel';
 import Template from '../template/utils/templateModel';
-import Page from '../template/utils/pageModel';
+import { TemplateInstanceModel } from '../template/utils/templateInstanceModel';
 import { getCurrentUser } from '../utils/authentication';
-import { AppSyncEvent } from '../utils/cutomTypes';
+import { AppSyncEvent } from '../utils/customTypes';
 import { runFormActions } from './utils/actions';
 // import { sendResponseNotification } from './utils/responseNotification';
 import getAdminFilter from '../utils/adminFilter';
@@ -170,6 +170,28 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         if (lastResponse) {
           args = { ...args, count: lastResponse?.count + 1 };
         }
+        let preFunction;
+        if (args?.templateId) {
+          preFunction = async (session) => {
+            let newArgs = {};
+            if (args?.templateId) {
+              const templateInstance = await TemplateInstanceModel.create(
+                [
+                  {
+                    template: args?.templateId,
+                    count: args?.count,
+                  },
+                ],
+                { session },
+              );
+              newArgs = {
+                templateInstanceId: templateInstance[0]._id,
+                options: { ...templateInstance[0].options, defaultWidgetResponse: true },
+              };
+            }
+            return newArgs;
+          };
+        }
         const callback = async (session, response) => {
           // Run Actions
           const res: any = await FormModel.findById(args.formId)
@@ -195,6 +217,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
             args,
             populate: responsePopulate,
             user,
+            preFunction,
           },
           callback,
         );
@@ -383,7 +406,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
   } catch (error) {
     if (error.runThis) {
       await Template.findOne();
-      await Page.findOne();
+      await TemplateInstanceModel.findOne();
     }
     const error2 = error;
     throw error2;

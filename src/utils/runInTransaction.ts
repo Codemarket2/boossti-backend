@@ -14,6 +14,7 @@ interface IOperation {
   args: any;
   populate?: any;
   user: any;
+  preFunction?: (session: ClientSession) => Promise<any>;
 }
 
 export const runInTransaction = async (operation: IOperation, callback?: TransactionCallback) => {
@@ -23,7 +24,16 @@ export const runInTransaction = async (operation: IOperation, callback?: Transac
   let data;
 
   try {
-    const { action, Model, args, populate, user } = operation;
+    const { action, Model, populate, user, preFunction } = operation;
+    let args = operation.args;
+
+    if (preFunction) {
+      const newArgs = await preFunction(session);
+      if (newArgs) {
+        args = { ...args, ...newArgs };
+      }
+    }
+
     const modelName = Model.modelName;
     switch (action) {
       case 'CREATE': {

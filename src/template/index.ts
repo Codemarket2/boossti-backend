@@ -1,9 +1,9 @@
 import slugify from 'slugify';
 import { DB } from '../utils/DB';
 import Template, { templatePopulate } from './utils/templateModel';
-import Page, { pagePopulate } from './utils/pageModel';
+import { TemplateInstanceModel, templateInstancePopulate } from './utils/templateInstanceModel';
 import { getCurrentUser } from '../utils/authentication';
-import { AppSyncEvent } from '../utils/cutomTypes';
+import { AppSyncEvent } from '../utils/customTypes';
 // import getAdminFilter from '../utils/adminFilter';
 import { User } from '../user/utils/userModel';
 import { runInTransaction } from '../utils/runInTransaction';
@@ -68,13 +68,13 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       }
       case 'getMentionItems': {
         const { search = '' } = args;
-        let pages: any = await Page.find({
+        let pages: any = await TemplateInstanceModel.find({
           $or: [
             { title: { $regex: search, $options: 'i' } },
             { description: { $regex: search, $options: 'i' } },
           ],
         })
-          .populate(pagePopulate)
+          .populate(templateInstancePopulate)
           .limit(5);
 
         pages = pages.map(
@@ -100,19 +100,19 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         const combinedItems = pages.concat(users);
         return combinedItems;
       }
-      case 'getPageMentions': {
+      case 'getTemplateInstanceMentions': {
         const { page = 1, _id, limit = 20, parentId, field, onlyShowByUser = null } = args;
         const tempFilter: any = {};
         if (onlyShowByUser) {
           tempFilter.createdBy = user._id;
         }
-        const data = await Page.find({
+        const data = await TemplateInstanceModel.find({
           'fields.options.values.value': { $regex: `data-id="${_id}"`, $options: 'i' },
         })
-          .populate(pagePopulate)
+          .populate(templateInstancePopulate)
           .limit(limit * 1)
           .skip((page - 1) * limit);
-        const count = await Page.countDocuments({
+        const count = await TemplateInstanceModel.countDocuments({
           ...tempFilter,
           parentId,
           field,
@@ -163,7 +163,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         });
         return args?._id;
       }
-      case 'getPages': {
+      case 'getTemplateInstances': {
         const { page = 1, limit = 20, search = '', active = null, template = null } = args;
         const tempFilter: any = {};
         if (active !== null) {
@@ -173,7 +173,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           tempFilter.template = template;
         }
         // const adminFilter = getAdminFilter(identity, user);
-        const data = await Page.find({
+        const data = await TemplateInstanceModel.find({
           ...tempFilter,
           // ...adminFilter,
           $or: [
@@ -181,10 +181,10 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
             { description: { $regex: search, $options: 'i' } },
           ],
         })
-          .populate(pagePopulate)
+          .populate(templateInstancePopulate)
           .limit(limit * 1)
           .skip((page - 1) * limit);
-        const count = await Page.countDocuments({
+        const count = await TemplateInstanceModel.countDocuments({
           ...tempFilter,
           // ...adminFilter,
           $or: [
@@ -197,25 +197,27 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           count,
         };
       }
-      case 'getPageBySlug': {
-        return await Page.findOne({ slug: args.slug }).populate(pagePopulate);
+      case 'getTemplateInstanceBySlug': {
+        return await TemplateInstanceModel.findOne({ slug: args.slug }).populate(
+          templateInstancePopulate,
+        );
       }
-      case 'getPage': {
-        return await Page.findById(args._id).populate(pagePopulate);
+      case 'getTemplateInstance': {
+        return await TemplateInstanceModel.findById(args._id).populate(templateInstancePopulate);
       }
-      case 'createPage': {
-        const page = await Page.create(args);
-        return await page.populate(pagePopulate); //.execPopulate();
+      case 'createTemplateInstance': {
+        const page = await TemplateInstanceModel.create(args);
+        return await page.populate(templateInstancePopulate); //.execPopulate();
       }
-      case 'updatePage': {
-        const page: any = await Page.findByIdAndUpdate(args._id, args, {
+      case 'updateTemplateInstance': {
+        const page: any = await TemplateInstanceModel.findByIdAndUpdate(args._id, args, {
           new: true,
           runValidators: true,
         });
-        return await page.populate(pagePopulate); //.execPopulate();
+        return await page.populate(templateInstancePopulate); //.execPopulate();
       }
-      case 'deletePage': {
-        await Page.findByIdAndDelete(args._id);
+      case 'deleteTemplateInstance': {
+        await TemplateInstanceModel.findByIdAndDelete(args._id);
         return args._id;
       }
       default:

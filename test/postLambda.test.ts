@@ -20,7 +20,7 @@ export const mockTemplate = {
   description: 'Doctors description',
 };
 
-const mockPage = {
+const mockTemplateInstance = {
   _id: '60fc4d29f11b170008d9ec99',
   types: [mockTemplate._id],
   title: 'Dr John',
@@ -30,7 +30,7 @@ const mockPage = {
 
 const createPostEvent = createMockEvent('createPost', mockPost);
 const createTemplateEvent = createMockEvent('createTemplate', mockTemplate);
-const createPageEvent = createMockEvent('createPage', mockPage);
+const createTemplateInstanceEvent = createMockEvent('createTemplateInstance', mockTemplateInstance);
 
 // yarn test test/postLambda.test.ts
 
@@ -43,11 +43,9 @@ describe('Post Lambda Tests', () => {
 
   it('getPostsByUserId test', async () => {
     await listHandler(createTemplateEvent);
-    await listHandler(createPageEvent);
+    await listHandler(createTemplateInstanceEvent);
     await handler(createPostEvent);
-    const res = await handler(
-      createMockEvent('getPostsByUserId', { userId: mockUser._id })
-    );
+    const res = await handler(createMockEvent('getPostsByUserId', { userId: mockUser._id }));
     expect(res.count).toBe(1);
     expect(res.data.length).toBe(1);
     const post = res.data[0];
@@ -70,9 +68,7 @@ describe('Post Lambda Tests', () => {
 
   it('getPost test', async () => {
     await handler(createPostEvent);
-    const post = await handler(
-      createMockEvent('getPost', { _id: mockPost._id })
-    );
+    const post = await handler(createMockEvent('getPost', { _id: mockPost._id }));
     expect(post._id).toBeDefined();
     expect(post.body).toBe(mockPost.body);
     expect(post.media.length).toBe(mockPost.media.length);
@@ -104,9 +100,7 @@ describe('Post Lambda Tests', () => {
 
   it('deletePost test', async () => {
     await handler(createPostEvent);
-    const res = await handler(
-      createMockEvent('deletePost', { _id: mockPost._id })
-    );
+    const res = await handler(createMockEvent('deletePost', { _id: mockPost._id }));
     expect(res).toBe(true);
   });
 });

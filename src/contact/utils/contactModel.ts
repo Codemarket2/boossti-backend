@@ -1,5 +1,5 @@
 import { model, Schema } from 'mongoose';
-import { ISchema } from '../../utils/cutomTypes';
+import { ISchema } from '../../utils/customTypes';
 
 export interface IContact extends ISchema {
   firstName: string;

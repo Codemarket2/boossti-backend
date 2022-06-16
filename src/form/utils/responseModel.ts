@@ -24,9 +24,9 @@ export const valueSchema = new Schema<IValue>({
     type: Schema.Types.ObjectId,
     ref: 'Template',
   },
-  page: {
+  templateInstance: {
     type: Schema.Types.ObjectId,
-    ref: 'Page',
+    ref: 'TemplateInstance',
   },
   form: {
     type: Schema.Types.ObjectId,
@@ -45,13 +45,13 @@ export const responseSchema = extendSchema({
     required: true,
     ref: 'Form',
   },
-  templateId: {
+  // templateId: {
+  //   type: Schema.Types.ObjectId,
+  //   ref: 'Template',
+  // },
+  templateInstanceId: {
     type: Schema.Types.ObjectId,
-    ref: 'Template',
-  },
-  templateDefaultWidgetResponseId: {
-    type: Schema.Types.ObjectId,
-    ref: 'Response',
+    ref: 'TemplateInstance',
   },
   count: {
     type: Number,
@@ -75,7 +75,7 @@ export const valuesPopulate = [
     select: 'title slug media',
   },
   {
-    path: 'values.page',
+    path: 'values.templateInstance',
     select: 'types title media slug',
   },
   {

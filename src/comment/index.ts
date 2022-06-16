@@ -1,6 +1,6 @@
 import { DB } from '../utils/DB';
 import { getCurrentUser } from '../utils/authentication';
-import { AppSyncEvent } from '../utils/cutomTypes';
+import { AppSyncEvent } from '../utils/customTypes';
 import { User } from '../user/utils/userModel';
 import { Post } from '../post/utils/postModel';
 import { Comment } from './utils/commentModel';

@@ -1,11 +1,11 @@
 import { DB } from '../utils/DB';
 import Template from '../template/utils/templateModel';
-import Page from '../template/utils/pageModel';
+import { TemplateInstanceModel } from '../template/utils/templateInstanceModel';
 import { getCurrentUser } from '../utils/authentication';
 import { Post } from './utils/postModel';
 import { getTags } from './utils/getTags';
 import { User } from '../user/utils/userModel';
-import { AppSyncEvent } from '../utils/cutomTypes';
+import { AppSyncEvent } from '../utils/customTypes';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -130,7 +130,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       default:
         if (args.registerModel) {
           await Template.findOne();
-          await Page.findOne();
+          await TemplateInstanceModel.findOne();
         }
         throw new Error('Something went wrong! Please check your Query or Mutation');
     }

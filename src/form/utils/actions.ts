@@ -1,7 +1,7 @@
 import { sendEmail } from '../../utils/email';
 import { User } from '../../user/utils/userModel';
 import { FormModel } from './formModel';
-import PageModel from '../../template/utils/pageModel';
+import { TemplateInstanceModel } from '../../template/utils/templateInstanceModel';
 import { ResponseModel } from './responseModel';
 import { sendSms } from '../../utils/sms';
 import {
@@ -183,7 +183,7 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
         action?.body
       ) {
         const notificationForm = await FormModel.findOne({ slug: 'notification' });
-        const feedPage = await PageModel.findOne({ slug: 'my' });
+        const feedPage = await TemplateInstanceModel.findOne({ slug: 'my' });
 
         if (notificationForm && feedPage) {
           const body = replaceSchemaVariables({ variable: action?.body, form, response, userForm });

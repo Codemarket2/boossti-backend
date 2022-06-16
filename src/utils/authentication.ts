@@ -1,7 +1,7 @@
 // import * as mongoose from 'mongoose';
 import { FormModel } from '../form/utils/formModel';
 import { ResponseModel } from '../form/utils/responseModel';
-import { IIdentity } from './cutomTypes';
+import { IIdentity } from './customTypes';
 
 export const getCurrentUser = async (identity: IIdentity) => {
   let user;

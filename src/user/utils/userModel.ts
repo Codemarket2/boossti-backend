@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose';
-import { ISchema } from '../../utils/cutomTypes';
+import { ISchema } from '../../utils/customTypes';
 
 // const subscriptionSchema = new Schema({
 //   active: {

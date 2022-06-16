@@ -4,7 +4,7 @@ type Query {
   getResponses(
     formId: ID!
     templateId: ID
-    templateDefaultWidgetResponseId: ID
+    templateInstanceId: ID
     workFlowFormResponseParentId: ID
     page: Int
     limit: Int
@@ -25,7 +25,7 @@ type Mutation {
   createResponse(
     formId: ID!
     templateId: ID
-    templateDefaultWidgetResponseId: ID
+    templateInstanceId: ID
     workFlowFormResponseParentId: ID
     values: [ValueInput]
     options: AWSJSON
@@ -59,7 +59,7 @@ type Value @aws_api_key @aws_cognito_user_pools {
   media: [Media]
   values: [String]
   template: Template
-  page: Page
+  templateInstance: TemplateInstance
   form: Form
   response: Response
   options: AWSJSON
@@ -75,7 +75,7 @@ input ValueInput {
   media: [MediaInput]
   values: [String]
   template: ID
-  page: ID
+  templateInstance: ID
   form: ID
   response: ID
   options: AWSJSON
@@ -86,7 +86,7 @@ type Response @aws_api_key @aws_cognito_user_pools {
   count: Int
   formId: ID
   templateId: ID
-  templateDefaultWidgetResponseId: ID
+  templateInstanceId: ID
   workFlowFormResponseParentId: ID
   values: [Value]
   options: AWSJSON
@@ -101,7 +101,7 @@ type Response2 @aws_api_key @aws_cognito_user_pools {
   count: Int
   formId: Form
   templateId: ID
-  templateDefaultWidgetResponseId: ID
+  templateInstanceId: ID
   workFlowFormResponseParentId: ID
   values: [Value]
   createdBy: Response

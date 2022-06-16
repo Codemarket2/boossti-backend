@@ -1,7 +1,7 @@
 import { DB } from '../utils/DB';
 import { RoleModel } from './utils/roleSchema';
 import { getCurrentUser } from '../utils/authentication';
-import { AppSyncEvent } from '../utils/cutomTypes';
+import { AppSyncEvent } from '../utils/customTypes';
 import { userPopulate } from '../utils/populate';
 import { User } from '../user/utils/userModel';
 import { FormModel } from '../form/utils/formModel';

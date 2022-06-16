@@ -1,15 +1,25 @@
 type Query {
   getTemplates(page: Int, limit: Int, active: Boolean, search: String): Templates
   getMenuTemplates: [Template]
-  getPages(page: Int, limit: Int, active: Boolean, search: String, template: ID): Pages
-    @aws_api_key
-    @aws_cognito_user_pools
+  getTemplateInstances(
+    page: Int
+    limit: Int
+    active: Boolean
+    search: String
+    template: ID
+  ): TemplateInstances @aws_api_key @aws_cognito_user_pools
   getTemplate(_id: ID!): Template
-  getPage(_id: ID!): Page
+  getTemplateInstance(_id: ID!): TemplateInstance
   getTemplateBySlug(slug: String!): Template @aws_api_key @aws_cognito_user_pools
-  getPageBySlug(slug: String!): Page @aws_api_key @aws_cognito_user_pools
+  getTemplateInstanceBySlug(slug: String!): TemplateInstance @aws_api_key @aws_cognito_user_pools
   getMentionItems(search: String): [MentionItems]
-  getPageMentions(_id: ID!, page: Int, limit: Int, active: Boolean, search: String): Pages
+  getTemplateInstanceMentions(
+    _id: ID!
+    page: Int
+    limit: Int
+    active: Boolean
+    search: String
+  ): TemplateInstances
 }
 
 type Mutation {
@@ -31,14 +41,14 @@ type Mutation {
     options: AWSJSON
   ): Template
   deleteTemplate(_id: ID!): String
-  createPage(
+  createTemplateInstance(
     template: ID!
     title: String!
     description: String
     media: [MediaInput]
     active: Boolean
-  ): Page
-  updatePage(
+  ): TemplateInstance
+  updateTemplateInstance(
     _id: ID!
     template: ID
     title: String
@@ -50,15 +60,17 @@ type Mutation {
     authenticateUser: Boolean
     options: AWSJSON
     values: [ValueInput]
-  ): Page
-  deletePage(_id: ID!): String
+  ): TemplateInstance
+  deleteTemplateInstance(_id: ID!): String
 }
 
 type Subscription {
   addedTemplate: Template @aws_subscribe(mutations: ["createTemplate", "updateTemplate"])
   updatedTemplate(_id: ID!): Template @aws_subscribe(mutations: ["updateTemplate"])
-  addedPage: Page @aws_subscribe(mutations: ["createPage", "updatePage"])
-  updatedPage(_id: ID!): Page @aws_subscribe(mutations: ["updatePage"])
+  addedTemplateInstance: TemplateInstance
+    @aws_subscribe(mutations: ["createTemplateInstance", "updateTemplateInstance"])
+  updatedTemplateInstance(_id: ID!): TemplateInstance
+    @aws_subscribe(mutations: ["updateTemplateInstance"])
 }
 
 type Templates {
@@ -81,8 +93,8 @@ type Template @aws_api_key @aws_cognito_user_pools {
   createdBy: Response
 }
 
-type Pages @aws_api_key @aws_cognito_user_pools {
-  data: [Page]
+type TemplateInstances @aws_api_key @aws_cognito_user_pools {
+  data: [TemplateInstance]
   count: Int
 }
 
@@ -93,14 +105,14 @@ type MentionItems {
   type: String
 }
 
-type Page @aws_api_key @aws_cognito_user_pools {
+type TemplateInstance @aws_api_key @aws_cognito_user_pools {
   _id: ID
-  title: String
-  slug: String
+  # title: String
+  # slug: String
+  # description: String
+  # media: [Media]
   authenticateUser: Boolean
-  description: String
   active: Boolean
-  media: [Media]
   fields: [Field2]
   template: Template
   options: AWSJSON
