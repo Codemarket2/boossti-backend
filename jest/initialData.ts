@@ -44,7 +44,7 @@ export const usersForm = {
         multipleValues: true,
         required: false,
         formField: '622bc280ab3639752ccd94fc',
-        optionsTemplate: 'existingForm',
+        optionsTemplate: 'response',
         hidden: false,
       },
       form: '622bc1c5f256f600095a529f',

@@ -238,7 +238,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
 
           const relationFieldIds: string[] = [];
           form?.fields?.forEach((field) => {
-            if (field?.fieldType === 'existingForm' && !field?.options?.selectItem) {
+            if (field?.fieldType === 'response' && !field?.options?.selectItem) {
               relationFieldIds.push(field?._id?.toString());
             }
           });
