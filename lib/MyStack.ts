@@ -11,10 +11,7 @@ export default class MyStack extends sst.Stack {
   constructor(scope: sst.App, id: string, props?: sst.StackProps) {
     super(scope, id, props);
 
-    const SENDER_EMAIL = StringParameter.valueForStringParameter(
-      this,
-      '/codemarket/default/senderEmail',
-    );
+    const SENDER_EMAIL = StringParameter.valueForStringParameter(this, '/boossti/sender-email');
     const EMAIL_VERIFICATION_API = StringParameter.valueForStringParameter(
       this,
       '/boossti/emailverification/apiKey',
@@ -27,7 +24,7 @@ export default class MyStack extends sst.Stack {
       this,
       '/boossti/form-slug/users',
     );
-    const USER_POOL_ID = StringParameter.valueForStringParameter(this, '/vijaa/userpoolId');
+    const USER_POOL_ID = StringParameter.valueForStringParameter(this, '/boossti/userpool-id');
     const userPol = UserPool.fromUserPoolId(this, 'UserPool', USER_POOL_ID);
 
     // Create the AppSync GraphQL API
