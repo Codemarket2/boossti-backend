@@ -7,9 +7,10 @@ const userForm = {
   slug: 'users',
   fields: [
     { fieldType: 'email', label: 'Email', options: { default: true, required: true } },
-    { fieldType: 'text', label: 'First name' },
-    { fieldType: 'text', label: 'Last name' },
+    { fieldType: 'text', label: 'First name', options: { required: true } },
+    { fieldType: 'text', label: 'Last name', options: { required: true } },
   ],
+  settings: { system: true },
 };
 
 const createSystemForm = async () => {
