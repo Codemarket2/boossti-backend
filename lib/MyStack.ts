@@ -1,5 +1,5 @@
 import * as sst from '@serverless-stack/resources';
-import { StringParameter } from '@aws-cdk/aws-ssm';
+import { StringParameter, ParameterType, ParameterTier } from '@aws-cdk/aws-ssm';
 import { AuthorizationType, UserPoolDefaultAction } from '@aws-cdk/aws-appsync';
 import { UserPool } from '@aws-cdk/aws-cognito';
 import { Expiration, Duration } from '@aws-cdk/core';
@@ -12,6 +12,14 @@ export default class MyStack extends sst.Stack {
     super(scope, id, props);
 
     const SENDER_EMAIL = StringParameter.valueForStringParameter(this, '/boossti/sender-email');
+    // const GRAPHQL_API_URL = StringParameter.valueForStringParameter(
+    //   this,
+    //   `/boossti/graphql-api-url/${scope.stage}`,
+    // );
+    // const GRAPHQL_API_KEY = StringParameter.valueForStringParameter(
+    //   this,
+    //   `/boossti/graphql-api-key/${scope.stage}`,
+    // );
     const EMAIL_VERIFICATION_API = StringParameter.valueForStringParameter(
       this,
       '/boossti/emailverification/apiKey',
@@ -83,6 +91,22 @@ export default class MyStack extends sst.Stack {
     api.attachPermissions(sst.PermissionType.ALL);
     csvFunction.attachPermissions(sst.PermissionType.ALL);
 
+    // const graphqlApiUrl = new StringParameter(this, scope.stage, {
+    //   parameterName: `/boossti/graphql-api-url/${scope.stage}`,
+    //   stringValue: api.graphqlApi.graphqlUrl,
+    //   description: 'Graphql api url',
+    //   type: ParameterType.STRING,
+    //   tier: ParameterTier.STANDARD,
+    // });
+
+    // const graphqlApiKey = new StringParameter(this, scope.stage, {
+    //   parameterName: `/boossti/graphql-api-key/${scope.stage}`,
+    //   stringValue: api.graphqlApi.graphqlUrl,
+    //   description: 'Graphql api key',
+    //   type: ParameterType.STRING,
+    //   tier: ParameterTier.STANDARD,
+    // });
+
     // Show the AppSync API Id in the output
     this.addOutputs({
       ApiId: api.graphqlApi.apiId,
@@ -90,6 +114,7 @@ export default class MyStack extends sst.Stack {
       // @ts-expect-error because some api will not have apiKey
       ApiKey: api.graphqlApi.apiKey,
       FunctionName: csvFunction.functionName,
+      // graphqlURL: graphqlURL.stringValue,
     });
   }
 }
