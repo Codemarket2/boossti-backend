@@ -125,6 +125,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           workFlowFormResponseParentId = null,
           templateId,
           templateDefaultWidgetResponseId,
+          valueFilter,
         } = args;
         let filter: any = { formId };
         if (templateDefaultWidgetResponseId) {
@@ -138,6 +139,9 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         }
         if (onlyMy && user?._id) {
           filter.createdBy = user?._id;
+        }
+        if (valueFilter) {
+          filter = { ...filter, ...valueFilter };
         }
         if (search && formField) {
           filter = {
@@ -158,7 +162,6 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           .limit(limit * 1)
           .skip((page - 1) * limit);
         const count = await ResponseModel.countDocuments(filter);
-        // debugger;
         return {
           data,
           count,
