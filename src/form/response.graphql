@@ -25,16 +25,21 @@ type Query {
 type Mutation {
   createResponse(
     formId: ID!
-    templateId: ID
+    # templateId: ID
+    templates: [ResponseTemplateInput]
     templateDefaultWidgetResponseId: ID
     workFlowFormResponseParentId: ID
     values: [ValueInput]
     options: AWSJSON
   ): Response @aws_api_key @aws_cognito_user_pools
-  updateResponse(_id: ID!, formId: ID, values: [ValueInput]): Response
-    @aws_api_key
-    @aws_cognito_user_pools
-  deleteResponse(_id: ID!): ID! @aws_api_key @aws_cognito_user_pools
+  updateResponse(
+    _id: ID!
+    formId: ID
+    values: [ValueInput]
+    templates: [ResponseTemplateInput]
+    newTemplates: [ResponseTemplateInput]
+  ): Response @aws_api_key @aws_cognito_user_pools
+  deleteResponse(_id: ID!, templateId: ID): ID! @aws_api_key @aws_cognito_user_pools
   createBulkResponses(
     formId: ID!
     fileUrl: String!
@@ -82,11 +87,26 @@ input ValueInput {
   options: AWSJSON
 }
 
+input ResponseTemplateInput {
+  _id: ID
+  template: ID!
+  user: ID
+  createdAt: AWSDateTime
+}
+
+type ResponseTemplate {
+  _id: ID
+  template: Template
+  user: Response
+  createdAt: AWSDateTime
+}
+
 type Response @aws_api_key @aws_cognito_user_pools {
   _id: ID
   count: Int
   formId: ID
-  templateId: ID
+  templates: [ResponseTemplate]
+  # templateId: ID
   templateDefaultWidgetResponseId: ID
   workFlowFormResponseParentId: ID
   values: [Value]
@@ -101,7 +121,8 @@ type Response2 @aws_api_key @aws_cognito_user_pools {
   _id: ID
   count: Int
   formId: Form
-  templateId: ID
+  templates: [ResponseTemplate]
+  # templateId: ID
   templateDefaultWidgetResponseId: ID
   workFlowFormResponseParentId: ID
   values: [Value]

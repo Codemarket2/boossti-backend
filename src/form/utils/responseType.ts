@@ -2,9 +2,14 @@ import { IMedia, ISchema } from '../../utils/cutomTypes';
 
 export interface IResponse extends ISchema {
   formId: any;
-  parentId: string[];
   count: number;
-  values: [IValue];
+  templates: ITemplate[];
+  values: IValue[];
+}
+
+export interface ITemplate extends ISchema {
+  template: string;
+  user: string;
 }
 
 export interface IValue {

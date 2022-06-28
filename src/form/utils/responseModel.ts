@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose';
 import { userPopulate } from '../../utils/populate';
 import { extendSchema } from '../../utils/extendSchema';
-import { IResponse, IValue } from './responseType';
+import { IResponse, IValue, ITemplate } from './responseType';
 
 export const valueSchema = new Schema<IValue>({
   field: {
@@ -39,16 +39,31 @@ export const valueSchema = new Schema<IValue>({
   options: { type: Schema.Types.Mixed, default: { option: false } },
 });
 
+const templateSchema = new Schema<ITemplate>(
+  {
+    template: {
+      type: Schema.Types.ObjectId,
+      ref: 'Template',
+    },
+    user: {
+      type: Schema.Types.ObjectId,
+      ref: 'Response',
+    },
+  },
+  { timestamps: true },
+);
+
 export const responseSchema = extendSchema({
   formId: {
     type: Schema.Types.ObjectId,
     required: true,
     ref: 'Form',
   },
-  templateId: {
-    type: Schema.Types.ObjectId,
-    ref: 'Template',
-  },
+  templates: { type: [templateSchema], default: [] },
+  // templateId: {
+  //   type: Schema.Types.ObjectId,
+  //   ref: 'Template',
+  // },
   templateDefaultWidgetResponseId: {
     type: Schema.Types.ObjectId,
     ref: 'Response',
@@ -90,10 +105,8 @@ export const valuesPopulate = [
 
 export const responsePopulate = [
   userPopulate,
-  // {
-  //   path: 'parentId',
-  //   select: 'types title media slug',
-  // },
+  'templates.template',
+  'templates.user',
   ...valuesPopulate,
 ];
 
