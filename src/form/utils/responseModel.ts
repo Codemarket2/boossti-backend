@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose';
 import { userPopulate } from '../../utils/populate';
 import { extendSchema } from '../../utils/extendSchema';
-import { IResponse, IValue, ITemplate } from './responseType';
+import { IResponse, IValue } from './responseType';
 
 export const valueSchema = new Schema<IValue>({
   field: {
@@ -39,32 +39,17 @@ export const valueSchema = new Schema<IValue>({
   options: { type: Schema.Types.Mixed, default: { option: false } },
 });
 
-const templateSchema = new Schema<ITemplate>(
-  {
-    template: {
-      type: Schema.Types.ObjectId,
-      ref: 'Template',
-    },
-    user: {
-      type: Schema.Types.ObjectId,
-      ref: 'Response',
-    },
-  },
-  { timestamps: true },
-);
-
 export const responseSchema = extendSchema({
   formId: {
     type: Schema.Types.ObjectId,
     required: true,
     ref: 'Form',
   },
-  templates: { type: [templateSchema], default: [] },
-  // templateId: {
-  //   type: Schema.Types.ObjectId,
-  //   ref: 'Template',
-  // },
-  templateDefaultWidgetResponseId: {
+  appId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Response',
+  },
+  installId: {
     type: Schema.Types.ObjectId,
     ref: 'Response',
   },
@@ -103,12 +88,7 @@ export const valuesPopulate = [
   },
 ];
 
-export const responsePopulate = [
-  userPopulate,
-  'templates.template',
-  'templates.user',
-  ...valuesPopulate,
-];
+export const responsePopulate = [userPopulate, ...valuesPopulate];
 
 export const myResponsePopulate = [
   ...responsePopulate,

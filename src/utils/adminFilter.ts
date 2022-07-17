@@ -1,4 +1,4 @@
-import { IIdentity } from './cutomTypes';
+import { IIdentity } from './customTypes';
 export default function getAdminFilter(identity: IIdentity, user: any) {
   const filter: any = {};
 

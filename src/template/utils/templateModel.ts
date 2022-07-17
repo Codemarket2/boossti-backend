@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose';
-import { ISchema, IMedia } from '../../utils/cutomTypes';
+import { ISchema, IMedia } from '../../utils/customTypes';
 import { fieldSchema, fieldsPopulate } from '../../form/utils/formModel';
 import { userPopulate } from '../../utils/populate';
 import { extendSchema } from '../../utils/extendSchema';

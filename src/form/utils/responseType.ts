@@ -1,15 +1,11 @@
-import { IMedia, ISchema } from '../../utils/cutomTypes';
+import { IMedia, ISchema } from '../../utils/customTypes';
 
 export interface IResponse extends ISchema {
   formId: any;
+  appId: string;
+  installId: string;
   count: number;
-  templates: ITemplate[];
   values: IValue[];
-}
-
-export interface ITemplate extends ISchema {
-  template: string;
-  user: string;
 }
 
 export interface IValue {

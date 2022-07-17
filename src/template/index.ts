@@ -3,7 +3,7 @@ import { DB } from '../utils/DB';
 import Template, { templatePopulate } from './utils/templateModel';
 import Page, { pagePopulate } from './utils/pageModel';
 import { getCurrentUser } from '../utils/authentication';
-import { AppSyncEvent } from '../utils/cutomTypes';
+import { AppSyncEvent } from '../utils/customTypes';
 // import getAdminFilter from '../utils/adminFilter';
 import { User } from '../user/utils/userModel';
 import { runInTransaction } from '../utils/runInTransaction';

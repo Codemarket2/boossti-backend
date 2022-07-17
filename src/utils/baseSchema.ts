@@ -1,5 +1,5 @@
 import { Schema } from 'mongoose';
-import { ISchema } from './cutomTypes';
+import { ISchema } from './customTypes';
 
 export const baseSchema = new Schema<ISchema>(
   {

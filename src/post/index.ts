@@ -5,7 +5,7 @@ import { getCurrentUser } from '../utils/authentication';
 import { Post } from './utils/postModel';
 import { getTags } from './utils/getTags';
 import { User } from '../user/utils/userModel';
-import { AppSyncEvent } from '../utils/cutomTypes';
+import { AppSyncEvent } from '../utils/customTypes';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {

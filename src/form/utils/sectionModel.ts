@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose';
-import { ISchema } from '../../utils/cutomTypes';
+import { ISchema } from '../../utils/customTypes';
 import { fieldSchema, fieldsPopulate } from '../../form/utils/formModel';
 import { valueSchema, valuesPopulate } from '../../form/utils/responseModel';
 import { IValue } from './responseType';

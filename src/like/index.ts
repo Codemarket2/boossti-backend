@@ -1,9 +1,9 @@
 import { DB } from '../utils/DB';
 import { getCurrentUser } from '../utils/authentication';
-import { AppSyncEvent } from '../utils/cutomTypes';
-import { User } from '../user/utils/userModel';
-import { LookoutMetrics } from 'aws-sdk';
-import { Like } from './utils/likeModel';
+import { AppSyncEvent } from '../utils/customTypes';
+import { LikeModel } from './utils/likeModel';
+import { runInTransaction } from '../utils/runInTransaction';
+import { userPopulate } from '../utils/populate';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -12,54 +12,43 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     const { identity } = event;
     let args = { ...event.arguments };
     const user = await getCurrentUser(identity);
-    const userSelect = 'name picture _id';
-    let data: any = [];
-    const { page = 1, limit = 10 } = args;
-    let tempLikes: any;
-    const userPopulate = {
-      path: 'createdBy',
-      select: userSelect,
-    };
+
     if (fieldName.toLocaleLowerCase().includes('create') && user && user._id) {
       args = { ...args, createdBy: user._id };
-    } else if (fieldName.toLocaleLowerCase().includes('update') && user && user._id) {
-      args = { ...args, updatedBy: user._id };
     }
 
     switch (fieldName) {
       case 'createLike': {
-        const like = await Like.create({
-          ...args,
-          like: true,
+        return await runInTransaction({
+          action: 'CREATE',
+          Model: LikeModel,
+          args,
+          populate: userPopulate,
+          user,
         });
-        return await like.populate(userPopulate); //.execPopulate();
       }
       case 'updateLike': {
-        tempLikes = await Like.findOneAndUpdate(
-          { _id: args._id, createdBy: user._id },
-          { like: false, updatedAt: new Date(), updatedBy: user._id },
-          {
-            new: true,
-            runValidators: true,
-          },
-        );
-        return await tempLikes.populate(userPopulate); //.execPopulate();
+        return await runInTransaction({
+          action: 'UPDATE',
+          Model: LikeModel,
+          args,
+          populate: userPopulate,
+          user,
+        });
       }
       case 'getLike': {
-        const getLike = await Like.findById(args._id).populate(userPopulate);
-
-        return await getLike;
+        return await LikeModel.findById(args._id).populate(userPopulate);
       }
-      case 'getLikesByParentId': {
-        await User.findById(args.userId);
-        data = await Like.find({
-          parentId: args.parentId,
+      case 'getLikesByThreadId': {
+        const { page = 1, limit = 10 } = args;
+        const data = await LikeModel.find({
+          threadId: args.threadId,
         })
           .populate(userPopulate)
           .limit(limit * 1)
           .skip((page - 1) * limit);
-        const count = await Like.countDocuments({
-          parentId: args.parentId,
+        const count = await LikeModel.countDocuments({
+          threadId: args.threadId,
         });
         return {
           data,
@@ -67,16 +56,21 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         };
       }
       case 'deleteLike': {
-        await Like.findOneAndDelete({
-          parentId: args.parentId,
-          createdBy: user._id,
-        });
-        return true;
+        const like = await LikeModel.findOne({ createdBy: user?._id, threadId: args?.threadId });
+        if (like?._id) {
+          await runInTransaction({
+            action: 'DELETE',
+            Model: LikeModel,
+            args: { _id: like?._id },
+            user,
+          });
+          return like._id;
+        }
+        return null;
       }
-      default:
-        await Like.findOne();
-        await User.findOne();
+      default: {
         throw new Error('Something went wrong! Please check your Query or Mutation');
+      }
     }
   } catch (error) {
     const error2 = error;

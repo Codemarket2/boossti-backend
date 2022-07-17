@@ -6,7 +6,7 @@ import { SectionModel, sectionPopulate } from './utils/sectionModel';
 import Template from '../template/utils/templateModel';
 import Page from '../template/utils/pageModel';
 import { getCurrentUser } from '../utils/authentication';
-import { AppSyncEvent } from '../utils/cutomTypes';
+import { AppSyncEvent } from '../utils/customTypes';
 import { runFormActions } from './utils/actions';
 // import { sendResponseNotification } from './utils/responseNotification';
 import getAdminFilter from '../utils/adminFilter';
@@ -123,16 +123,16 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           formField,
           onlyMy = false,
           workFlowFormResponseParentId = null,
-          templateId,
-          templateDefaultWidgetResponseId,
           valueFilter,
+          appId,
+          installId,
         } = args;
         let filter: any = { formId };
-        if (templateDefaultWidgetResponseId) {
-          filter = { ...filter, templateDefaultWidgetResponseId };
+        if (appId) {
+          filter = { ...filter, appId };
         }
-        if (templateId) {
-          filter = { ...filter, 'templates.template': templateId };
+        if (installId) {
+          filter = { ...filter, installId };
         }
         if (workFlowFormResponseParentId) {
           filter = { ...filter, workFlowFormResponseParentId };
@@ -162,12 +162,6 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       }
       case 'createResponse': {
         args = { ...args, count: 1 };
-        if (args?.templates?.length > 0) {
-          args.templates = args?.templates?.map((template) => ({
-            template: template?.template,
-            user: user?._id,
-          }));
-        }
         const lastResponse = await ResponseModel.findOne({ formId: args.formId }).sort('-count');
         if (lastResponse) {
           args = { ...args, count: lastResponse?.count + 1 };
@@ -203,28 +197,6 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         return response;
       }
       case 'updateResponse': {
-        let templates: any = [];
-        if (args?.templates?.length > 0) {
-          templates = [...args?.templates];
-          if (args?.newTemplates?.length > 0) {
-            args?.newTemplates?.forEach((newTemplate) => {
-              const templateExist = templates.find(
-                (t) =>
-                  t?.template?.toString() === newTemplate?.template?.toString() &&
-                  t?.user?.toString() === user?._id?.toString(),
-              );
-              if (!templateExist) {
-                templates.push({ template: newTemplate?.template, user: user?._id });
-              }
-            });
-          }
-        } else if (args?.newTemplates?.length > 0) {
-          templates = args?.newTemplates?.map((newTemplate) => ({
-            template: newTemplate?.template,
-            user: user?._id,
-          }));
-        }
-        args = { ...args, templates };
         const callback = async (session, response) => {
           const res: any = await FormModel.findById(response.formId).populate(formPopulate);
           const form = { ...res.toObject() };
@@ -253,22 +225,6 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         return response;
       }
       case 'deleteResponse': {
-        let updateResponse;
-        if (args.templateId) {
-          let oldResponse: any = await ResponseModel.findById(args._id);
-          if (oldResponse?.templates?.length > 1) {
-            oldResponse = oldResponse?.templates?.filter(
-              (t) =>
-                !(
-                  t?.template?.toString() === args.templateId?.toString() &&
-                  t?.user?.toString() === user?._id?.toString()
-                ),
-            );
-            if (oldResponse?.templates?.length > 0) {
-              updateResponse = oldResponse;
-            }
-          }
-        }
         const callback = async (session, response) => {
           const res: any = await FormModel.findById(response.formId).populate(formPopulate);
           const form: IForm = { ...res?.toObject() };
@@ -305,28 +261,15 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           });
           // await sendResponseNotification(form, response);
         };
-        let response;
-        if (updateResponse) {
-          response = await runInTransaction(
-            {
-              action: 'UPDATE',
-              Model: ResponseModel,
-              args: updateResponse,
-              user,
-            },
-            callback,
-          );
-        } else {
-          response = await runInTransaction(
-            {
-              action: 'DELETE',
-              Model: ResponseModel,
-              args,
-              user,
-            },
-            callback,
-          );
-        }
+        const response = await runInTransaction(
+          {
+            action: 'DELETE',
+            Model: ResponseModel,
+            args,
+            user,
+          },
+          callback,
+        );
         return response._id;
       }
       case 'getMyResponses': {

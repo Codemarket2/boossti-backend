@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose';
-import { ISchema } from '../../utils/cutomTypes';
+import { ISchema } from '../../utils/customTypes';
 import { extendSchema } from '../../utils/extendSchema';
 import { userPopulate } from '../../utils/populate';
 

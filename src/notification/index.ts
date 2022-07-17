@@ -1,4 +1,4 @@
-import { AppSyncEvent } from '../utils/cutomTypes';
+import { AppSyncEvent } from '../utils/customTypes';
 import { NotificationModel } from './utils/notificationSchema';
 import { sendNotification } from './utils/sendNotification';
 import { DB } from '../utils/DB';

@@ -51,7 +51,11 @@ export const getUserAttributes = (userForm: any, userResponse) => {
   )?.value;
   const lastName = getFieldValueByLabel('Last Name', userForm?.fields, userResponse?.values)?.value;
   const email = getFieldValueByLabel('email', userForm?.fields, userResponse?.values)?.value;
-  return { firstName, lastName, email };
+  let name = `${firstName}`;
+  if (lastName) {
+    name += ` ${lastName}`;
+  }
+  return { firstName, lastName, email, name };
 };
 
 interface IReplaceVariablePayload {

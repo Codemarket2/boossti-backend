@@ -1,7 +1,7 @@
 import { DB } from '../utils/DB';
 import { AuditLogModel, auditLogPopulate } from './utils/auditLogModel';
 // import { getCurrentUser } from '../utils/authentication';
-import { AppSyncEvent } from '../utils/cutomTypes';
+import { AppSyncEvent } from '../utils/customTypes';
 import { Types } from 'mongoose';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {

@@ -1,5 +1,5 @@
 import { getCurrentUser } from '../utils/authentication';
-import { AppSyncEvent } from '../utils/cutomTypes';
+import { AppSyncEvent } from '../utils/customTypes';
 import { DB } from '../utils/DB';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
