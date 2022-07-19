@@ -9,8 +9,8 @@ export const getFieldValue = (fieldId, values) => {
 };
 
 export const getFieldValueByLabel = (label, fields, values) => {
-  const fieldId = fields.find((f) => f?.label?.toLowerCase() === label?.toLowerCase())?._id;
-  const value = values.find((v) => v?.field?.toString() === fieldId?.toString());
+  const fieldId = fields?.find((f) => f?.label?.toLowerCase() === label?.toLowerCase())?._id;
+  const value = values?.find((v) => v?.field?.toString() === fieldId?.toString());
   return value;
 };
 

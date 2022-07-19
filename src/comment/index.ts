@@ -6,6 +6,7 @@ import { LikeModel } from '../like/utils/likeModel';
 // import { sendCommentNotification } from './utils/commentNotification';
 import { userPopulate } from '../utils/populate';
 import { runInTransaction } from '../utils/runInTransaction';
+import { sendCommentNotification } from './utils/commentNotification';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -67,13 +68,19 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         };
       }
       case 'createComment': {
-        return await runInTransaction({
-          action: 'CREATE',
-          Model: CommentModel,
-          args,
-          populate: userPopulate,
-          user,
-        });
+        const callback = async (session, comment) => {
+          await sendCommentNotification(session, comment);
+        };
+        return await runInTransaction(
+          {
+            action: 'CREATE',
+            Model: CommentModel,
+            args,
+            populate: userPopulate,
+            user,
+          },
+          callback,
+        );
       }
       case 'updateComment': {
         return await runInTransaction({

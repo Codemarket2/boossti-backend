@@ -20,6 +20,7 @@ export default class MyStack extends sst.Stack {
     //   this,
     //   `/boossti/graphql-api-key/${scope.stage}`,
     // );
+    const FRONTEND_URL = StringParameter.valueForStringParameter(this, '/boossti/frontend-url');
     const EMAIL_VERIFICATION_API = StringParameter.valueForStringParameter(
       this,
       '/boossti/emailverification/apiKey',
@@ -58,7 +59,7 @@ export default class MyStack extends sst.Stack {
         },
       },
       defaultFunctionProps: {
-        timeout: 30,
+        timeout: 60,
         environment: {
           SENDER_EMAIL: SENDER_EMAIL || '',
           DATABASE: `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@codemarket-staging.k16z7.mongodb.net/${scope.stage}?retryWrites=true&w=majority`,
@@ -68,6 +69,7 @@ export default class MyStack extends sst.Stack {
           GRAPHQL_API_KEY: process.env.GRAPHQL_API_KEY || '',
           ONESIGNAL_API_KEY: process.env.ONESIGNAL_API_KEY || '',
           ONESIGNAL_APP_ID: process.env.ONESIGNAL_APP_ID || '',
+          FRONTEND_URL,
           STAGE: scope.stage,
           USERS_FORM_SLUG,
         },

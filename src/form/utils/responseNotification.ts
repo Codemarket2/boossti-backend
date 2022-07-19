@@ -1,28 +1,46 @@
-import { sendNotification } from '../../notification/utils/sendNotification';
+import { ClientSession } from 'mongoose';
+// import { sendNotification } from '../../notification/utils/sendNotification';
+import { sendEmail } from '../../utils/email';
 import { getUserAttributes } from './actionHelper';
 import { FormModel } from './formModel';
+import { IForm } from './formType';
+import { IResponse } from './responseType';
 
-export const sendResponseNotification = async (form: any, response: any) => {
-  if (!(process.env.NODE_ENV === 'test')) {
-    const { createdBy } = form;
-    const userForm = FormModel.findOne({ slug: process.env.USERS_FORM_SLUG });
-    const { name } = getUserAttributes(userForm, createdBy);
-    const submittedBy = name || 'UnAuthenticated user';
+interface IPayload {
+  session: ClientSession;
+  form: IForm;
+  response: IResponse;
+}
 
-    const description = `${submittedBy} has submitted form <i>${form?.name}</i>`;
-
-    const payload = {
-      userIds: [createdBy?._id],
-      title: form.name,
-      description,
-      link: `/forms/${form?.slug}/response/${response?.count}`,
-      formId: form._id,
-      threadId: form._id,
-      parentId: form.parentId,
-    };
-
-    if (payload?.userIds?.length > 0) {
-      await sendNotification(payload);
-    }
+export const sendResponseNotification = async ({ session, form, response }: IPayload) => {
+  if (
+    process.env.NODE_ENV === 'test' ||
+    !form?.createdBy?._id ||
+    form?.createdBy?._id?.toString() === response?.createdBy?._id?.toString()
+  ) {
+    return;
   }
+  const userForm = await FormModel.findOne({ slug: process.env.USERS_FORM_SLUG }).session(session);
+
+  const formOwner = getUserAttributes(userForm, form?.createdBy);
+  const responseOwner = getUserAttributes(userForm, response?.createdBy);
+  const responseOwnerName = responseOwner?.name || 'UnAuthenticated user';
+
+  const body = `Hello ${formOwner?.name}<br/>
+      <p>
+      <b>${responseOwnerName}</b> has submitted response on your <b>${form?.name} form</b>.
+      <br/>
+      <a href="${process.env.FRONTEND_URL}/forms/${form?.slug}/response/${response?.count}"><button>View Response</button></a>
+      </p>`;
+  const to: string[] = [];
+  if (formOwner?.email) {
+    to.push(formOwner?.email);
+  }
+  const emailPayload = {
+    from: `Boossti <${process.env.SENDER_EMAIL}>`,
+    to,
+    body,
+    subject: `New Response on ${form?.name} form`,
+  };
+  if (emailPayload?.to?.length > 0 && emailPayload?.from) await sendEmail(emailPayload);
 };

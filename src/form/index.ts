@@ -8,7 +8,7 @@ import Page from '../template/utils/pageModel';
 import { getCurrentUser } from '../utils/authentication';
 import { AppSyncEvent } from '../utils/customTypes';
 import { runFormActions } from './utils/actions';
-// import { sendResponseNotification } from './utils/responseNotification';
+import { sendResponseNotification } from './utils/responseNotification';
 import getAdminFilter from '../utils/adminFilter';
 import { fileParser } from './utils/readCsvFile';
 import { runInTransaction } from '../utils/runInTransaction';
@@ -182,7 +182,8 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
             args,
             session,
           });
-          //   await sendResponseNotification(form, response);
+
+          await sendResponseNotification({ session, form, response });
         };
         const response = await runInTransaction(
           {

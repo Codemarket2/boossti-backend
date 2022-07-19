@@ -74,10 +74,10 @@ export const valuesPopulate = [
     path: 'values.template',
     select: 'title slug media',
   },
-  {
-    path: 'values.page',
-    select: 'types title media slug',
-  },
+  // {
+  //   path: 'values.page',
+  //   select: 'types title media slug',
+  // },
   {
     path: 'values.form',
     select: 'name',
@@ -94,6 +94,6 @@ export const myResponsePopulate = [
   ...responsePopulate,
   {
     path: 'formId',
-    select: 'name',
+    select: 'name slug',
   },
 ];
