@@ -1,7 +1,7 @@
 import { DB } from '../utils/DB';
 import { getCurrentUser } from '../utils/authentication';
 import { AppSyncEvent } from '../utils/customTypes';
-import { CommentModel } from './utils/commentModel';
+import { CommentModel, IComment } from './utils/commentModel';
 import { LikeModel } from '../like/utils/likeModel';
 // import { sendCommentNotification } from './utils/commentNotification';
 import { userPopulate } from '../utils/populate';
@@ -37,12 +37,12 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           ],
         });
         const likeCount = await LikeModel.countDocuments({
-          parentId: args.threadId,
+          threadId: args.threadId,
         });
         let likedByUser = false;
         if (user?._id) {
           const tempLike = await LikeModel.findOne({
-            parentId: args.threadId,
+            threadId: args.threadId,
             createdBy: user._id,
           });
           if (tempLike) {
@@ -52,16 +52,22 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         return { commentCount, likeCount, likedByUser };
       }
       case 'getCommentsByThreadId': {
-        const { page = 1, limit = 10 } = args;
-        const data = await CommentModel.find({
-          threadId: args.threadId,
-        })
+        const { page = 1, limit = 10, commentIds = [] } = args;
+        const filter = { threadId: args.threadId };
+        let data: IComment[] = [];
+        if (commentIds?.length > 0) {
+          data = await CommentModel.find({ ...filter, _id: { $in: commentIds } }).populate(
+            userPopulate,
+          );
+        }
+        const newLimit = limit - data?.length;
+        const newData = await CommentModel.find({ ...filter, _id: { $nin: commentIds } })
           .populate(userPopulate)
-          .limit(limit * 1)
-          .skip((page - 1) * limit);
-        const count = await CommentModel.countDocuments({
-          threadId: args.threadId,
-        });
+          .limit(newLimit * 1)
+          .skip((page - 1) * newLimit)
+          .sort('-createdAt');
+        data = [...data, ...newData];
+        const count = await CommentModel.countDocuments(filter);
         return {
           data,
           count,
@@ -92,12 +98,25 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         });
       }
       case 'deleteComment': {
-        await runInTransaction({
-          action: 'DELETE',
-          Model: CommentModel,
-          args,
-          user,
-        });
+        const callback = async (session, comment) => {
+          if (comment?._id) {
+            await CommentModel.deleteMany({
+              parentIds: { $elemMatch: { $eq: comment?._id } },
+            }).session(session);
+            await LikeModel.deleteMany({
+              threadId: comment?._id,
+            }).session(session);
+          }
+        };
+        await runInTransaction(
+          {
+            action: 'DELETE',
+            Model: CommentModel,
+            args,
+            user,
+          },
+          callback,
+        );
         return args?._id;
       }
       default: {

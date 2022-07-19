@@ -1,6 +1,6 @@
 type Query {
   getComment(_id: ID!): Comment
-  getCommentsByThreadId(threadId: ID!, page: Int, limit: Int): Comments
+  getCommentsByThreadId(threadId: ID!, commentIds: [ID], page: Int, limit: Int): Comments
     @aws_api_key
     @aws_cognito_user_pools
   getActionCounts(threadId: ID!): ActionCounts @aws_api_key @aws_cognito_user_pools
