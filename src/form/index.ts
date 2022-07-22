@@ -36,6 +36,11 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       case 'getForm': {
         return await FormModel.findById(args._id).populate(formPopulate);
       }
+      case 'getFormRelations': {
+        return await FormModel.find({
+          fields: { $elemMatch: { form: args?._id, 'options.twoWayRelationship': true } },
+        }).populate(formPopulate);
+      }
       case 'getFormBySlug': {
         return await FormModel.findOne({ slug: args.slug }).populate(formPopulate);
       }
