@@ -1,12 +1,12 @@
 import { DB } from '../utils/DB';
 import { getCurrentUser } from '../utils/authentication';
-import { AppSyncEvent } from '../utils/cutomTypes';
-import { User } from '../user/utils/userModel';
-import { Post } from '../post/utils/postModel';
-import { Comment } from './utils/commentModel';
-import { Like } from '../like/utils/likeModel';
-import { sendCommentNotification } from './utils/commentNotification';
+import { AppSyncEvent } from '../utils/customTypes';
+import { CommentModel, IComment } from './utils/commentModel';
+import { LikeModel } from '../like/utils/likeModel';
+// import { sendCommentNotification } from './utils/commentNotification';
 import { userPopulate } from '../utils/populate';
+import { runInTransaction } from '../utils/runInTransaction';
+import { sendCommentNotification } from './utils/commentNotification';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -14,48 +14,35 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     const { fieldName } = event.info;
     const { identity } = event;
     let args = { ...event.arguments };
-    let data: any = [];
-    let tempComment: any;
-    const user = await getCurrentUser(identity);
-    const { page = 1, limit = 50 } = args;
 
-    if (fieldName.toLocaleLowerCase().includes('create') && user && user._id) {
+    const user = await getCurrentUser(identity);
+
+    if (fieldName.toLocaleLowerCase().includes('create') && user?._id) {
       args = { ...args, createdBy: user._id };
-    } else if (fieldName.toLocaleLowerCase().includes('update') && user && user._id) {
-      args = { ...args, updatedBy: user._id };
     }
 
     switch (fieldName) {
-      case 'createComment': {
-        let comment = await Comment.create({
-          ...args,
-          createdBy: user._id,
-        });
-        comment = await comment.populate(userPopulate); //.execPopulate();
-        if (!(process.env.NODE_ENV === 'test')) {
-          await sendCommentNotification(comment);
-        }
-        return comment;
-      }
       case 'getComment': {
-        return await Comment.findById(args._id).populate(userPopulate);
+        return await CommentModel.findById(args._id).populate(userPopulate);
       }
       case 'getActionCounts': {
-        let commentCount = await Comment.countDocuments({
-          threadId: args.parentId,
+        const commentCount = await CommentModel.countDocuments({
+          $or: [
+            {
+              threadId: args.threadId,
+            },
+            {
+              parentIds: { $elemMatch: { $eq: args.threadId } },
+            },
+          ],
         });
-        if (commentCount === 0) {
-          commentCount = await Comment.countDocuments({
-            parentId: args.parentId,
-          });
-        }
-        const likeCount = await Like.countDocuments({
-          parentId: args.parentId,
+        const likeCount = await LikeModel.countDocuments({
+          threadId: args.threadId,
         });
         let likedByUser = false;
-        if (user && user._id) {
-          const tempLike = await Like.findOne({
-            parentId: args.parentId,
+        if (user?._id) {
+          const tempLike = await LikeModel.findOne({
+            threadId: args.threadId,
             createdBy: user._id,
           });
           if (tempLike) {
@@ -64,41 +51,77 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         }
         return { commentCount, likeCount, likedByUser };
       }
-      case 'getCommentsByParentID': {
-        await User.findById(args.userId);
-        data = await Comment.find({
-          parentId: args.parentId,
-        })
+      case 'getCommentsByThreadId': {
+        const { page = 1, limit = 10, commentIds = [] } = args;
+        const filter = { threadId: args.threadId };
+        let data: IComment[] = [];
+        if (commentIds?.length > 0) {
+          data = await CommentModel.find({ ...filter, _id: { $in: commentIds } }).populate(
+            userPopulate,
+          );
+        }
+        const newLimit = limit - data?.length;
+        const newData = await CommentModel.find({ ...filter, _id: { $nin: commentIds } })
           .populate(userPopulate)
-          .limit(limit * 1)
-          .skip((page - 1) * limit);
-        const count = await Comment.countDocuments({
-          parentId: args.parentId,
-        });
+          .limit(newLimit * 1)
+          .skip((page - 1) * newLimit)
+          .sort('-createdAt');
+        data = [...data, ...newData];
+        const count = await CommentModel.countDocuments(filter);
         return {
           data,
           count,
         };
       }
-      case 'updateComment': {
-        tempComment = await Comment.findOneAndUpdate(
-          { _id: args._id, createdBy: user._id },
-          { ...args, updatedAt: new Date(), updatedBy: user._id },
+      case 'createComment': {
+        const callback = async (session, comment) => {
+          await sendCommentNotification(session, comment);
+        };
+        return await runInTransaction(
           {
-            new: true,
-            runValidators: true,
+            action: 'CREATE',
+            Model: CommentModel,
+            args,
+            populate: userPopulate,
+            user,
           },
+          callback,
         );
-        return await tempComment.populate(userPopulate); //.execPopulate();
+      }
+      case 'updateComment': {
+        return await runInTransaction({
+          action: 'UPDATE',
+          Model: CommentModel,
+          args,
+          populate: userPopulate,
+          user,
+        });
       }
       case 'deleteComment': {
-        await Comment.findOneAndDelete({ _id: args._id, createdBy: user._id });
-        return true;
+        const callback = async (session, comment) => {
+          if (comment?._id) {
+            await CommentModel.deleteMany({
+              parentIds: { $elemMatch: { $eq: comment?._id } },
+            }).session(session);
+            await LikeModel.deleteMany({
+              threadId: comment?._id,
+            }).session(session);
+          }
+        };
+        await runInTransaction(
+          {
+            action: 'DELETE',
+            Model: CommentModel,
+            args,
+            user,
+          },
+          callback,
+        );
+        return args?._id;
       }
-      default:
-        await Post.findOne();
-        await User.findOne();
+      default: {
         throw new Error('Something went wrong! Please check your Query or Mutation');
+      }
     }
   } catch (error) {
     const error2 = error;

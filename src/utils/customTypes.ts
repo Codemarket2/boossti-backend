@@ -1,4 +1,5 @@
 import { Schema } from 'mongoose';
+import { IResponse } from '../form/utils/responseType';
 
 interface AppSyncIdentityCognito {
   sub: string;
@@ -11,6 +12,7 @@ interface AppSyncIdentityCognito {
   'custom:_id': string;
   name: string;
   picture: string;
+  email: string;
 }
 
 export interface IIdentity {
@@ -28,7 +30,7 @@ export type AppSyncEvent = {
 
 export interface ISchema {
   _id: string;
-  createdBy: Schema.Types.ObjectId;
+  createdBy: IResponse | any;
   updatedBy?: Schema.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;

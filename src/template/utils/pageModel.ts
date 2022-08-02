@@ -1,8 +1,10 @@
 import { Schema, model } from 'mongoose';
-import { ISchema, IMedia } from '../../utils/cutomTypes';
-import { fieldSchema, fieldsPopulate, IField } from '../../form/utils/formModel';
-import { valueSchema, IValue, valuesPopulate } from '../../form/utils/responseModel';
+import { ISchema, IMedia } from '../../utils/customTypes';
+import { fieldSchema, fieldsPopulate } from '../../form/utils/formModel';
+import { valueSchema, valuesPopulate } from '../../form/utils/responseModel';
 import { userPopulate } from '../../utils/populate';
+import { IField } from '../../form/utils/formType';
+import { IValue } from '../../form/utils/responseType';
 
 export interface IPage extends ISchema {
   template: string;

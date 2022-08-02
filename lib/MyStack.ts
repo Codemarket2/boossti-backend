@@ -1,5 +1,5 @@
 import * as sst from '@serverless-stack/resources';
-import { StringParameter } from '@aws-cdk/aws-ssm';
+import { StringParameter, ParameterType, ParameterTier } from '@aws-cdk/aws-ssm';
 import { AuthorizationType, UserPoolDefaultAction } from '@aws-cdk/aws-appsync';
 import { UserPool } from '@aws-cdk/aws-cognito';
 import { Expiration, Duration } from '@aws-cdk/core';
@@ -11,10 +11,16 @@ export default class MyStack extends sst.Stack {
   constructor(scope: sst.App, id: string, props?: sst.StackProps) {
     super(scope, id, props);
 
-    const SENDER_EMAIL = StringParameter.valueForStringParameter(
-      this,
-      '/codemarket/default/senderEmail',
-    );
+    const SENDER_EMAIL = StringParameter.valueForStringParameter(this, '/boossti/sender-email');
+    // const GRAPHQL_API_URL = StringParameter.valueForStringParameter(
+    //   this,
+    //   `/boossti/graphql-api-url/${scope.stage}`,
+    // );
+    // const GRAPHQL_API_KEY = StringParameter.valueForStringParameter(
+    //   this,
+    //   `/boossti/graphql-api-key/${scope.stage}`,
+    // );
+    const FRONTEND_URL = StringParameter.valueForStringParameter(this, '/boossti/frontend-url');
     const EMAIL_VERIFICATION_API = StringParameter.valueForStringParameter(
       this,
       '/boossti/emailverification/apiKey',
@@ -23,7 +29,11 @@ export default class MyStack extends sst.Stack {
       this,
       '/codemarket/sns/originalNumber',
     );
-    const USER_POOL_ID = StringParameter.valueForStringParameter(this, '/vijaa/userpoolId');
+    const USERS_FORM_SLUG = StringParameter.valueForStringParameter(
+      this,
+      '/boossti/form-slug/users',
+    );
+    const USER_POOL_ID = StringParameter.valueForStringParameter(this, '/boossti/userpool-id');
     const userPol = UserPool.fromUserPoolId(this, 'UserPool', USER_POOL_ID);
 
     // Create the AppSync GraphQL API
@@ -49,7 +59,7 @@ export default class MyStack extends sst.Stack {
         },
       },
       defaultFunctionProps: {
-        timeout: 20,
+        timeout: 60,
         environment: {
           SENDER_EMAIL: SENDER_EMAIL || '',
           DATABASE: `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@codemarket-staging.k16z7.mongodb.net/${scope.stage}?retryWrites=true&w=majority`,
@@ -59,7 +69,9 @@ export default class MyStack extends sst.Stack {
           GRAPHQL_API_KEY: process.env.GRAPHQL_API_KEY || '',
           ONESIGNAL_API_KEY: process.env.ONESIGNAL_API_KEY || '',
           ONESIGNAL_APP_ID: process.env.ONESIGNAL_APP_ID || '',
+          FRONTEND_URL,
           STAGE: scope.stage,
+          USERS_FORM_SLUG,
         },
       },
       dataSources: dataSources,
@@ -81,6 +93,22 @@ export default class MyStack extends sst.Stack {
     api.attachPermissions(sst.PermissionType.ALL);
     csvFunction.attachPermissions(sst.PermissionType.ALL);
 
+    // const graphqlApiUrl = new StringParameter(this, scope.stage, {
+    //   parameterName: `/boossti/graphql-api-url/${scope.stage}`,
+    //   stringValue: api.graphqlApi.graphqlUrl,
+    //   description: 'Graphql api url',
+    //   type: ParameterType.STRING,
+    //   tier: ParameterTier.STANDARD,
+    // });
+
+    // const graphqlApiKey = new StringParameter(this, scope.stage, {
+    //   parameterName: `/boossti/graphql-api-key/${scope.stage}`,
+    //   stringValue: api.graphqlApi.graphqlUrl,
+    //   description: 'Graphql api key',
+    //   type: ParameterType.STRING,
+    //   tier: ParameterTier.STANDARD,
+    // });
+
     // Show the AppSync API Id in the output
     this.addOutputs({
       ApiId: api.graphqlApi.apiId,
@@ -88,6 +116,7 @@ export default class MyStack extends sst.Stack {
       // @ts-expect-error because some api will not have apiKey
       ApiKey: api.graphqlApi.apiKey,
       FunctionName: csvFunction.functionName,
+      // graphqlURL: graphqlURL.stringValue,
     });
   }
 }

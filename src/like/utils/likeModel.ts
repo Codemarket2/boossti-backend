@@ -1,26 +1,23 @@
-import * as mongoose from "mongoose";
+import * as mongoose from 'mongoose';
+import { ISchema } from '../../utils/customTypes';
+import { extendSchema } from '../../utils/extendSchema';
 
-const likeSchema = new mongoose.Schema({
+interface ILike extends ISchema {
+  like: boolean;
+  threadId: string;
+}
+
+const likeSchema = extendSchema({
   like: {
     type: Boolean,
     default: false,
   },
-  parentId: {
+  threadId: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
-  },
-  createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-  updatedAt: {
-    type: Date,
   },
 });
 
-export const Like = mongoose.model("Like", likeSchema);
+likeSchema.index({ like: 1, threadId: 1, createdBy: 1 }, { unique: true });
+
+export const LikeModel = mongoose.model<ILike>('Like', likeSchema);

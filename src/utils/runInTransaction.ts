@@ -6,7 +6,7 @@ import {
   updateAuctionAuditLog,
 } from '../auditLog/utils/auditLog';
 
-// type TransactionCallback = (session: ClientSession) => Promise<any>;
+type TransactionCallback = (session: ClientSession, payload: any) => Promise<any>;
 
 interface IOperation {
   action: 'CREATE' | 'UPDATE' | 'DELETE';
@@ -16,13 +16,12 @@ interface IOperation {
   user: any;
 }
 
-// callback: TransactionCallback,
-
-export const runInTransaction = async (operation: IOperation) => {
+export const runInTransaction = async (operation: IOperation, callback?: TransactionCallback) => {
   const session: ClientSession = await mongoose.startSession();
 
   session.startTransaction();
   let data;
+
   try {
     const { action, Model, args, populate, user } = operation;
     const modelName = Model.modelName;
@@ -74,6 +73,10 @@ export const runInTransaction = async (operation: IOperation) => {
         });
         break;
       }
+    }
+
+    if (callback) {
+      await callback(session, data);
     }
 
     // Commit the changes

@@ -1,21 +1,15 @@
 type Query {
   getForm(_id: ID!): Form @aws_api_key @aws_cognito_user_pools
+  getFormRelations(_id: ID!): [Form] @aws_api_key @aws_cognito_user_pools
+  getFormTabRelations(_id: ID!): [Form] @aws_api_key @aws_cognito_user_pools
   getFormBySlug(slug: String!): Form @aws_api_key @aws_cognito_user_pools
   getForms(page: Int, limit: Int, search: String): Forms
-  getCheckUnique(values: [ValueInput], _id: ID): Unique
 }
 
 type Mutation {
-  createForm(
-    parentId: ID
-    name: String!
-    fields: [FieldInput]
-    settings: AWSJSON
-    virtualForm: Boolean
-  ): Form
+  createForm(name: String!, fields: [FieldInput], settings: AWSJSON, virtualForm: Boolean): Form
   updateForm(
     _id: ID!
-    parentId: ID
     name: String
     fields: [FieldInput]
     settings: AWSJSON
@@ -53,20 +47,14 @@ type ValueInput {
   fieldId: ID
 }
 
-type Unique{
-  res: Boolean,
-  fieldId: String
-}
-
 type Form @aws_api_key @aws_cognito_user_pools {
   _id: ID!
-  parentId: ID
   name: String
   slug: String
   fields: [Field2]
   settings: AWSJSON
   published: Boolean
-  createdBy: User
+  createdBy: Response
   updatedBy: ID
   createdAt: AWSDateTime
   updatedAt: AWSDateTime

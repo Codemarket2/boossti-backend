@@ -1,5 +1,6 @@
 import { Schema, model } from 'mongoose';
-import { ISchema } from '../../utils/cutomTypes';
+import { ISchema } from '../../utils/customTypes';
+import { extendSchema } from '../../utils/extendSchema';
 import { userPopulate } from '../../utils/populate';
 
 export interface IAuditLog extends ISchema {
@@ -10,23 +11,12 @@ export interface IAuditLog extends ISchema {
   message: string;
 }
 
-const auditLogSchema = new Schema<IAuditLog>(
-  {
-    action: { type: String, required: true },
-    model: { type: String, required: true },
-    documentId: { type: Schema.Types.ObjectId, required: true },
-    diff: { type: Schema.Types.Mixed },
-    createdBy: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-    },
-    updatedBy: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-    },
-  },
-  { timestamps: true },
-);
+const auditLogSchema = extendSchema({
+  action: { type: String, required: true },
+  model: { type: String, required: true },
+  documentId: { type: Schema.Types.ObjectId, required: true },
+  diff: { type: Schema.Types.Mixed },
+});
 
 export const AuditLogModel = model<IAuditLog>('AuditLog', auditLogSchema);
 

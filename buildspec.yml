@@ -4,17 +4,18 @@ phases:
     runtime-versions:
       nodejs: 14.x
     commands:
-      - npm install -g yarn
-      - yarn install
+      - export NODE_OPTIONS="--max-old-space-size=8192"
+      - npm install --silent -g yarn
+      - yarn install --silent
   pre_build:
     commands:
-      - yarn test
+      # - yarn test
       - echo "Creating .env file"
-      - echo "MONGO_USERNAME=$MONGO_USERNAME\nMONGO_PASSWORD=$MONGO_PASSWORD\nGRAPHQL_API_URL=$GRAPHQL_API_URL\nGRAPHQL_API_KEY=$GRAPHQL_API_KEY\nONESIGNAL_API_KEY=$ONESIGNAL_API_KEY\nONESIGNAL_APP_ID=$ONESIGNAL_APP_ID\nTWILIO_ACCOUNT_SID=$TWILIO_ACCOUNT_SID\nTWILIO_AUTH_TOKEN=$TWILIO_AUTH_TOKEN" > .env
+      - echo "MONGO_USERNAME=$MONGO_USERNAME\nMONGO_PASSWORD=$MONGO_PASSWORD\nGRAPHQL_API_URL=$GRAPHQL_API_URL\nGRAPHQL_API_KEY=$GRAPHQL_API_KEY\nONESIGNAL_API_KEY=$ONESIGNAL_API_KEY\nONESIGNAL_APP_ID=$ONESIGNAL_APP_ID" > .env
   build:
     commands:
       - echo Starting Deployment
-      - npx sst deploy --stage $STAGE
+      - npx sst deploy --stage ${CODEBUILD_INITIATOR#*codepipeline/}
   post_build:
     commands:
       - echo Build Completed on `date`

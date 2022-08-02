@@ -1,71 +1,76 @@
-// import { Comment } from './commentModel';
-// import { Post } from '../../post/utils/postModel';
-// import { getAllIntrestedUsers } from '../../utils/getAllIntrestedUser';
-export const sendCommentNotification = async (comment) => {
-  console.log('sendCommentNotification');
-};
-/* export const sendCommentNotification = async (comment) => {
-  const fieldValue = await FieldValueModel.findById(comment.threadId);
-  if (fieldValue && fieldValue?.createdBy.toString() !== comment.createdBy?._id.toString()) {
-    const payload = {
-      userId: [`${fieldValue.createdBy}`],
-      title: 'New Comment',
-      description: `${comment.createdBy?.name} commented on your post`,
-      // link: `/response/${responseId}`,
-    };
-    await sendNotification(payload);
-  }
-  if (comment.threadId.toString() !== comment.parentId.toString()) {
-    const parentComment = await Comment.findById(comment.parentId);
-    if (
-      parentComment &&
-      parentComment?.createdBy.toString() !== comment.createdBy?._id.toString()
-    ) {
-      const payload = {
-        userId: [`${parentComment.createdBy}`],
-        title: 'New Comment',
-        description: `${comment.createdBy?.name} replied to your comment`,
-        // link: `/response/${responseId}`,
-      };
-      await sendNotification(payload);
-    }
-  }
+import { FormModel } from '../../form/utils/formModel';
+import { ResponseModel } from '../../form/utils/responseModel';
+import { sendEmail } from '../../utils/email';
+import { userPopulate } from '../../utils/populate';
+import { CommentModel } from './commentModel';
+import { getUserAttributes } from '../../form/utils/actionHelper';
 
-  //implemented by sonu for feed post notifications
-  try {
-    const post = await Post.findById(comment.parentId);
-    const users = await getAllIntrestedUsers(comment);
-    const intrestedUser = users?.map((e) => `${e?._id}`);
-
-    if (post?.createdBy?.toString() !== comment?.createdBy?._id.toString()) {
-      const parentComment = await Comment.findById(comment.parentId);
+export const sendCommentNotification = async (session, comment) => {
+  if (process.env.NODE_ENV === 'test') {
+    return;
+  }
+  const receivers: any[] = [];
+  let response, form;
+  for (const [parentIdIndex, parentId] of comment.parentIds?.entries()) {
+    try {
+      let parentComment;
+      if (parentIdIndex === 0) {
+        response = await ResponseModel.findOne({ 'values._id': parentId })
+          .populate(userPopulate)
+          .session(session);
+        parentComment = response;
+        if (response?.formId) {
+          form = await FormModel.findById(response?.formId).session(session);
+        }
+      } else {
+        parentComment = await CommentModel.findById(parentId)
+          .populate(userPopulate)
+          .session(session);
+      }
+      const commentString = comment?.createdBy?._id?.toString();
+      const parentCommentString = parentComment?.createdBy?._id?.toString();
+      const output = commentString === parentCommentString;
       if (
-        parentComment &&
-        parentComment?.createdBy.toString() !== comment?.createdBy?._id.toString()
+        commentString &&
+        parentCommentString &&
+        !output &&
+        !receivers?.find((receiver) => receiver?._id == parentComment?.createdBy?._id)?._id
       ) {
-        !intrestedUser.includes(`${parentComment?.createdBy}`) &&
-          intrestedUser.push(`${parentComment?.createdBy}`);
-        const payload = {
-          userId: intrestedUser,
-          title: `New Reply on your comment.`,
-          description: `${comment?.createdBy?.name} replied to your comment`,
-          threadId: parentComment?.threadId,
-        };
-        await sendNotification(payload);
+        receivers.push(parentComment?.createdBy);
       }
-      if (!parentComment && post) {
-        !intrestedUser.includes(`${post?.createdBy?._id}`) &&
-          intrestedUser.push(`${post?.createdBy?._id}`);
-        const payload = {
-          userId: intrestedUser,
-          title: 'New Comment on Your Post',
-          description: `${comment?.createdBy?.name} commented on your post`,
-          threadId: comment?.threadId,
-        };
-        await sendNotification(payload);
-      }
+    } catch (error) {
+      console.log('Error while getting parentId');
     }
-  } catch (e) {
-    console.log(e.message);
   }
-}; */
+  if (receivers?.length > 0) {
+    const userForm = await FormModel.findOne({ slug: process.env.USERS_FORM_SLUG }).session(
+      session,
+    );
+    const to: string[] = [];
+    receivers?.map((receiver) => {
+      const userEmail = getUserAttributes(userForm, receiver)?.email;
+      if (userEmail) to.push(userEmail);
+    });
+    const createdBy = getUserAttributes(userForm, comment?.createdBy);
+    let linkToComment = ``;
+    if (form?.slug && response?.count) {
+      linkToComment = `<p><a href="${process.env.FRONTEND_URL}/forms/${form?.slug}/response/${response?.count}?threadId=${comment.parentIds[0]}"><button>View Comment</button></a></p>`;
+    }
+    const body = `
+      Hi there,<br/>
+      <p><b>${createdBy?.name}</b> just 
+      ${comment.parentIds?.length > 1 ? 'replied to a comment' : 'commented on your response'}
+      </p>
+    ${linkToComment}
+    Comment Preview
+    ${comment.body}
+    `;
+    const emailPayload = {
+      from: `Boossti <${process.env.SENDER_EMAIL}>`,
+      to,
+      body,
+      subject: `New Comment`,
+    };
+    if (emailPayload?.to?.length > 0 && emailPayload?.from) await sendEmail(emailPayload);
+  }
+};

@@ -14,6 +14,6 @@ type AuditLog {
   documentId: String
   diff: AWSJSON
   message: String
-  createdBy: User
+  createdBy: Response
   createdAt: AWSDateTime
 }

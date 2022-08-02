@@ -1,7 +1,7 @@
-import { Comment } from '../comment/utils/commentModel';
+import { CommentModel } from '../comment/utils/commentModel';
 
 export const getAllIntrestedUsers = async (comment) => {
-  return await Comment.aggregate([
+  return await CommentModel.aggregate([
     {
       $match: {
         threadId: comment.threadId,

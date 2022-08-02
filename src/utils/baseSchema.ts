@@ -1,16 +1,12 @@
 import { Schema } from 'mongoose';
-import { ISchema } from './cutomTypes';
+import { ISchema } from './customTypes';
 
 export const baseSchema = new Schema<ISchema>(
   {
     createdBy: {
       type: Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-    },
-    updatedBy: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
+      ref: 'Response',
+      // required: true,
     },
   },
   { timestamps: true },

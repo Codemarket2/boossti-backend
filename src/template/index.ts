@@ -3,17 +3,20 @@ import { DB } from '../utils/DB';
 import Template, { templatePopulate } from './utils/templateModel';
 import Page, { pagePopulate } from './utils/pageModel';
 import { getCurrentUser } from '../utils/authentication';
-import { AppSyncEvent } from '../utils/cutomTypes';
+import { AppSyncEvent } from '../utils/customTypes';
 // import getAdminFilter from '../utils/adminFilter';
 import { User } from '../user/utils/userModel';
+import { runInTransaction } from '../utils/runInTransaction';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
     await DB();
     const { fieldName } = event.info;
     const { identity } = event;
+    // debugger;
     const user = await getCurrentUser(identity);
     let args = { ...event.arguments };
+
     if (fieldName.toLocaleLowerCase().includes('create') && user && user._id) {
       args = { ...args, createdBy: user._id };
     } else if (fieldName.toLocaleLowerCase().includes('update') && user && user._id) {
@@ -21,15 +24,15 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     }
 
     if (
-      Object.prototype.hasOwnProperty.call(args, 'title') &&
-      fieldName.toLocaleLowerCase().includes('create')
+      (fieldName.toLocaleLowerCase().includes('create') ||
+        fieldName.toLocaleLowerCase().includes('update')) &&
+      Object.prototype.hasOwnProperty.call(args, 'title')
     ) {
       args = { ...args, slug: slugify(args.title, { lower: true }) };
-    }
-
-    if (
-      Object.prototype.hasOwnProperty.call(args, 'slug') &&
-      fieldName.toLocaleLowerCase().includes('update')
+    } else if (
+      (fieldName.toLocaleLowerCase().includes('create') ||
+        fieldName.toLocaleLowerCase().includes('update')) &&
+      Object.prototype.hasOwnProperty.call(args, 'slug')
     ) {
       args = { ...args, slug: slugify(args.slug, { lower: true }) };
     }
@@ -127,31 +130,38 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       }
       case 'createTemplate': {
         let count = 1;
-        args = { ...args, count, slug: count };
+        args = { ...args, count };
         const lastTemplate = await Template.findOne().sort('-count');
         if (lastTemplate) {
           count = lastTemplate?.count + 1;
-          args = { ...args, count, slug: count };
+          args = { ...args, count };
         }
-        const template = await Template.create(args);
-        return await template.populate(templatePopulate); //.execPopulate();
+        return await runInTransaction({
+          action: 'CREATE',
+          Model: Template,
+          args,
+          populate: templatePopulate,
+          user,
+        });
       }
       case 'updateTemplate': {
-        const template: any = await Template.findByIdAndUpdate(args._id, args, {
-          new: true,
-          runValidators: true,
+        return await runInTransaction({
+          action: 'UPDATE',
+          Model: Template,
+          args,
+          populate: templatePopulate,
+          user,
         });
-        return await template.populate(templatePopulate); //.execPopulate();
       }
       case 'deleteTemplate': {
-        const count = await Page.countDocuments({
-          template: args._id,
+        await runInTransaction({
+          action: 'DELETE',
+          Model: Template,
+          args,
+          populate: templatePopulate,
+          user,
         });
-        if (count > 0) {
-          throw new Error('First delete the items under this type');
-        }
-        await Template.findByIdAndDelete(args._id);
-        return args._id;
+        return args?._id;
       }
       case 'getPages': {
         const { page = 1, limit = 20, search = '', active = null, template = null } = args;

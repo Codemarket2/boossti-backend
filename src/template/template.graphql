@@ -78,7 +78,7 @@ type Template @aws_api_key @aws_cognito_user_pools {
   showInMenu: Boolean
   options: AWSJSON
   createdAt: AWSDateTime
-  createdBy: User
+  createdBy: Response
 }
 
 type Pages @aws_api_key @aws_cognito_user_pools {

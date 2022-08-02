@@ -1,37 +1,14 @@
 import { Schema, model } from 'mongoose';
-import { IMedia, ISchema } from '../../utils/cutomTypes';
 import { userPopulate } from '../../utils/populate';
 import { extendSchema } from '../../utils/extendSchema';
-
-export interface IResponse extends ISchema {
-  formId: any;
-  parentId: string[];
-  count: number;
-  values: [IValue];
-}
-
-export interface IValue {
-  _id: string;
-  field: string;
-  value: string;
-  valueNumber: number;
-  valueBoolean: boolean;
-  valueDate: Date;
-  values: string[];
-  template: string;
-  page: string;
-  response: string;
-  form: string;
-  options: any;
-  media: IMedia[];
-}
+import { IResponse, IValue } from './responseType';
 
 export const valueSchema = new Schema<IValue>({
   field: {
     type: String,
     required: true,
   },
-  value: { type: String },
+  value: String,
   valueDate: Date,
   valueNumber: Number,
   valueBoolean: Boolean,
@@ -68,29 +45,24 @@ export const responseSchema = extendSchema({
     required: true,
     ref: 'Form',
   },
+  appId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Response',
+  },
+  installId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Response',
+  },
   count: {
     type: Number,
     required: true,
   },
-  parentId: {
-    // templatePageParentId
-    type: Schema.Types.ObjectId,
-    ref: 'Page',
-  },
-  workFlowFormReponseParentId: {
+  workFlowFormResponseParentId: {
     type: Schema.Types.ObjectId,
     default: null,
   },
   values: [valueSchema],
   options: { type: Schema.Types.Mixed, default: { option: false } },
-  createdBy: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-  },
-  updatedBy: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-  },
 });
 
 responseSchema.index({ formId: 1, count: 1 }, { unique: true });
@@ -102,10 +74,10 @@ export const valuesPopulate = [
     path: 'values.template',
     select: 'title slug media',
   },
-  {
-    path: 'values.page',
-    select: 'types title media slug',
-  },
+  // {
+  //   path: 'values.page',
+  //   select: 'types title media slug',
+  // },
   {
     path: 'values.form',
     select: 'name',
@@ -116,19 +88,12 @@ export const valuesPopulate = [
   },
 ];
 
-export const responsePopulate = [
-  userPopulate,
-  {
-    path: 'parentId',
-    select: 'types title media slug',
-  },
-  ...valuesPopulate,
-];
+export const responsePopulate = [userPopulate, ...valuesPopulate];
 
 export const myResponsePopulate = [
   ...responsePopulate,
   {
     path: 'formId',
-    select: 'name',
+    select: 'name slug',
   },
 ];

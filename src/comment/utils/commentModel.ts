@@ -1,24 +1,21 @@
 import * as mongoose from 'mongoose';
+import { ISchema } from '../../utils/customTypes';
+import { extendSchema } from '../../utils/extendSchema';
 
-const commentSchema = new mongoose.Schema({
-  body: String,
+export interface IComment extends ISchema {
+  body: string;
+  threadId: string;
+  parentIds: string[];
+}
+
+const commentSchema = extendSchema({
+  body: { type: String, required: true },
   threadId: { type: mongoose.Schema.Types.ObjectId, required: true },
-  parentId: {
-    type: mongoose.Schema.Types.ObjectId,
+  parentIds: {
+    type: [mongoose.Schema.Types.ObjectId],
     required: true,
-  },
-  createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-  updatedAt: {
-    type: Date,
+    default: [],
   },
 });
 
-export const Comment = mongoose.model('Comment', commentSchema);
+export const CommentModel = mongoose.model<IComment>('Comment', commentSchema);

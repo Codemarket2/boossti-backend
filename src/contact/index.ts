@@ -1,6 +1,6 @@
 import { DB } from '../utils/DB';
 import { getCurrentUser } from '../utils/authentication';
-import { AppSyncEvent } from '../utils/cutomTypes';
+import { AppSyncEvent } from '../utils/customTypes';
 import { Contact, MailingList } from './utils/contactModel';
 import { invokeCsvLambda } from './utils/invokeLambda';
 

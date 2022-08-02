@@ -12,18 +12,21 @@ export const getValue = (field, value) => {
     case 'dateTime': {
       return value?.valueDate && moment(value?.valueDate).format('lll');
     }
-    case 'checkbox': {
-      return value.valueBoolean?.toString();
+    case 'boolean': {
+      return value.valueBoolean ? 'Yes' : 'No';
     }
-    case 'select': {
-      if (field?.options?.optionsTemplate === 'type') {
-        return value?.itemId?.title;
-      }
-      if (field?.options?.optionsTemplate === 'existingForm') {
-        return getLabel(field?.options?.formField, value?.response);
-      }
-      return value?.value;
+    case 'response': {
+      return getLabel(field?.options?.formField, value?.response);
     }
+    // case 'select': {
+    //   if (field?.options?.optionsTemplate === 'type') {
+    //     return value?.itemId?.title;
+    //   }
+    //   if (field?.options?.optionsTemplate === 'response') {
+    //     return getLabel(field?.options?.formField, value?.response);
+    //   }
+    //   return value?.value;
+    // }
     default: {
       return value.value;
     }

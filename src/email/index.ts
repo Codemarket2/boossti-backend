@@ -1,6 +1,6 @@
 import { DB } from '../utils/DB';
 import { getCurrentUser } from '../utils/authentication';
-import { AppSyncEvent } from '../utils/cutomTypes';
+import { AppSyncEvent } from '../utils/customTypes';
 import EmailModel, { EmailCampaign, EmailTemplate } from './utils/emailModel';
 import { userPopulate } from '../utils/populate';
 import { createTemplate, deleteTemplate, updateTemplate } from './utils/sesCreateEmailTemplate';

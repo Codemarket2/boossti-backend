@@ -2,6 +2,8 @@ export const formResolvers = {
   'Query getForm': 'formLambda',
   'Query getFormBySlug': 'formLambda',
   'Query getForms': 'formLambda',
+  'Query getFormRelations': 'formLambda',
+  'Query getFormTabRelations': 'formLambda',
   'Mutation createForm': 'formLambda',
   'Mutation updateForm': 'formLambda',
   'Mutation deleteForm': 'formLambda',

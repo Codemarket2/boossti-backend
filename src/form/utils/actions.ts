@@ -4,13 +4,42 @@ import { FormModel } from './formModel';
 import PageModel from '../../template/utils/pageModel';
 import { ResponseModel } from './responseModel';
 import { sendSms } from '../../utils/sms';
-import { responsePopulate } from './responseModel';
-import { getValue } from './variables';
-import moment from 'moment';
+import {
+  getFieldValue,
+  replaceVariables,
+  replaceSchemaVariables,
+  getUserAttributes,
+} from './actionHelper';
+import { createDistribution } from '../../utils/cloudfront';
+import { createCognitoGroup, deleteCognitoGroup, updateCognitoGroup } from './cognitoGroupHandler';
+import {
+  addUserToGroup,
+  createUser,
+  deleteUser,
+  isUserAlreadyExist,
+  removeUserFromGroup,
+  updateUserAttributes,
+  getGroupListOfUser,
+} from '../../permissions/utils/cognitoHandlers';
+import { ClientSession } from 'mongoose';
 
-export const runFormActions = async (response, form, pageId: any = null) => {
-  if (form?.settings?.actions?.length > 0) {
-    const actions = form?.settings?.actions?.filter((a) => a.active);
+interface IPayload {
+  triggerType: 'onCreate' | 'onUpdate' | 'onDelete' | 'onView';
+  response: any;
+  form: any;
+  args?: any;
+  session: ClientSession;
+}
+
+export const runFormActions = async ({ triggerType, response, form, args, session }: IPayload) => {
+  const userForm = await FormModel.findOne({ slug: process.env.USERS_FORM_SLUG }).session(session);
+
+  const actions = form?.settings?.actions?.filter(
+    (action) => action.active && action.triggerType === triggerType,
+  );
+  const pageId = response?.pageId?._id || response?.pageId || null;
+
+  if (actions?.length > 0 && response?._id && form?._id && !(process.env.NODE_ENV === 'test')) {
     for (const action of actions) {
       if (
         action?.actionType === 'sendEmail' &&
@@ -24,20 +53,23 @@ export const runFormActions = async (response, form, pageId: any = null) => {
       ) {
         const payload: any = {
           from: action?.senderEmail,
-          body: variableParser(action, form, response),
+          body: replaceSchemaVariables({ variable: action?.body, form, response, userForm }),
           subject: action?.subject,
         };
 
         if (action?.variables?.length > 0) {
-          const { subject, body, senderEmail } = await replaceVariables(
-            payload?.subject,
-            payload?.body,
-            action?.variables,
-            form?.fields,
-            response?.values,
+          const { subject, body, senderEmail } = await replaceVariables({
+            subject: payload?.subject,
+            body: payload?.body,
+            variables: action?.variables,
+            fields: form?.fields,
+            values: response?.values,
             pageId,
-            payload.from,
-          );
+            senderEmail: payload.from,
+            session,
+            form,
+            response,
+          });
 
           payload.subject = subject;
           payload.body = body;
@@ -45,42 +77,46 @@ export const runFormActions = async (response, form, pageId: any = null) => {
         }
 
         if (action?.receiverType === 'formOwner') {
-          const user = await User.findById(form?.createdBy?._id);
+          const user = getUserAttributes(userForm, form?.createdBy);
           if (user?.email) {
             payload.to = [user?.email];
           }
         } else if (action?.receiverType === 'responseSubmitter') {
-          const user = await User.findById(response?.createdBy?._id);
-          if (user?.email) {
-            payload.to = [user?.email];
+          const user = getUserAttributes(userForm, response?.createdBy);
+          if (!user.email) {
+            throw new Error('Response submitter email not found in send email action');
           }
+          payload.to = [user?.email];
         } else if (action?.receiverType === 'customEmail') {
           payload.to = action?.receiverEmails;
         } else if (action?.receiverType === 'emailField') {
-          const emailField = response?.values?.filter(
-            (value) => value.field === action?.emailFieldId,
-          )[0];
+          const emailField = response?.values?.find(
+            (value) => value.field?.toString() === action?.emailFieldId?.toString(),
+          );
           if (emailField) {
             payload.to = [emailField?.value];
           }
         }
-        if (payload?.to?.length > 0) {
-          await sendEmail(payload);
+        if (!(payload?.to?.length > 0)) {
+          throw new Error('Receiver email not found in send email action');
         }
+        await sendEmail(payload);
       } else if (action?.actionType === 'sendSms' && action?.phoneFieldId && action?.body) {
         const payload = {
-          body: variableParser(action, form, response),
+          body: replaceSchemaVariables({ variable: action.body, form, response, userForm }),
           phoneNumber: '',
         };
         if (action?.variables?.length > 0) {
-          const { body } = await replaceVariables(
-            '',
-            payload.body,
-            action?.variables,
-            form?.fields,
-            response?.values,
+          const { body } = await replaceVariables({
+            body: payload.body,
+            variables: action?.variables,
+            fields: form?.fields,
+            values: response?.values,
             pageId,
-          );
+            session,
+            form,
+            response,
+          });
           payload.body = body;
         }
         const phoneField = response?.values?.filter(
@@ -98,21 +134,32 @@ export const runFormActions = async (response, form, pageId: any = null) => {
         action?.receiverType === 'emailField' &&
         action?.emailFieldId
       ) {
+        const action = form.settings?.actions?.filter((a) => a.actionType === 'generateNewUser')[0];
+        const email = getFieldValue(action?.emailFieldId, response.values)?.value;
+        if (email) {
+          const tempUser = await User.findOne({ email: email });
+          if (tempUser) {
+            await ResponseModel.findByIdAndUpdate(response._id, { createdBy: tempUser._id });
+          }
+        }
         const payload: any = {
           from: action?.senderEmail,
-          body: variableParser(action, form, response),
+          body: replaceSchemaVariables({ variable: action?.body, form, response, userForm }),
           subject: action?.subject,
         };
-        payload.body = payload.body.split(`{{password}}`).join(response.options.password || '');
+        payload.body = payload.body.split(`{{password}}`).join(response.options?.password || '');
         if (action?.variables?.length > 0) {
-          const { subject, body } = await replaceVariables(
-            payload?.subject,
-            payload?.body,
-            action?.variables,
-            form?.fields,
-            response?.values,
+          const { subject, body } = await replaceVariables({
+            subject: payload?.subject,
+            body: payload?.body,
+            variables: action?.variables,
+            fields: form?.fields,
+            values: response?.values,
             pageId,
-          );
+            session,
+            form,
+            response,
+          });
 
           payload.subject = subject;
           payload.body = body;
@@ -139,15 +186,17 @@ export const runFormActions = async (response, form, pageId: any = null) => {
         const feedPage = await PageModel.findOne({ slug: 'my' });
 
         if (notificationForm && feedPage) {
-          const body = variableParser(action, form, response);
-          const { body: newBody } = await replaceVariables(
-            '',
+          const body = replaceSchemaVariables({ variable: action?.body, form, response, userForm });
+          const { body: newBody } = await replaceVariables({
             body,
-            action?.variables,
-            form?.fields,
-            response?.values,
+            variables: action?.variables,
+            fields: form?.fields,
+            values: response?.values,
             pageId,
-          );
+            session,
+            form,
+            response,
+          });
           const payload = { description: '', link: '', responseId: '' };
           payload.description = newBody;
           payload.link = `/forms/${form.slug}/response/${response.count}`;
@@ -194,83 +243,330 @@ export const runFormActions = async (response, form, pageId: any = null) => {
           }
           await ResponseModel.create(responsePayload);
         }
+      } else if (
+        action?.actionType === 'createSubDomainRoute53' &&
+        action.domain &&
+        action.distributionId
+      ) {
+        const domain = getFieldValue(action.domain, response.values);
+        if (!domain?.value) {
+          throw new Error('Account domain name not found');
+        }
+        const res = await createDistribution(domain.value);
+        const distributionId = { value: res?.Distribution?.Id, field: action.distributionId };
+        await ResponseModel.findByIdAndUpdate(
+          response._id,
+          { $push: { values: distributionId } },
+          { session },
+        );
+      } else if (
+        action?.actionType === 'updateSubDomainRoute53' &&
+        action.domain &&
+        action.distributionId
+      ) {
+        const domain = getFieldValue(action.domain, response.values);
+        const distributionId = getFieldValue(action.distributionId, response.values);
+        if (!domain?.value || !distributionId.value) {
+          throw new Error('Account domain name, distributionId not found');
+        }
+        // update cloudfront distribution
+      } else if (
+        action?.actionType === 'deleteSubDomainRoute53' &&
+        action.domain &&
+        action.distributionId
+      ) {
+        const domain = getFieldValue(action.domain, response.values);
+        const distributionId = getFieldValue(action.distributionId, response.values);
+        if (!domain?.value || !distributionId.value) {
+          throw new Error('Account domain name, distributionId not found');
+        }
+        // delete cloudfront distribution
+      } else if (
+        action?.actionType === 'createCognitoUser' &&
+        action?.userPoolId &&
+        // action?.firstName &&
+        // action?.lastName &&
+        action?.userEmail
+      ) {
+        const rolesField = form?.fields?.find(
+          (e) => e.fieldType === 'select' && e.label.toUpperCase().includes('ROLE'),
+        );
+        const rolesFieldId = rolesField?._id.toString();
+        const selectedFieldId = rolesField?.options?.formField;
+        const updatedRolesID = args?.values
+          ?.filter((e) => e.field === rolesFieldId)
+          ?.map((e) => e.response);
+        const RoleName: string[] = [];
+        for (let i = 0; i < updatedRolesID.length; i++) {
+          const tempResponse = await ResponseModel.findById(updatedRolesID[i]).lean();
+          const value = tempResponse?.values?.find((e) => e.field === selectedFieldId)?.value;
+          value && RoleName.push(value);
+        }
+
+        const fName =
+          getFieldValue(action?.firstName, response.values)?.value?.trim() || 'First Name';
+        const lName =
+          getFieldValue(action?.lastName, response.values)?.value?.trim() || 'Last Name';
+        const uEmail = getFieldValue(action?.userEmail, response.values)?.value?.trim();
+
+        const payload = {
+          UserPoolId: action?.userPoolId,
+          Username: uEmail,
+          UserAttributes: [
+            {
+              Name: 'email',
+              Value: uEmail,
+            },
+            {
+              Name: 'email_verified',
+              Value: 'True',
+            },
+            {
+              Name: 'name',
+              Value: `${fName} ${lName}`,
+            },
+            {
+              Name: 'custom:_id',
+              Value: `${response._id}`,
+            },
+          ],
+        };
+        const checkUser = await isUserAlreadyExist({
+          Username: payload?.Username,
+          UserPoolId: payload.UserPoolId,
+        });
+        if (!checkUser?.message && checkUser.error === null) {
+          const createdUser = await createUser(payload);
+          // create response in users form before creating new user
+          // requirement: formid of users form
+          // formId: ID!;
+          // count: Int;
+          // values: [ValueInput]; field, value
+          // options: AWSJSON;
+          // cretedBy : can be null
+          if (form.slug !== 'users' && createdUser) {
+            const usersForm = await FormModel.findOne({ slug: 'users' });
+            const fNameField = usersForm?.fields?.find(
+              (field) => field?.label === 'First Name',
+            )?._id;
+            const lNameField = usersForm?.fields?.find(
+              (field) => field?.label === 'Last Name',
+            )?._id;
+            const emailField = usersForm?.fields?.find(
+              (field) => field?.fieldType === 'email',
+            )?._id;
+            const lastResponse = await ResponseModel.findOne({ formId: usersForm?._id }).sort(
+              '-count',
+            );
+            let responseCount;
+            if (lastResponse) {
+              responseCount = lastResponse?.count + 1;
+            } else {
+              responseCount = 1;
+            }
+            const cretatePayload = {
+              formId: usersForm?._id,
+              values: [
+                {
+                  field: fNameField, // for first name
+                  value: fName,
+                },
+                {
+                  field: lNameField, // for last name
+                  value: lName,
+                },
+                {
+                  field: emailField, // for email
+                  value: uEmail,
+                },
+              ],
+              count: responseCount,
+            };
+
+            await ResponseModel.create(cretatePayload);
+          }
+        }
+        // add user to group
+        for (let i = 0; i < RoleName?.length; i++) {
+          const Cpayload = {
+            GroupName: RoleName[i],
+            UserPoolId: action?.userPoolId,
+            Username: uEmail,
+          };
+          await addUserToGroup(Cpayload);
+        }
+      } else if (action?.actionType === 'createCognitoGroup') {
+        const ResponseValue = args?.values
+          ?.filter((e) => e.field === action?.cognitoGroupName)[0]
+          ?.value.trim();
+        const Desc = args?.values
+          ?.filter((e) => e?.field === action?.cognitoGroupDesc)[0]
+          ?.value.trim();
+        const payload = {
+          GroupName: ResponseValue,
+          UserPoolId: action?.userPoolId,
+          Description: Desc,
+        };
+        const highPriorityGroup = [
+          'superadmin',
+          'us-east-1_eBnsz43bl_Facebook',
+          'us-east-1_eBnsz43bl_Google',
+        ];
+        if (!highPriorityGroup.includes(payload.GroupName)) await createCognitoGroup(payload);
+        else
+          return {
+            message: 'you are not allowd for this action',
+          };
+      } else if (action?.actionType === 'deleteCognitoUser') {
+        const selectItemInForm = response?.values?.filter((e) => e?.response !== null)[0]?.response;
+        const selectItemResponse = await ResponseModel.findById(selectItemInForm);
+        const selectForm = await FormModel.findById(selectItemResponse?.formId);
+        const selectItemField = selectForm?.fields
+          ?.filter((e) => e?.fieldType === 'text' && e?.label?.toUpperCase().includes('ROLE'))
+          .map((e) => e._id);
+        const RoleName =
+          selectItemResponse?.values
+            ?.filter((e) => selectItemField?.includes(e.field))
+            .map((e) => e.value) || [];
+
+        const uEmail = response?.values
+          ?.filter((e) => e?.field === action?.userEmail)[0]
+          ?.value.trim();
+
+        const payload = {
+          UserPoolId: action?.userPoolId,
+          Username: uEmail,
+        };
+        try {
+          for (let i = 0; i < RoleName?.length; i++) {
+            const Dpayload = {
+              GroupName: RoleName[i],
+              UserPoolId: action?.userPoolId,
+              Username: uEmail,
+            };
+            await removeUserFromGroup(Dpayload);
+          }
+          await deleteUser(payload);
+        } catch (error) {
+          return error.message;
+        }
+      } else if (action.actionType === 'deleteCognitoGroup') {
+        const ResponseValue = response?.values
+          ?.filter((e) => e.field === action?.cognitoGroupName)[0]
+          ?.value.trim();
+        const payload = {
+          GroupName: ResponseValue,
+          UserPoolId: action?.userPoolId,
+        };
+        const highPriorityGroup = [
+          'superadmin',
+          'us-east-1_eBnsz43bl_Facebook',
+          'us-east-1_eBnsz43bl_Google',
+        ];
+        if (!highPriorityGroup.includes(payload.GroupName)) {
+          await deleteCognitoGroup(payload);
+        } else {
+          throw new Error('you are not allowd for this action');
+        }
+      } else if (
+        action.actionType === 'updateCognitoUser' &&
+        action?.userPoolId &&
+        action?.userEmail
+      ) {
+        const fName = args?.values?.filter((e) => e?.field === action?.firstName)[0]?.value.trim();
+        const lName = args?.values?.filter((e) => e?.field === action?.lastName)[0]?.value.trim();
+        const uEmail = args?.values?.filter((e) => e?.field === action?.userEmail)[0]?.value.trim();
+        const rolesField = form?.fields?.find(
+          (e) => e.fieldType === 'select' && e.label.toUpperCase().includes('ROLE'),
+        );
+        const rolesFieldId = rolesField?._id.toString();
+        const selectedFieldId = rolesField?.options?.formField;
+        const updatedRolesID = args?.values
+          ?.filter((e) => e.field === rolesFieldId)
+          ?.map((e) => e.response);
+        const selectedResponse: string[] = [];
+        for (let i = 0; i < updatedRolesID.length; i++) {
+          const tempResponse = await ResponseModel.findById(updatedRolesID[i]).lean();
+          const value = tempResponse?.values?.find((e) => e.field === selectedFieldId)?.value;
+          value && selectedResponse.push(value);
+        }
+        const cognitoGroupList =
+          (
+            await getGroupListOfUser({
+              UserPoolId: action?.userPoolId,
+              Username: uEmail,
+            })
+          )?.Groups || [];
+
+        const cognitoGroupListName: string[] = cognitoGroupList?.map((e) => e.GroupName || '');
+
+        for (let i = 0; i < selectedResponse.length; i++) {
+          if (!cognitoGroupListName?.includes(selectedResponse[i])) {
+            const Cpayload = {
+              GroupName: selectedResponse[i],
+              UserPoolId: action?.userPoolId,
+              Username: uEmail,
+            };
+            await addUserToGroup(Cpayload);
+          }
+        }
+        for (let i = 0; i < cognitoGroupListName?.length; i++) {
+          if (
+            cognitoGroupListName[i] !== '' &&
+            !selectedResponse?.includes(cognitoGroupListName[i])
+          ) {
+            const Dpayload = {
+              GroupName: cognitoGroupListName[i],
+              UserPoolId: action?.userPoolId,
+              Username: uEmail,
+            };
+            await removeUserFromGroup(Dpayload);
+          }
+        }
+        const payload = {
+          UserPoolId: action?.userPoolId,
+          Username: uEmail,
+          UserAttributes: [
+            {
+              Name: 'email',
+              Value: uEmail,
+            },
+            {
+              Name: 'email_verified',
+              Value: 'True',
+            },
+            {
+              Name: 'name',
+              Value: `${fName} ${lName}`,
+            },
+          ],
+        };
+
+        await updateUserAttributes(payload);
+      } else if (action.actionType === 'updateCognitoGroup') {
+        const ResponseValue = args?.values
+          ?.filter((e) => e.field === action?.cognitoGroupName)[0]
+          ?.value.trim();
+        const Desc = args?.values
+          ?.filter((e) => e?.field === action?.cognitoGroupDesc)[0]
+          ?.value.trim();
+        const payload = {
+          GroupName: ResponseValue,
+          UserPoolId: action?.userPoolId,
+          Description: Desc,
+        };
+
+        const highPriorityGroup = [
+          'superadmin',
+          'us-east-1_eBnsz43bl_Facebook',
+          'us-east-1_eBnsz43bl_Google',
+        ];
+        if (!highPriorityGroup.includes(payload.GroupName)) await updateCognitoGroup(payload);
+        else
+          return {
+            message: 'you are not allowd for this action',
+          };
       }
     }
   }
-};
-
-//  variable parser function
-
-const variableParser = (action: any, form: any, response: any) => {
-  let body = action?.body;
-  body = body.split('{{formName}}').join(`${form?.name}`);
-  body = body.split('{{createdBy}}').join(`${response?.createdBy?.name || ''}`);
-  body = body.split('{{updatedBy}}').join(`${response?.updatedBy?.name || ''}`);
-  body = body.split('{{createdAt}}').join(`${moment(response?.createdAt).format('llll')}`);
-  body = body.split('{{updatedAt}}').join(`${moment(response?.updatedAt).format('llll')}`);
-  body = body.split('{{pageName}}').join(`${response?.parentId?.title || ''}`);
-  return body;
-};
-
-const replaceVariables = async (
-  oldSubject,
-  oldBody,
-  oldVariables,
-  fields,
-  values,
-  pageId,
-  oldSenderEmail = '',
-) => {
-  let subject = oldSubject;
-  let senderEmail = oldSenderEmail;
-  let body = oldBody;
-  const formIds: any = [];
-  const forms: any = [];
-
-  oldVariables?.forEach((variable: any) => {
-    if (variable.formId && !formIds.includes(variable.formId)) {
-      formIds.push(variable.formId);
-    }
-  });
-
-  for (const formId of formIds) {
-    const form = await FormModel.findById(formId);
-    const response = await ResponseModel.findOne({
-      formId,
-      parentId: pageId,
-    })
-      .sort({
-        createdAt: -1,
-      })
-      .populate(responsePopulate);
-    if (form && response) {
-      forms.push({ ...form?.toObject(), response });
-    }
-  }
-
-  const variables = oldVariables?.map((oneVariable) => {
-    const variable = { ...oneVariable, value: '' };
-    let field = null;
-    let value = null;
-    field = fields.find((f) => f._id?.toString() === variable?.field);
-    value = values.find((v) => v.field === variable?.field);
-
-    if (variable.formId) {
-      const form = forms.find((f) => f._id?.toString() === variable.formId);
-      if (form) {
-        field = form?.fields?.find((f) => f._id?.toString() === variable?.field);
-        value = form?.response?.values?.find((v) => v.field === variable?.field);
-      }
-    }
-    if (field && value) {
-      variable.value = getValue(field, value);
-    }
-    return variable;
-  });
-  variables.forEach((variable) => {
-    body = body.split(`{{${variable.name}}}`).join(variable.value || '');
-    subject = subject.split(`{{${variable.name}}}`).join(variable.value || '');
-    senderEmail = senderEmail.split(`{{${variable.name}}}`).join(variable.value || '');
-  });
-  return { subject, body, senderEmail };
 };

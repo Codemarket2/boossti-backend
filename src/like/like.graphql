@@ -1,12 +1,12 @@
 type Query {
   getLike(_id: ID!): Like
-  getLikesByParentId(parentId: ID!, page: Int, limit: Int): Likes
+  getLikesByThreadId(threadId: ID!, page: Int, limit: Int): Likes
 }
 
 type Mutation {
-  createLike(parentId: ID!): Like
-  updateLike(_id: ID!): Like
-  deleteLike(parentId: ID!): Boolean
+  createLike(threadId: ID!): Like
+  updateLike(_id: ID!, like: Boolean!): Like
+  deleteLike(threadId: ID!): ID!
 }
 
 type Subscription {
@@ -16,8 +16,8 @@ type Subscription {
 type Like {
   _id: ID
   like: Boolean
-  parentId: ID
-  createdBy: User
+  threadId: ID
+  createdBy: Response
   createdAt: AWSDateTime
 }
 

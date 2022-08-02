@@ -1,5 +1,5 @@
 import { Schema, model } from 'mongoose';
-import { ISchema } from '../../utils/cutomTypes';
+import { ISchema } from '../../utils/customTypes';
 
 export interface INotification extends ISchema {
   userId: string;

@@ -40,7 +40,7 @@ const notificationMutation = gql`
 const { GRAPHQL_API_URL = '', GRAPHQL_API_KEY = '', SENDER_EMAIL = '' } = process.env;
 
 type payload = {
-  userId: string[];
+  userIds: string[];
   title: string;
   description?: string;
   link?: string;
@@ -50,9 +50,9 @@ type payload = {
 };
 
 export const sendNotification = async (payload: payload) => {
-  if (GRAPHQL_API_URL && GRAPHQL_API_KEY) {
-    try {
-      const payloadArray = payload?.userId?.map((uid) => ({
+  try {
+    if (GRAPHQL_API_URL && GRAPHQL_API_KEY) {
+      const payloadArray = payload?.userIds?.map((uid) => ({
         ...payload,
         userId: uid,
       }));
@@ -72,15 +72,14 @@ export const sendNotification = async (payload: payload) => {
         }),
       );
       await NotificationModel.create(payloadArray);
-
-      // const user = await User.findById(payload.userId);
-      const users = await User.find({ _id: { $in: payload.userId } });
-      await emailNotification(payload, users);
-      // await mobileNotification(payload, user);
-      await pushNotification(payload, users);
-    } catch (error) {
-      console.error(error.message);
     }
+    // const user = await User.findById(payload.userId);
+    const users = await User.find({ _id: { $in: payload.userIds } });
+    await emailNotification(payload, users);
+    // await mobileNotification(payload, user);
+    // await pushNotification(payload, users);
+  } catch (error) {
+    console.error(error.message);
   }
 };
 
@@ -103,6 +102,7 @@ export const sendNotification = async (payload: payload) => {
 //     console.log(error.message);
 //   }
 // };
+
 const pushNotification = async (payload: payload, users: any) => {
   const uids = users?.map((u) => `${u._id}`);
   const pushPayload = {
@@ -116,24 +116,28 @@ const pushNotification = async (payload: payload, users: any) => {
     console.log(error.message);
   }
 };
+
 const emailNotification = async (payload: payload, users: any) => {
-  const toArray = users?.map((u) => u.email);
-  const emailBody = `
+  try {
+    const toArray = users?.map((u) => u.email);
+    const emailBody = `
       Dear User, 
     
       ${payload.description}.
        <a href='https://boossti.com${payload?.link || '/'}'><button> View </button></a> 
     `;
 
-  const emailPayload = {
-    from: SENDER_EMAIL,
-    to: toArray,
-    body: emailBody,
-    subject: `New Response on ${payload.title}`,
-  };
+    const emailPayload = {
+      from: SENDER_EMAIL,
+      to: toArray,
+      body: emailBody,
+      subject: `New Response on ${payload.title}`,
+    };
 
-  toArray &&
-    sendEmail(emailPayload)
-      .then(() => console.log('Email Send!'))
-      .catch((e) => console.log(e.message));
+    if (emailPayload?.to) {
+      await sendEmail(emailPayload);
+    }
+  } catch (error) {
+    console.log('Error while sending email', error.message);
+  }
 };

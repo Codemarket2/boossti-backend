@@ -6,25 +6,13 @@ import { SectionModel, sectionPopulate } from './utils/sectionModel';
 import Template from '../template/utils/templateModel';
 import Page from '../template/utils/pageModel';
 import { getCurrentUser } from '../utils/authentication';
-import { AppSyncEvent } from '../utils/cutomTypes';
+import { AppSyncEvent } from '../utils/customTypes';
 import { runFormActions } from './utils/actions';
 import { sendResponseNotification } from './utils/responseNotification';
 import getAdminFilter from '../utils/adminFilter';
 import { fileParser } from './utils/readCsvFile';
-import { User } from '../user/utils/userModel';
-import {
-  createCognitoGroup,
-  deleteCognitoGroup,
-  updateCognitoGroup,
-} from './utils/cognitoGroupHandler';
 import { runInTransaction } from '../utils/runInTransaction';
-import {
-  addUserToGroup,
-  createUser,
-  deleteUser,
-  removeUserFromGroup,
-  updateUserAttributes,
-} from '../permissions/utils/cognitoHandlers';
+import { IForm } from './utils/formType';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -47,6 +35,19 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
     switch (fieldName) {
       case 'getForm': {
         return await FormModel.findById(args._id).populate(formPopulate);
+      }
+      case 'getFormRelations': {
+        return await FormModel.find({
+          fields: { $elemMatch: { form: args?._id, 'options.twoWayRelationship': true } },
+        }).populate(formPopulate);
+      }
+      case 'getFormTabRelations': {
+        return await FormModel.find({
+          'settings.tabs': { $elemMatch: { 'form._id': args?._id } },
+          // settings: {
+          //   tabs: { $elemMatch: { 'form._id': args?._id } },
+          // },
+        }).populate(formPopulate);
       }
       case 'getFormBySlug': {
         return await FormModel.findOne({ slug: args.slug }).populate(formPopulate);
@@ -89,53 +90,41 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         });
       }
       case 'deleteForm': {
-        const form = await runInTransaction({
-          action: 'DELETE',
-          Model: FormModel,
-          args,
-          user,
-        });
+        const callback = async (session, form) => {
+          await ResponseModel.deleteMany({ formId: form?._id });
+        };
+        const form = await runInTransaction(
+          {
+            action: 'DELETE',
+            Model: FormModel,
+            args,
+            user,
+          },
+          callback,
+        );
         return form._id;
-        // let formId;
-        // await runInTransaction(
-        //   async (session) => {
-        //     const deletedForm: any = await FormModel.findByIdAndDelete(args._id, {
-        //       session: session,
-        //     });
-        //     await ResponseModel.deleteMany({ formId: args._id }, { session: session });
-        //     await SectionModel.findByIdAndDelete(args._id, { session: session });
-        //     formId = deletedForm._id;
-        //     return deletedForm;
-        //   },
-        //   { action: 'DELETE', model: FormModel },
-        // );
-        // return formId;
       }
       case 'getResponse': {
         return await ResponseModel.findById(args._id).populate(responsePopulate);
       }
       case 'getResponseByCount': {
         const response: any = await ResponseModel.findOne(args).populate(responsePopulate);
-        const oldOptions = { ...args.options };
-        if (!(process.env.NODE_ENV === 'test')) {
-          const res: any = await FormModel.findById(response?.formId).populate(formPopulate);
-          const form = { ...res.toObject() };
-          const act = form?.settings?.actions?.filter((e) => e.triggerType === 'onView');
-          if (form && act) {
-            await runFormActions(
-              { ...response.toObject(), options: oldOptions },
-              {
-                ...form,
-                settings: {
-                  ...form.settings,
-                  actions: args?.options?.actions || form.settings?.actions,
-                },
-              },
-              args?.parentId,
-            );
-            await sendResponseNotification(form, response);
-          }
-        }
+        // const oldOptions = { ...args.options };
+        // if (!(process.env.NODE_ENV === 'test')) {
+        //   const res: any = await FormModel.findById(response?.formId).populate(formPopulate);
+        //   const form = { ...res.toObject() };
+        //   await runFormActions({
+        //     triggerType: 'onView',
+        //     form: {
+        //       ...form,
+        //       settings: {
+        //         ...form.settings,
+        //         actions: args?.options?.actions || form.settings?.actions,
+        //       },
+        //     },
+        //     response: { ...response.toObject(), options: oldOptions },
+        //   });
+        // }
         return response;
       }
       case 'getResponses': {
@@ -143,29 +132,34 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           page = 1,
           limit = 20,
           formId,
-          parentId,
           search = '',
           formField,
           onlyMy = false,
-          workFlowFormReponseParentId = null,
+          workFlowFormResponseParentId = null,
+          valueFilter,
+          appId,
+          installId,
         } = args;
         let filter: any = { formId };
-        if (parentId) {
-          filter = { ...filter, parentId };
+        if (appId) {
+          filter = { ...filter, appId };
         }
-        if (workFlowFormReponseParentId) {
-          filter = { ...filter, workFlowFormReponseParentId };
+        if (installId) {
+          filter = { ...filter, installId };
+        }
+        if (workFlowFormResponseParentId) {
+          filter = { ...filter, workFlowFormResponseParentId };
         }
         if (onlyMy && user?._id) {
           filter.createdBy = user?._id;
         }
+        if (valueFilter) {
+          filter = { ...filter, ...valueFilter };
+        }
         if (search && formField) {
           filter = {
             ...filter,
-            $and: [
-              { 'values.value': { $regex: search, $options: 'i' } },
-              { 'values.field': formField },
-            ],
+            $or: [{ 'values.value': { $regex: search, $options: 'i' } }],
           };
         }
         const data = await ResponseModel.find(filter)
@@ -185,336 +179,112 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         if (lastResponse) {
           args = { ...args, count: lastResponse?.count + 1 };
         }
-        const res: any = await FormModel.findById(args.formId).populate(formPopulate);
-        const form = { ...res.toObject() };
-        let emailId = '';
-        const action = form.settings?.actions?.filter((a) => a.actionType === 'generateNewUser')[0];
-        emailId = action?.emailFieldId;
-        let email = '';
-        lastResponse?.values.forEach((element) => {
-          if (element.field === emailId) {
-            email = element.value;
-          }
-        });
-        if (email) {
-          const tempUser = await User.findOne({ email: email });
-          if (tempUser) {
-            args = { ...args, createdBy: tempUser._id };
-          }
-        }
-        const oldOptions = { ...args.options };
+        const callback = async (session, response) => {
+          // Run Actions
+          const res: any = await FormModel.findById(args.formId)
+            .populate(formPopulate)
+            .session(session);
+          const form: any = { ...res.toObject() };
+          form.settings = form.settings || {};
+          form.settings.actions = args?.options?.actions || form.settings?.actions;
+          response.options = args.options;
+          await runFormActions({
+            triggerType: 'onCreate',
+            form,
+            response,
+            args,
+            session,
+          });
 
-        if (args?.options) {
-          const { password, ...options } = args?.options;
-          args = { ...args, options };
-        }
-
-        const createUserActionType = form?.settings?.actions?.filter(
-          (e) => e?.actionType === 'createCognitoUser',
-        )[0];
-
-        const selectItemInForm = args?.values?.filter((e) => e?.response !== null)[0]?.response;
-        const selectItemResponse = await ResponseModel.findById(selectItemInForm);
-        const selectForm = await FormModel.findById(selectItemResponse?.formId);
-        const selectItemField = selectForm?.fields
-          ?.filter((e) => e?.fieldType === 'text' && e?.label?.toUpperCase().includes('ROLE'))
-          .map((e) => e._id);
-        const RoleName =
-          selectItemResponse?.values
-            ?.filter((e) => selectItemField?.includes(e.field))
-            .map((e) => e.value) || [];
-
-        if (createUserActionType?.actionType === 'createCognitoUser') {
-          const fName = args?.values
-            ?.filter((e) => e?.field === createUserActionType?.firstName)[0]
-            ?.value.trim();
-          const lName = args?.values
-            ?.filter((e) => e?.field === createUserActionType?.lastName)[0]
-            ?.value.trim();
-          const uEmail = args?.values
-            ?.filter((e) => e?.field === createUserActionType?.userEmail)[0]
-            ?.value.trim();
-
-          const payload = {
-            UserPoolId: createUserActionType?.userPoolId,
-            Username: uEmail,
-            UserAttributes: [
-              {
-                Name: 'email',
-                Value: uEmail,
-              },
-              {
-                Name: 'email_verified',
-                Value: 'True',
-              },
-              {
-                Name: 'name',
-                Value: `${fName} ${lName}`,
-              },
-            ],
-          };
-          try {
-            for (let i = 0; i < RoleName?.length; i++) {
-              const Cpayload = {
-                GroupName: RoleName[i],
-                UserPoolId: createUserActionType?.userPoolId,
-                Username: uEmail,
-              };
-              await createUser(payload);
-              await addUserToGroup(Cpayload);
-            }
-          } catch (error) {
-            return error.message;
-          }
-        }
-        // let response = await ResponseModel.create(args);
-        // response = await response.populate(responsePopulate);
-        const response = await runInTransaction({
-          action: 'CREATE',
-          Model: ResponseModel,
-          args,
-          populate: responsePopulate,
-          user,
-        });
-        // Run Actions
-        const createGroupActionType = form?.settings?.actions?.filter(
-          (e) => e.actionType === 'createCognitoGroup',
-        )[0];
-        if (createGroupActionType?.actionType === 'createCognitoGroup') {
-          const ResponseValue = args?.values
-            ?.filter((e) => e.field === createGroupActionType?.cognitoGroupName)[0]
-            ?.value.trim();
-          const Desc = args?.values
-            ?.filter((e) => e?.field === createGroupActionType?.cognitoGroupDesc)[0]
-            ?.value.trim();
-          const payload = {
-            GroupName: ResponseValue,
-            UserPoolId: createGroupActionType?.userPoolId,
-            Description: Desc,
-          };
-          const highPriorityGroup = [
-            'superadmin',
-            'us-east-1_eBnsz43bl_Facebook',
-            'us-east-1_eBnsz43bl_Google',
-          ];
-          if (!highPriorityGroup.includes(payload.GroupName)) await createCognitoGroup(payload);
-          else
-            return {
-              message: 'you are not allowd for this action',
-            };
-        } else {
-          if (!(process.env.NODE_ENV === 'test')) {
-            const res: any = await FormModel.findById(response?.formId).populate(formPopulate);
-            const form = { ...res.toObject() };
-            const act = form?.settings?.actions?.filter((e) => e.triggerType === 'onCreate');
-            if (form && act) {
-              await runFormActions(
-                { ...response.toObject(), options: oldOptions },
-                {
-                  ...form,
-                  settings: {
-                    ...form.settings,
-                    actions: args?.options?.actions || form.settings?.actions,
-                  },
-                },
-                args?.parentId,
-              );
-              await sendResponseNotification(form, response);
-            }
-          }
-        }
+          await sendResponseNotification({ session, form, response });
+        };
+        const response = await runInTransaction(
+          {
+            action: 'CREATE',
+            Model: ResponseModel,
+            args,
+            populate: responsePopulate,
+            user,
+          },
+          callback,
+        );
         return response;
       }
       case 'updateResponse': {
-        const response = await runInTransaction({
-          action: 'UPDATE',
-          Model: ResponseModel,
-          args,
-          populate: responsePopulate,
-          user,
-        });
-        const oldOptions = { ...args.options };
-        const res: any = await FormModel.findById(response.formId).populate(formPopulate);
-        const form = { ...res.toObject() };
-        const updateUserActionType = form?.settings?.actions?.filter(
-          (e) => e?.actionType === 'updateCognitoUser',
-        )[0];
-
-        if (updateUserActionType?.actionType === 'updateCognitoUser') {
-          const fName = args?.values
-            ?.filter((e) => e?.field === updateUserActionType?.firstName)[0]
-            ?.value.trim();
-          const lName = args?.values
-            ?.filter((e) => e?.field === updateUserActionType?.lastName)[0]
-            ?.value.trim();
-          const uEmail = args?.values
-            ?.filter((e) => e?.field === updateUserActionType?.userEmail)[0]
-            ?.value.trim();
-
-          const payload = {
-            UserPoolId: updateUserActionType?.userPoolId,
-            Username: uEmail,
-            UserAttributes: [
-              {
-                Name: 'email',
-                Value: uEmail,
-              },
-              {
-                Name: 'email_verified',
-                Value: 'True',
-              },
-              {
-                Name: 'name',
-                Value: `${fName} ${lName}`,
-              },
-            ],
-          };
-          await updateUserAttributes(payload);
-        }
-        const createGroupActionType = form?.settings?.actions?.filter(
-          (e) => e.actionType === 'updateCognitoGroup',
-        )[0];
-        if (createGroupActionType?.actionType === 'updateCognitoGroup') {
-          const ResponseValue = args?.values
-            ?.filter((e) => e.field === createGroupActionType?.cognitoGroupName)[0]
-            ?.value.trim();
-          const Desc = args?.values
-            ?.filter((e) => e?.field === createGroupActionType?.cognitoGroupDesc)[0]
-            ?.value.trim();
-          const payload = {
-            GroupName: ResponseValue,
-            UserPoolId: createGroupActionType?.userPoolId,
-            Description: Desc,
-          };
-
-          const highPriorityGroup = [
-            'superadmin',
-            'us-east-1_eBnsz43bl_Facebook',
-            'us-east-1_eBnsz43bl_Google',
-          ];
-          if (!highPriorityGroup.includes(payload.GroupName)) await updateCognitoGroup(payload);
-          else
-            return {
-              message: 'you are not allowd for this action',
-            };
-        } else {
-          if (!(process.env.NODE_ENV === 'test')) {
-            const res: any = await FormModel.findById(response?.formId).populate(formPopulate);
-            const form = { ...res.toObject() };
-            const act = form?.settings?.actions?.filter((e) => e.triggerType === 'onUpdate');
-            if (form && act) {
-              await runFormActions(
-                { ...response.toObject(), options: oldOptions },
-                {
-                  ...form,
-                  settings: {
-                    ...form.settings,
-                    actions: args?.options?.actions || form.settings?.actions,
-                  },
-                },
-                args?.parentId,
-              );
-              await sendResponseNotification(form, response);
-            }
-          }
-        }
+        const callback = async (session, response) => {
+          const res: any = await FormModel.findById(response.formId).populate(formPopulate);
+          const form = { ...res.toObject() };
+          form.settings = form.settings || {};
+          form.settings.actions = args?.options?.actions || form.settings?.actions;
+          response.options = args.options;
+          await runFormActions({
+            triggerType: 'onUpdate',
+            form,
+            response,
+            args,
+            session,
+          });
+          // await sendResponseNotification(form, response);
+        };
+        const response = await runInTransaction(
+          {
+            action: 'UPDATE',
+            Model: ResponseModel,
+            args,
+            populate: responsePopulate,
+            user,
+          },
+          callback,
+        );
         return response;
       }
       case 'deleteResponse': {
-        const response = await runInTransaction({
-          action: 'DELETE',
-          Model: ResponseModel,
-          args,
-          user,
-        });
-        const oldOptions = { ...args.options };
+        const callback = async (session, response) => {
+          const res: any = await FormModel.findById(response.formId).populate(formPopulate);
+          const form: IForm = { ...res?.toObject() };
+          form.settings = form.settings || {};
+          form.settings.actions = args?.options?.actions || form.settings?.actions;
+          response.options = args.options;
 
-        const res: any = await FormModel.findById(response.formId).populate(formPopulate);
-        const form = { ...res.toObject() };
-
-        const deleteUserActionType = form?.settings?.actions?.filter(
-          (e) => e?.actionType === 'deleteCognitoUser',
-        )[0];
-        const selectItemInForm = response?.values?.filter((e) => e?.response !== null)[0]?.response;
-        const selectItemResponse = await ResponseModel.findById(selectItemInForm);
-        const selectForm = await FormModel.findById(selectItemResponse?.formId);
-        const selectItemField = selectForm?.fields
-          ?.filter((e) => e?.fieldType === 'text' && e?.label?.toUpperCase().includes('ROLE'))
-          .map((e) => e._id);
-        const RoleName =
-          selectItemResponse?.values
-            ?.filter((e) => selectItemField?.includes(e.field))
-            .map((e) => e.value) || [];
-
-        console.log(RoleName);
-
-        if (deleteUserActionType?.actionType === 'deleteCognitoUser') {
-          const uEmail = response?.values
-            ?.filter((e) => e?.field === deleteUserActionType?.userEmail)[0]
-            ?.value.trim();
-
-          const payload = {
-            UserPoolId: deleteUserActionType?.userPoolId,
-            Username: uEmail,
-          };
-          try {
-            for (let i = 0; i < RoleName?.length; i++) {
-              const Dpayload = {
-                GroupName: RoleName[i],
-                UserPoolId: deleteUserActionType?.userPoolId,
-                Username: uEmail,
-              };
-              await removeUserFromGroup(Dpayload);
-              await deleteUser(payload);
+          const relationFieldIds: string[] = [];
+          form?.fields?.forEach((field) => {
+            if (field?.fieldType === 'response' && !field?.options?.selectItem) {
+              relationFieldIds.push(field?._id?.toString());
             }
-          } catch (error) {
-            return error.message;
-          }
-        }
-
-        const createGroupActionType = form?.settings?.actions?.filter(
-          (e) => e.actionType === 'deleteCognitoGroup',
-        )[0];
-        if (createGroupActionType?.actionType === 'deleteCognitoGroup') {
-          const ResponseValue = response?.values
-            ?.filter((e) => e.field === createGroupActionType?.cognitoGroupName)[0]
-            ?.value.trim();
-          const payload = {
-            GroupName: ResponseValue,
-            UserPoolId: createGroupActionType?.userPoolId,
-          };
-          const highPriorityGroup = [
-            'superadmin',
-            'us-east-1_eBnsz43bl_Facebook',
-            'us-east-1_eBnsz43bl_Google',
-          ];
-          if (!highPriorityGroup.includes(payload.GroupName)) await deleteCognitoGroup(payload);
-          else
-            return {
-              message: 'you are not allowd for this action',
-            };
-        } else {
-          if (!(process.env.NODE_ENV === 'test')) {
-            const res: any = await FormModel.findById(response?.formId).populate(formPopulate);
-            const form = { ...res?.toObject() };
-            const act = form?.settings?.actions?.filter((e) => e.triggerType === 'onDelete');
-            if (form && act) {
-              await runFormActions(
-                { ...response.toObject(), options: oldOptions },
-                {
-                  ...form,
-                  settings: {
-                    ...form.settings,
-                    actions: args?.options?.actions || form.settings?.actions,
-                  },
-                },
-                args?.parentId,
-              );
-              await sendResponseNotification(form, response);
+          });
+          if (relationFieldIds?.length > 0) {
+            const responseIds: string[] = [];
+            response?.values?.forEach((value) => {
+              if (
+                relationFieldIds?.includes(value?.field?.toString()) &&
+                (value?.response?._id || value?.response)
+              ) {
+                responseIds?.push(value?.response?._id || value?.response);
+              }
+            });
+            if (responseIds?.length > 0) {
+              await ResponseModel.deleteMany({ _id: { $in: responseIds } });
             }
           }
-        }
-        return args._id;
+          await runFormActions({
+            triggerType: 'onDelete',
+            form,
+            response,
+            args,
+            session,
+          });
+          // await sendResponseNotification(form, response);
+        };
+        const response = await runInTransaction(
+          {
+            action: 'DELETE',
+            Model: ResponseModel,
+            args,
+            user,
+          },
+          callback,
+        );
+        return response._id;
       }
       case 'getMyResponses': {
         const { page = 1, limit = 20 } = args;
@@ -595,16 +365,27 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         return null;
       }
       case 'getCheckUnique': {
-        const latestResponse = await ResponseModel.find({ formId: args._id });
-        let finalRes = { res: false, fieldId: '' };
-        latestResponse.map((response, i) => {
-          response?.values?.map((val, j) => {
-            if (val.value === args.values[0].value) {
-              finalRes = { res: true, fieldId: val.field };
-            }
-          });
-        });
-        return finalRes;
+        const { formId, responseId, value, caseInsensitiveUnique = false } = args;
+        let filter: any = {
+          formId,
+          values: { $elemMatch: { value: value.value, field: value.field } },
+        };
+        if (caseInsensitiveUnique) {
+          filter = {
+            ...filter,
+            values: {
+              $elemMatch: { value: { $regex: new RegExp(`^${value?.value}$`), $options: 'i' } },
+            },
+          };
+        }
+        if (responseId) {
+          filter = {
+            ...filter,
+            _id: { $ne: responseId },
+          };
+        }
+        const response = await ResponseModel.findOne(filter);
+        return Boolean(response?._id);
       }
       default:
         throw new Error('Something went wrong! Please check your Query or Mutation');

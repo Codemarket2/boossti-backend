@@ -1,5 +1,5 @@
 {
-  "name": "backend",
+  "name": "app",
   "region": "us-east-1",
   "lint": true,
   "typeCheck": false
