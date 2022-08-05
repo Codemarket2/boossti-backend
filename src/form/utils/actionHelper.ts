@@ -3,7 +3,11 @@ import { ClientSession } from 'mongoose';
 import { FormModel } from './formModel';
 import { ResponseModel, responsePopulate } from './responseModel';
 import { getValue } from './variables';
-
+/**
+ * @description Is used to get a Form Field's value by the fieldID of that field
+ * @param1 fieldId is the field id of the form's field
+ * @param2 values ???
+ * */
 export const getFieldValue = (fieldId, values) => {
   return values.find((v) => v?.field === fieldId);
 };
