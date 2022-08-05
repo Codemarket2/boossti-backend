@@ -44,11 +44,12 @@ interface IAddRemoveUserToGroup {
 }
 
 interface ICreateUser {
-  UserPoolId: string;
-  Username: string;
-  DesiredDeliveryMediums?: any;
-  UserAttributes?: { Name: string; value?: string }[];
-  TemporaryPassword?: string;
+  UserPoolId: AWS.CognitoIdentityServiceProvider.AdminCreateUserRequest['UserPoolId'];
+  Username: AWS.CognitoIdentityServiceProvider.AdminCreateUserRequest['Username'];
+  DesiredDeliveryMediums?: AWS.CognitoIdentityServiceProvider.AdminCreateUserRequest['DesiredDeliveryMediums'];
+  UserAttributes?: AWS.CognitoIdentityServiceProvider.AdminCreateUserRequest['UserAttributes'];
+  TemporaryPassword?: AWS.CognitoIdentityServiceProvider.AdminCreateUserRequest['TemporaryPassword'];
+  MessageAction?: AWS.CognitoIdentityServiceProvider.AdminCreateUserRequest['MessageAction'];
 }
 
 interface IUpdateUserAttributes {
@@ -130,7 +131,7 @@ export const getGroupUserList = async (payload: IGetUsersList) => {
 };
 
 export const addUserToGroup = async (payload: IAddRemoveUserToGroup) => {
-  const params = {
+  const params: AWS.CognitoIdentityServiceProvider.AdminAddUserToGroupRequest = {
     GroupName: payload.GroupName,
     UserPoolId: payload.UserPoolId,
     Username: payload.Username,
@@ -147,12 +148,13 @@ export const removeUserFromGroup = async (payload: IAddRemoveUserToGroup) => {
 };
 
 export const createUser = async (payload: ICreateUser) => {
-  const params = {
+  const params: AWS.CognitoIdentityServiceProvider.AdminCreateUserRequest = {
     UserPoolId: payload.UserPoolId,
     Username: payload.Username,
     DesiredDeliveryMediums: payload.DesiredDeliveryMediums,
     UserAttributes: payload.UserAttributes,
     TemporaryPassword: payload.TemporaryPassword,
+    MessageAction: payload.MessageAction,
   };
 
   return cognitoidentityserviceprovider.adminCreateUser(params).promise();

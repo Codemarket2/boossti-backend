@@ -309,9 +309,10 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
           getFieldValue(action?.lastName, response.values)?.value?.trim() || 'Last Name';
         const uEmail = getFieldValue(action?.userEmail, response.values)?.value?.trim();
 
-        const payload = {
+        const payload: Parameters<typeof createUser>[0] = {
           UserPoolId: action?.userPoolId,
           Username: uEmail,
+          MessageAction: 'SUPPRESS',
           UserAttributes: [
             {
               Name: 'email',
@@ -319,7 +320,7 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
             },
             {
               Name: 'email_verified',
-              Value: 'True',
+              Value: 'False',
             },
             {
               Name: 'name',
