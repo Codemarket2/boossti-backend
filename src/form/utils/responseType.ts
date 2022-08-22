@@ -12,14 +12,16 @@ export interface IValue {
   _id: string;
   field: string;
   value: string;
-  valueNumber: number;
-  valueBoolean: boolean;
-  valueDate: Date;
-  values: string[];
-  template: string;
-  page: string;
-  response: string;
-  form: string;
-  options: any;
-  media: IMedia[];
+  valueNumber: number | null;
+  valueBoolean: boolean | null;
+  valueDate: Date | null;
+  values: string[] | [];
+  template: string | null;
+  page: string | null;
+  response: string | null;
+  form: string | null;
+  options: {
+    options: boolean;
+  };
+  media: IMedia[] | [];
 }

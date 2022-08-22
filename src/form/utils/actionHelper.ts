@@ -149,5 +149,5 @@ export const replaceVariables = async ({
       senderEmail = senderEmail.split(variableName).join(variableValue);
     }
   });
-  return { subject, body, senderEmail };
+  return { subject, body, senderEmail } as const;
 };

@@ -1,4 +1,10 @@
 import * as AWS from 'aws-sdk';
+import { DB } from '../../utils/DB';
+import { User } from './userModel';
+import { UserFormConfig } from '../../form/utils/userFormConfig';
+import { FormModel } from '../../form/utils/formModel';
+import { ResponseModel } from '../../form/utils/responseModel';
+import { IValue as ResponseValueType } from '../../form/utils/responseType';
 
 const { USER_POOL_ID } = process.env;
 
@@ -109,10 +115,7 @@ export const adminSetUserPassword = async ({
   return cognitoIdp.adminSetUserPassword(params).promise();
 };
 
-export const markUserEmailAsVerified = async (
-  username: string,
-  userPoolId: string
-) => {
+export const markUserEmailAsVerified = async (username: string, userPoolId: string) => {
   const params = {
     UserAttributes: [
       {
@@ -140,7 +143,7 @@ export const adminToggleUserStatus = (username: string, status: boolean) => {
 
 export const adminUpdateUserAttribute = (
   username = '',
-  attribute: { Name: string; Value: string }
+  attribute: { Name: string; Value: string },
 ) => {
   const params = {
     UserPoolId: USER_POOL_ID || '',
@@ -157,4 +160,73 @@ export const adminConfirmSignUp = (username = '') => {
     Username: username,
   };
   return cognitoIdp.adminConfirmSignUp(params).promise();
+};
+
+/**
+ * updates the emailVerified field of the User in Database
+ * @param userAttributes AWS Cognito User's user attribute.
+ *
+ * Links :
+ * - User Pool Attributes : https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-settings-attributes.html
+ * */
+export const updateEmailVerified = async (userAttributes: any) => {
+  await DB();
+  const userForm = await FormModel.findOne({
+    slug: UserFormConfig.slug,
+  });
+
+  if (!userForm) {
+    throw new Error('Users Form Now Found');
+  }
+
+  const userResponseId = userAttributes['custom:_id'];
+  const isEmailVerifiedinCongito = userAttributes['email_verified'] === 'True';
+
+  const emailVerifiedFieldId = userForm.fields.find(
+    (val) => val.label === UserFormConfig.fields.emailVerified,
+  )?._id;
+
+  if (!emailVerifiedFieldId) {
+    throw new Error(
+      `'${UserFormConfig.fields.emailVerified}' field not foud in the user's form in database`,
+    );
+  }
+
+  const userResponse = await ResponseModel.findOne({
+    _id: userResponseId,
+  });
+
+  if (!userResponse) {
+    throw new Error('User not present in database but the user is present in AWS Cognito');
+  }
+
+  const EmailVerifiedField = userResponse.values.find(
+    (value) => value.field === emailVerifiedFieldId,
+  );
+
+  if (!EmailVerifiedField) {
+    // Email Verified Field is not present. so create the field and push it in values array
+    const newResponseValue: Partial<ResponseValueType> = {
+      field: emailVerifiedFieldId,
+      valueBoolean: isEmailVerifiedinCongito,
+      // valueDate: null,
+      // valueNumber: null,
+      // template: null,
+      // page: null,
+      // form: null,
+      // response: null,
+    };
+
+    await userResponse.updateOne({
+      $push: {
+        values: newResponseValue,
+      },
+    });
+  } else if (EmailVerifiedField.valueBoolean !== isEmailVerifiedinCongito) {
+    await userResponse.updateOne({
+      $set: {
+        'values.$.valueBoolean': isEmailVerifiedinCongito,
+      },
+    });
+  }
 };

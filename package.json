@@ -33,6 +33,7 @@
     "axios": "^0.24.0",
     "email-validator": "^2.0.4",
     "fast-csv": "^4.3.6",
+    "generate-password": "^1.7.0",
     "graphql-tag": "^2.12.6",
     "lodash": "^4.17.21",
     "moment": "^2.29.1",
