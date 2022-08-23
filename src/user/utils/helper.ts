@@ -170,6 +170,8 @@ export const adminConfirmSignUp = (username = '') => {
  * - User Pool Attributes : https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-settings-attributes.html
  * */
 export const updateEmailVerified = async (userAttributes: any) => {
+  console.log('Request GOTTEN');
+
   await DB();
   const userForm = await FormModel.findOne({
     slug: UserFormConfig.slug,
@@ -180,11 +182,14 @@ export const updateEmailVerified = async (userAttributes: any) => {
   }
 
   const userResponseId = userAttributes['custom:_id'];
-  const isEmailVerifiedinCongito = userAttributes['email_verified'] === 'True';
+  const isEmailVerifiedinCongito =
+    userAttributes['email_verified'] === 'True' ||
+    userAttributes['email_verified'] === 'true' ||
+    userAttributes['email_verified'] === true;
 
-  const emailVerifiedFieldId = userForm.fields.find(
-    (val) => val.label === UserFormConfig.fields.emailVerified,
-  )?._id;
+  const emailVerifiedFieldId = userForm.fields
+    .find((val) => val.label === UserFormConfig.fields.emailVerified)
+    ?._id.toString();
 
   if (!emailVerifiedFieldId) {
     throw new Error(
@@ -209,12 +214,6 @@ export const updateEmailVerified = async (userAttributes: any) => {
     const newResponseValue: Partial<ResponseValueType> = {
       field: emailVerifiedFieldId,
       valueBoolean: isEmailVerifiedinCongito,
-      // valueDate: null,
-      // valueNumber: null,
-      // template: null,
-      // page: null,
-      // form: null,
-      // response: null,
     };
 
     await userResponse.updateOne({
@@ -223,10 +222,16 @@ export const updateEmailVerified = async (userAttributes: any) => {
       },
     });
   } else if (EmailVerifiedField.valueBoolean !== isEmailVerifiedinCongito) {
-    await userResponse.updateOne({
-      $set: {
-        'values.$.valueBoolean': isEmailVerifiedinCongito,
+    await ResponseModel.updateOne(
+      {
+        _id: userResponseId,
+        'values.field': emailVerifiedFieldId,
       },
-    });
+      {
+        $set: {
+          'values.$.valueBoolean': isEmailVerifiedinCongito,
+        },
+      },
+    );
   }
 };

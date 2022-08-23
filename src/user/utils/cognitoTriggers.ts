@@ -139,8 +139,6 @@ export const postAuthenticationTrigger = async (
   //   });
   // }
 
-  const isEmailVerified = event.request.userAttributes.email_verified === 'True';
-
   // if the email is verified then also make emailVerified = true property of User in the Database
 
   await updateEmailVerified(event.request.userAttributes);
