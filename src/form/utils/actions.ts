@@ -347,16 +347,14 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
           UserPoolId: payload.UserPoolId,
         });
 
-        const tempPassword =
-          '12345678' ||
-          generatePassword.generate({
-            length: 8,
-            strict: true,
-            uppercase: true,
-            lowercase: true,
-            numbers: false,
-            symbols: false,
-          });
+        const tempPassword = generatePassword.generate({
+          length: 8,
+          strict: true,
+          uppercase: true,
+          lowercase: true,
+          numbers: false,
+          symbols: true,
+        });
 
         // USER DOES NOT EXISTS, SO CREATE THE USER
         if (!checkUser?.message && checkUser.error === null) {
