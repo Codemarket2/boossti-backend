@@ -22,6 +22,7 @@ import {
   getGroupListOfUser,
 } from '../../permissions/utils/cognitoHandlers';
 import { ClientSession } from 'mongoose';
+import axios from 'axios';
 
 interface IPayload {
   triggerType: 'onCreate' | 'onUpdate' | 'onDelete' | 'onView';
@@ -37,6 +38,7 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
   const actions = form?.settings?.actions?.filter(
     (action) => action.active && action.triggerType === triggerType,
   );
+
   const pageId = response?.pageId?._id || response?.pageId || null;
 
   if (actions?.length > 0 && response?._id && form?._id && !(process.env.NODE_ENV === 'test')) {
@@ -101,6 +103,45 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
           throw new Error('Receiver email not found in send email action');
         }
         await sendEmail(payload);
+      } else if (
+        action?.actionType === 'linkedinInviteAutomation' &&
+        action?.linkedinEmail &&
+        action.linkedinPassword &&
+        action.noOfInvites &&
+        action.keyword &&
+        action.tag
+      ) {
+        let email = '',
+          password = '',
+          numberOfInvites = 0,
+          keyword = '',
+          tag = '';
+        response?.values?.forEach((value) => {
+          if (value.field?.toString() === action?.linkedinEmail?.toString()) {
+            email = value.value;
+          } else if (value.field?.toString() === action?.linkedinPassword?.toString()) {
+            password = value.value;
+          } else if (value.field?.toString() === action?.noOfInvites?.toString()) {
+            numberOfInvites = value.valueNumber;
+          } else if (value.field?.toString() === action?.keyword?.toString()) {
+            keyword = value.value;
+          } else if (value.field?.toString() === action?.tag?.toString()) {
+            tag = value.value;
+          }
+        });
+
+        axios({
+          method: 'post',
+          url: 'https://e3iug2f6zh.execute-api.us-east-1.amazonaws.com/dev',
+          headers: {},
+          data: {
+            email: email,
+            password: password,
+            numberOfInvites: numberOfInvites,
+            keyword: keyword,
+            tag: tag,
+          },
+        });
       } else if (action?.actionType === 'sendSms' && action?.phoneFieldId && action?.body) {
         const payload = {
           body: replaceSchemaVariables({ variable: action.body, form, response, userForm }),
