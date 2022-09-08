@@ -1,3 +1,4 @@
+import { Schema } from 'mongoose';
 import { IMedia, ISchema } from '../../utils/customTypes';
 
 export interface IResponse extends ISchema {
@@ -16,10 +17,10 @@ export interface IValue {
   valueBoolean: boolean;
   valueDate: Date;
   values: string[];
-  template: string;
-  page: string;
-  response: string;
-  form: string;
+  template: Schema.Types.ObjectId;
+  page: Schema.Types.ObjectId;
+  response: Schema.Types.ObjectId;
+  form: Schema.Types.ObjectId;
   options: any;
   media: IMedia[];
 }

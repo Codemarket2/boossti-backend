@@ -7,7 +7,7 @@ import { IField } from '../../form/utils/formType';
 import { IValue } from '../../form/utils/responseType';
 
 export interface IPage extends ISchema {
-  template: string;
+  template: Schema.Types.ObjectId;
   title: string;
   slug: string;
   description: string;
