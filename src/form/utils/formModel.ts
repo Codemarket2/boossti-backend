@@ -32,10 +32,6 @@ const formSchema = extendSchema({
     type: Boolean,
     default: false,
   },
-  // virtualForm: {
-  //   type: Boolean,
-  //   default: false,
-  // },
 });
 
 export const FormModel = model<IForm>('Form', formSchema);
