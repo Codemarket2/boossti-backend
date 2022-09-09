@@ -13,6 +13,7 @@ import getAdminFilter from '../utils/adminFilter';
 import { fileParser } from './utils/readCsvFile';
 import { runInTransaction } from '../utils/runInTransaction';
 import { IForm } from './utils/formType';
+// import { authorization } from './permission/authorization';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -27,9 +28,9 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       args = { ...args, slug: slugify(args.name, { lower: true }) };
     }
     if (fieldName.toLocaleLowerCase().includes('create') && user?._id) {
-      args = { ...args, createdBy: user._id };
+      args = { ...args, createdBy: user?._id };
     } else if (fieldName.toLocaleLowerCase().includes('update') && user?._id) {
-      args = { ...args, updatedBy: user._id };
+      args = { ...args, updatedBy: user?._id };
     }
 
     switch (fieldName) {
@@ -108,6 +109,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         return await ResponseModel.findById(args._id).populate(responsePopulate);
       }
       case 'getResponseByCount': {
+        // await authorization({ user, actionType: 'VIEW', formId: args?.formId });
         const response: any = await ResponseModel.findOne(args).populate(responsePopulate);
         // const oldOptions = { ...args.options };
         // if (!(process.env.NODE_ENV === 'test')) {

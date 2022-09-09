@@ -19,7 +19,7 @@ export interface IValue {
   values: string[];
   template: Schema.Types.ObjectId;
   page: Schema.Types.ObjectId;
-  response: Schema.Types.ObjectId;
+  response: Schema.Types.ObjectId | any;
   form: Schema.Types.ObjectId;
   options: any;
   media: IMedia[];

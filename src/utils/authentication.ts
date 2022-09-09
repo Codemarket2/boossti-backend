@@ -1,17 +1,18 @@
 // import * as mongoose from 'mongoose';
 import { FormModel } from '../form/utils/formModel';
-import { ResponseModel } from '../form/utils/responseModel';
+import { ResponseModel, responsePopulate } from '../form/utils/responseModel';
+import { IResponse } from '../form/utils/responseType';
 import { IIdentity } from './customTypes';
 
-export const getCurrentUser = async (identity: IIdentity) => {
+export const getCurrentUser = async (identity: IIdentity): Promise<IResponse> => {
   let user;
-  if (identity && identity.claims && identity.claims.sub && identity.claims['custom:_id']) {
-    user = {
-      _id: identity.claims['custom:_id'],
-      name: identity.claims.name,
-      picture: identity.claims.picture,
-    };
-  } else if (identity && identity.claims && identity.claims.sub) {
+  if (identity?.claims?.['custom:_id']) {
+    user = await ResponseModel.findOne({
+      _id: identity?.claims?.['custom:_id'],
+    })
+      .populate(responsePopulate)
+      .lean();
+  } else if (identity?.claims?.email) {
     const userForm = await FormModel.findOne({ slug: process.env.USERS_FORM_SLUG });
     if (!userForm?._id) {
       throw new Error('Users form not found in database');
@@ -20,7 +21,9 @@ export const getCurrentUser = async (identity: IIdentity) => {
     user = await ResponseModel.findOne({
       formId: userForm?._id,
       values: { $elemMatch: { value: identity.claims.email, field: emailFieldId } },
-    });
+    })
+      .populate(responsePopulate)
+      .lean();
   }
   return user;
 };
