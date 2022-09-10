@@ -1,5 +1,6 @@
 import moment from 'moment';
 import { ClientSession } from 'mongoose';
+import { systemForms } from '../permission/systemFormsConfig';
 import { FormModel } from './formModel';
 import { ResponseModel, responsePopulate } from './responseModel';
 import { getValue } from './variables';
@@ -43,19 +44,34 @@ export const replaceSchemaVariables = ({
   return variable;
 };
 
-export const getUserAttributes = (userForm: any, userResponse) => {
+export interface IUserAttributes {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  name: string;
+}
+export const getUserAttributes = (userForm: any, userResponse): IUserAttributes => {
   const firstName = getFieldValueByLabel(
-    'First Name',
+    systemForms.users.fields.firstName,
     userForm?.fields,
     userResponse?.values,
   )?.value;
-  const lastName = getFieldValueByLabel('Last Name', userForm?.fields, userResponse?.values)?.value;
-  const email = getFieldValueByLabel('email', userForm?.fields, userResponse?.values)?.value;
+  const lastName = getFieldValueByLabel(
+    systemForms.users.fields.lastName,
+    userForm?.fields,
+    userResponse?.values,
+  )?.value;
+  const email = getFieldValueByLabel(
+    systemForms.users.fields.email,
+    userForm?.fields,
+    userResponse?.values,
+  )?.value;
   let name = `${firstName}`;
   if (lastName) {
     name += ` ${lastName}`;
   }
-  return { firstName, lastName, email, name };
+  return { _id: userResponse?._id?.toString(), firstName, lastName, email, name };
 };
 
 interface IReplaceVariablePayload {

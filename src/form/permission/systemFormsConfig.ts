@@ -17,8 +17,17 @@ export const systemForms = {
   permissions: {
     slug: 'permissions',
     fields: {
+      form: 'form',
       role: 'role',
       actionPermissions: 'Action Permissions',
+    },
+  },
+  actionPermissions: {
+    slug: 'action-permissions',
+    fields: {
+      actionType: 'action type',
+      conditionType: 'condition type',
+      condition: 'condition',
     },
   },
 };

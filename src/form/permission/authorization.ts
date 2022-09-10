@@ -1,16 +1,25 @@
 import { FormModel } from '../utils/formModel';
 import { ResponseModel, responsePopulate } from '../utils/responseModel';
-import { IResponse } from '../utils/responseType';
+import { IResponse } from '../types/response';
 import { getFieldByLabel } from './fieldHelper';
+import { resolveCondition } from '../condition/resolveCondition';
 import { systemForms } from './systemFormsConfig';
+import { ICondition } from '../types/form';
+import { getUserAttributes } from '../utils/actionHelper';
 
 interface AuthorizationPayload {
   actionType: 'CREATE' | 'VIEW' | 'EDIT' | 'DELETE';
   user: IResponse;
+  response: IResponse;
   formId: string;
 }
 
-export const authorization = async ({ user, formId }: AuthorizationPayload) => {
+export const authorization = async ({
+  actionType,
+  user,
+  formId,
+  response,
+}: AuthorizationPayload) => {
   try {
     // Get User Roles
     if (!user?._id) throw new Error('User not found');
@@ -37,9 +46,6 @@ export const authorization = async ({ user, formId }: AuthorizationPayload) => {
       throw new Error("user doesn't have any roles");
     }
 
-    // const rolesForm = await FormModel.findOne({ slug: systemForms.roles.slug });
-    // if (!rolesField?._id) throw new Error('roles form not found');
-
     // Get User Permission By Roles
     const permissionsForm = await FormModel.findOne({ slug: systemForms.permissions.slug }).lean();
     if (!permissionsForm?._id) throw new Error('permissions form not found');
@@ -48,35 +54,82 @@ export const authorization = async ({ user, formId }: AuthorizationPayload) => {
       systemForms.permissions.fields.role,
       permissionsForm?.fields,
     );
-    if (!permissionFormRoleField?._id) throw new Error('role field in permissions form not found');
+    if (!permissionFormRoleField?._id) throw new Error('role field not found in permissions form');
+    const permissionFormFormField = getFieldByLabel(
+      systemForms.permissions.fields.form,
+      permissionsForm?.fields,
+    );
+    if (!permissionFormFormField?._id) throw new Error('form field not found in permissions form');
 
     const permissionFormActionField = getFieldByLabel(
       systemForms.permissions.fields.actionPermissions,
       permissionsForm?.fields,
     );
-    if (!permissionFormRoleField?._id) throw new Error('role field in permissions form not found');
+    if (!permissionFormRoleField?._id) throw new Error('action field not found in permission form');
 
     const userPermissions = await ResponseModel.find({
       formId: permissionsForm?._id,
-      'values.field': permissionFormRoleField?._id,
-      'values.response': { $in: userRoleIds },
+      $and: [
+        { 'values.field': permissionFormRoleField?._id, 'values.response': { $in: userRoleIds } },
+        { 'values.field': permissionFormFormField?._id, 'values.form': formId },
+      ],
     })
       .populate(responsePopulate)
       .lean();
     if (!(userPermissions?.length > 0)) throw new Error(`user doesn't have permission`);
 
-    // const permissionConditions:any =[]
-    //  userPermissions.forEach(perm=>{
-    //   const actionPermissionValues = per
-    //   if(perm)
-    //   return false
-    //  })
-    // debugger;
+    // Get User Permission By Roles
+    const actionPermissionsForm = await FormModel.findOne({
+      slug: systemForms.actionPermissions.slug,
+    }).lean();
+    if (!actionPermissionsForm?._id) throw new Error('actionPermissions form not found');
 
-    //    return null;
+    const actionTypeField = getFieldByLabel(
+      systemForms.actionPermissions.fields.actionType,
+      actionPermissionsForm?.fields,
+    );
+    const conditionField = getFieldByLabel(
+      systemForms.actionPermissions.fields.condition,
+      actionPermissionsForm?.fields,
+    );
+
+    let conditions: ICondition[] = [];
+    userPermissions.forEach((perm) => {
+      const actionPermissionValues = perm.values?.filter(
+        (value) => value?.field?.toString() === permissionFormActionField?._id?.toString(),
+      );
+      actionPermissionValues.forEach((value) => {
+        value?.response?.values?.forEach((v) => {
+          if (
+            v?.field?.toString() === actionTypeField?._id?.toString() &&
+            v?.value === actionType
+          ) {
+            const tempConditions = value?.response?.values?.find(
+              (v) => v?.field?.toString() === conditionField?._id?.toString(),
+            )?.options?.conditions;
+            if (tempConditions?.length > 0) {
+              conditions = [...conditions, ...tempConditions];
+            }
+          }
+        });
+      });
+    });
+
+    if (!(conditions?.length > 0)) {
+      throw new Error(`No permissions found for ${actionType} actionType`);
+    }
+
+    const userAttributes = getUserAttributes(userForm, user);
+    const result = await resolveCondition({
+      conditions,
+      leftPartResponse: response,
+      authState: userAttributes,
+    });
+    if (!result) throw new Error('User is not authorized');
   } catch (error) {
     console.log(error);
-    // debugger;
-    throw new Error('You are not authorized to perform this action');
+    throw new Error(
+      `You are not authorized to perform this action, you don't have enough permission`,
+    );
   }
 };

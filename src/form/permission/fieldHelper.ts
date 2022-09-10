@@ -1,4 +1,4 @@
-import { IField } from '../utils/formType';
+import { IField } from '../types/form';
 
 export const getFieldByLabel = (label: string, fields: IField[]) => {
   const field = fields?.find(

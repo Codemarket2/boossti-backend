@@ -1,5 +1,6 @@
 import { Schema } from 'mongoose';
 import { IMedia, ISchema } from '../../utils/customTypes';
+import { ICondition } from './form';
 
 export interface IResponse extends ISchema {
   formId: any;
@@ -19,8 +20,12 @@ export interface IValue {
   values: string[];
   template: Schema.Types.ObjectId;
   page: Schema.Types.ObjectId;
-  response: Schema.Types.ObjectId | any;
+  response: Schema.Types.ObjectId | any; // IResponse
   form: Schema.Types.ObjectId;
-  options: any;
+  options: IValueOptions | any;
   media: IMedia[];
+}
+
+export interface IValueOptions {
+  conditions: ICondition[];
 }

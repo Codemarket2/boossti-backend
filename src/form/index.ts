@@ -12,8 +12,9 @@ import { sendResponseNotification } from './utils/responseNotification';
 import getAdminFilter from '../utils/adminFilter';
 import { fileParser } from './utils/readCsvFile';
 import { runInTransaction } from '../utils/runInTransaction';
-import { IForm } from './utils/formType';
+import { IForm } from './types/form';
 // import { authorization } from './permission/authorization';
+// import { IResponse } from './types/response';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -109,8 +110,8 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         return await ResponseModel.findById(args._id).populate(responsePopulate);
       }
       case 'getResponseByCount': {
-        // await authorization({ user, actionType: 'VIEW', formId: args?.formId });
-        const response: any = await ResponseModel.findOne(args).populate(responsePopulate);
+        const response: any = await ResponseModel.findOne(args).populate(responsePopulate).lean();
+        // await authorization({ user, actionType: 'VIEW', formId: args?.formId, response });
         // const oldOptions = { ...args.options };
         // if (!(process.env.NODE_ENV === 'test')) {
         //   const res: any = await FormModel.findById(response?.formId).populate(formPopulate);

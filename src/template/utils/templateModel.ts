@@ -3,7 +3,7 @@ import { ISchema, IMedia } from '../../utils/customTypes';
 import { fieldSchema, fieldsPopulate } from '../../form/utils/formModel';
 import { userPopulate } from '../../utils/populate';
 import { extendSchema } from '../../utils/extendSchema';
-import { IField } from '../../form/utils/formType';
+import { IField } from '../../form/types/form';
 
 export interface ITemplate extends ISchema {
   title: string;

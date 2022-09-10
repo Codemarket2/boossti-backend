@@ -1,7 +1,7 @@
 // import * as mongoose from 'mongoose';
 import { FormModel } from '../form/utils/formModel';
 import { ResponseModel, responsePopulate } from '../form/utils/responseModel';
-import { IResponse } from '../form/utils/responseType';
+import { IResponse } from '../form/types/response';
 import { IIdentity } from './customTypes';
 
 export const getCurrentUser = async (identity: IIdentity): Promise<IResponse> => {
