@@ -6,7 +6,7 @@ import { getLeftPartValue, getRightPartValue } from './getConditionPartValue';
 
 interface IResolveConditionPayload {
   conditions: ICondition[];
-  leftPartResponse: IResponse;
+  leftPartResponse?: IResponse;
   authState: IUserAttributes;
 }
 
@@ -15,6 +15,7 @@ export const resolveCondition = async ({
   leftPartResponse,
   authState,
 }: IResolveConditionPayload): Promise<boolean> => {
+  if (!leftPartResponse?._id) throw new Error('leftPartResponse field not found in payload');
   const { forms, responses } = await getConditionFormsAndResponses(conditions);
   const tempResult: boolean[] = [];
 
@@ -31,11 +32,14 @@ export const resolveCondition = async ({
       authState: authState,
     });
 
+    // debugger;
     let conditionResult = false;
-    if (condition?.conditionType === '==') {
-      conditionResult = leftValue === rightValue;
-    } else if (condition?.conditionType === '!=') {
-      conditionResult = leftValue !== rightValue;
+    if (leftValue || rightValue) {
+      if (condition?.conditionType === '==') {
+        conditionResult = leftValue === rightValue;
+      } else if (condition?.conditionType === '!=') {
+        conditionResult = leftValue !== rightValue;
+      }
     }
     tempResult.push(conditionResult);
   }

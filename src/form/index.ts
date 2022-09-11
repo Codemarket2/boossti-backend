@@ -13,8 +13,7 @@ import getAdminFilter from '../utils/adminFilter';
 import { fileParser } from './utils/readCsvFile';
 import { runInTransaction } from '../utils/runInTransaction';
 import { IForm } from './types/form';
-// import { authorization } from './permission/authorization';
-// import { IResponse } from './types/response';
+import { authorization, AuthorizationActionTypes } from './permission/authorization';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -111,7 +110,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       }
       case 'getResponseByCount': {
         const response: any = await ResponseModel.findOne(args).populate(responsePopulate).lean();
-        // await authorization({ user, actionType: 'VIEW', formId: args?.formId, response });
+        // await authorization({ user, actionType: AuthorizationActionTypes.VIEW, formId: response?.formId, response });
         // const oldOptions = { ...args.options };
         // if (!(process.env.NODE_ENV === 'test')) {
         //   const res: any = await FormModel.findById(response?.formId).populate(formPopulate);
@@ -178,6 +177,12 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       }
       case 'createResponse': {
         args = { ...args, count: 1 };
+        // await authorization({
+        //   user,
+        //   actionType: AuthorizationActionTypes.CREATE,
+        //   formId: args.formId,
+        //   // response: null,
+        // });
         const lastResponse = await ResponseModel.findOne({ formId: args.formId }).sort('-count');
         if (lastResponse) {
           args = { ...args, count: lastResponse?.count + 1 };
@@ -214,6 +219,15 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         return response;
       }
       case 'updateResponse': {
+        // const tempResponse: any = await ResponseModel.findById(args?._id)
+        //   .populate(responsePopulate)
+        //   .lean();
+        // await authorization({
+        //   user,
+        //   actionType: AuthorizationActionTypes.EDIT,
+        //   formId: tempResponse?.formId,
+        //   response: tempResponse,
+        // });
         const callback = async (session, response) => {
           const res: any = await FormModel.findById(response.formId).populate(formPopulate);
           const form = { ...res.toObject() };
@@ -242,6 +256,17 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         return response;
       }
       case 'deleteResponse': {
+        const tempResponse: any = await ResponseModel.findById(args?._id)
+          .populate(responsePopulate)
+          .lean();
+        if (process?.env?.NODE_ENV !== 'test') {
+          await authorization({
+            user,
+            actionType: AuthorizationActionTypes.DELETE,
+            formId: tempResponse?.formId,
+            response: tempResponse,
+          });
+        }
         const callback = async (session, response) => {
           const res: any = await FormModel.findById(response.formId).populate(formPopulate);
           const form: IForm = { ...res?.toObject() };

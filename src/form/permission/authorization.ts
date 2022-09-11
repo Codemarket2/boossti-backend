@@ -7,10 +7,17 @@ import { systemForms } from './systemFormsConfig';
 import { ICondition } from '../types/form';
 import { getUserAttributes } from '../utils/actionHelper';
 
+export enum AuthorizationActionTypes {
+  CREATE = 'CREATE',
+  VIEW = 'VIEW',
+  EDIT = 'EDIT',
+  DELETE = 'DELETE',
+}
+
 interface AuthorizationPayload {
-  actionType: 'CREATE' | 'VIEW' | 'EDIT' | 'DELETE';
+  actionType: AuthorizationActionTypes;
   user: IResponse;
-  response: IResponse;
+  response?: IResponse;
   formId: string;
 }
 
@@ -21,6 +28,9 @@ export const authorization = async ({
   response,
 }: AuthorizationPayload) => {
   try {
+    if (!actionType || !user?._id || !formId) {
+      throw new Error('actionType, user, formId not found in payload');
+    }
     // Get User Roles
     if (!user?._id) throw new Error('User not found');
     const userForm = await FormModel.findOne({ slug: systemForms.users.slug })?.lean();
@@ -93,7 +103,8 @@ export const authorization = async ({
       actionPermissionsForm?.fields,
     );
 
-    let conditions: ICondition[] = [];
+    let conditions: ICondition[][] = [];
+    let hasCreateActionPermission = false;
     userPermissions.forEach((perm) => {
       const actionPermissionValues = perm.values?.filter(
         (value) => value?.field?.toString() === permissionFormActionField?._id?.toString(),
@@ -104,32 +115,47 @@ export const authorization = async ({
             v?.field?.toString() === actionTypeField?._id?.toString() &&
             v?.value === actionType
           ) {
+            if (actionType === AuthorizationActionTypes.CREATE) {
+              hasCreateActionPermission = true;
+            }
             const tempConditions = value?.response?.values?.find(
               (v) => v?.field?.toString() === conditionField?._id?.toString(),
             )?.options?.conditions;
             if (tempConditions?.length > 0) {
-              conditions = [...conditions, ...tempConditions];
+              conditions = [...conditions, tempConditions];
             }
           }
         });
       });
     });
 
+    if (hasCreateActionPermission && actionType === AuthorizationActionTypes.CREATE) {
+      return;
+    }
+
     if (!(conditions?.length > 0)) {
       throw new Error(`No permissions found for ${actionType} actionType`);
     }
-
+    // debugger;
     const userAttributes = getUserAttributes(userForm, user);
-    const result = await resolveCondition({
-      conditions,
-      leftPartResponse: response,
-      authState: userAttributes,
-    });
-    if (!result) throw new Error('User is not authorized');
+    const results: boolean[] = [];
+    for (const condition of conditions) {
+      if (!results?.some((result) => result)) {
+        const conditionResult = await resolveCondition({
+          conditions: condition,
+          leftPartResponse: response,
+          authState: userAttributes,
+        });
+        results.push(conditionResult);
+      }
+    }
+    // debugger;
+    if (!results?.some((result) => result)) throw new Error('User is not authorized');
   } catch (error) {
     console.log(error);
+    // debugger;
     throw new Error(
-      `You are not authorized to perform this action, you don't have enough permission`,
+      `You are not authorized to perform this action, you don't have enough permission.`,
     );
   }
 };
