@@ -4,43 +4,45 @@ import { FormModel, formPopulate } from '../utils/formModel';
 import { ResponseModel, responsePopulate } from '../utils/responseModel';
 
 export const getConditionFormsAndResponses = async (conditions: ICondition[]) => {
-  const formIds: string[] = [];
-  const responseIds: string[] = [];
+  let formIds: string[] = [];
+  let responseIds: string[] = [];
   conditions?.forEach((condition) => {
     const leftFormIds = getFormIds(condition?.left);
     const rightFormIds = getFormIds(condition?.right);
-    const rightResponseIds = getResponseIds(condition?.right);
-    [...leftFormIds, ...rightFormIds].forEach((formId) => {
-      if (formId && !formIds?.includes(formId)) {
-        formIds.push(formId);
-      }
-    });
-    rightResponseIds.forEach((responseId) => {
-      if (responseId && !responseIds?.includes(responseId)) {
-        responseIds.push(responseId);
-      }
-    });
+    formIds = [...formIds, ...leftFormIds, ...rightFormIds];
+    const leftResponseIds = getResponseIds(condition?.right);
+    responseIds = [...responseIds, ...leftResponseIds];
   });
+
+  formIds = [...new Set(formIds)];
+  responseIds = [...new Set(responseIds)];
+
   const forms: { [key: string]: IForm } = {};
-  for (const formId of formIds) {
-    if (!forms[formId]?._id) {
-      const form = await FormModel.findOne({ _id: formId }).populate(formPopulate).lean();
-      if (form?._id) {
-        forms[form?._id] = form;
-      }
+  const formsArray = await FormModel.find({ _id: { $in: formIds } })
+    .populate(formPopulate)
+    .lean();
+
+  formIds.forEach((formId) => {
+    const form = formsArray?.find((selectedForm) => selectedForm?._id?.toString() === formId);
+    if (form?._id) {
+      forms[formId] = form;
     }
-  }
+  });
+
   const responses: { [key: string]: IResponse } = {};
-  for (const responseId of responseIds) {
-    if (!responses[responseId]?._id) {
-      const response = await ResponseModel.findOne({ _id: responseId })
-        .populate(responsePopulate)
-        .lean();
-      if (response?._id) {
-        responses[response?._id] = response;
-      }
+  const responsesArray = await ResponseModel.find({ _id: { $in: responseIds } })
+    .populate(responsePopulate)
+    .lean();
+
+  responseIds.forEach((responseId) => {
+    const response = responsesArray?.find(
+      (selectedResponse) => selectedResponse?._id?.toString() === responseId,
+    );
+    if (response?._id) {
+      responses[responseId] = response;
     }
-  }
+  });
+
   return { forms, responses };
 };
 

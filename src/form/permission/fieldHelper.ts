@@ -6,3 +6,10 @@ export const getFieldByLabel = (label: string, fields: IField[]) => {
   );
   return field;
 };
+
+// export const getFieldValueById = (label: string, fields: IField[]) => {
+//   const field = fields?.find(
+//     (selectedField) => selectedField?.label?.toLowerCase() === label?.toLowerCase(),
+//   );
+//   return field;
+// };

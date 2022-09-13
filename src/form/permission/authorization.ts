@@ -28,17 +28,18 @@ export const authorization = async ({
   response,
 }: AuthorizationPayload) => {
   try {
+    if (process?.env?.NODE_ENV === 'test') return true;
     if (!actionType || !user?._id || !formId) {
       throw new Error('actionType, user, formId not found in payload');
     }
     // Get User Roles
     if (!user?._id) throw new Error('User not found');
-    const userForm = await FormModel.findOne({ slug: systemForms.users.slug })?.lean();
-    if (!userForm?._id) throw new Error('users form not found');
+    const { userForm, permissionsForm, actionPermissionsForm } = await getForms();
 
     const rolesField = getFieldByLabel(systemForms.users.fields.roles, userForm?.fields);
     if (!rolesField?._id) throw new Error('roles field not found in users form');
 
+    let isSuperAdmin = false;
     const userRoleIds: string[] = [];
     user?.values?.forEach((value) => {
       if (
@@ -47,18 +48,23 @@ export const authorization = async ({
         !userRoleIds.includes(value?.response?._id)
       ) {
         userRoleIds.push(value?.response?._id);
-        return true;
+        const roleName = value?.response?.values?.find(
+          (v) => v?.field === rolesField?.options?.formField,
+        )?.value;
+        if (roleName === 'superadmin') {
+          isSuperAdmin = true;
+        }
       }
-      return false;
     });
 
     if (!(userRoleIds?.length > 0)) {
       throw new Error("user doesn't have any roles");
     }
+    if (isSuperAdmin) {
+      return true;
+    }
 
     // Get User Permission By Roles
-    const permissionsForm = await FormModel.findOne({ slug: systemForms.permissions.slug }).lean();
-    if (!permissionsForm?._id) throw new Error('permissions form not found');
 
     const permissionFormRoleField = getFieldByLabel(
       systemForms.permissions.fields.role,
@@ -87,12 +93,6 @@ export const authorization = async ({
       .populate(responsePopulate)
       .lean();
     if (!(userPermissions?.length > 0)) throw new Error(`user doesn't have permission`);
-
-    // Get User Permission By Roles
-    const actionPermissionsForm = await FormModel.findOne({
-      slug: systemForms.actionPermissions.slug,
-    }).lean();
-    if (!actionPermissionsForm?._id) throw new Error('actionPermissions form not found');
 
     const actionTypeField = getFieldByLabel(
       systemForms.actionPermissions.fields.actionType,
@@ -151,6 +151,7 @@ export const authorization = async ({
     }
     // debugger;
     if (!results?.some((result) => result)) throw new Error('User is not authorized');
+    return;
   } catch (error) {
     console.log(error);
     // debugger;
@@ -158,4 +159,29 @@ export const authorization = async ({
       `You are not authorized to perform this action, you don't have enough permission.`,
     );
   }
+};
+
+const getForms = async () => {
+  const forms = await FormModel.find({
+    slug: {
+      $in: [
+        systemForms.users.slug,
+        systemForms.permissions.slug,
+        systemForms.actionPermissions.slug,
+      ],
+    },
+  })?.lean();
+
+  const userForm = forms?.find((form) => form?.slug === systemForms.users.slug);
+  if (!userForm?._id) throw new Error('users form not found');
+
+  const permissionsForm = forms?.find((form) => form?.slug === systemForms.permissions.slug);
+  if (!permissionsForm?._id) throw new Error('permissions form not found');
+
+  const actionPermissionsForm = forms?.find(
+    (form) => form?.slug === systemForms.actionPermissions.slug,
+  );
+  if (!actionPermissionsForm?._id) throw new Error('action permissions form not found');
+
+  return { userForm, permissionsForm, actionPermissionsForm };
 };
