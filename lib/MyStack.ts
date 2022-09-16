@@ -1,5 +1,5 @@
 import * as sst from '@serverless-stack/resources';
-import { StringParameter, ParameterType, ParameterTier } from '@aws-cdk/aws-ssm';
+import { StringParameter } from '@aws-cdk/aws-ssm';
 import { AuthorizationType, UserPoolDefaultAction } from '@aws-cdk/aws-appsync';
 import { UserPool } from '@aws-cdk/aws-cognito';
 import { Expiration, Duration } from '@aws-cdk/core';
@@ -20,6 +20,10 @@ export default class MyStack extends sst.Stack {
     //   this,
     //   `/boossti/graphql-api-key/${scope.stage}`,
     // );
+    const DISTRIBUTION_ID = StringParameter.valueForStringParameter(
+      this,
+      `/boossti/frontend/master/distribution-id`,
+    );
     const FRONTEND_URL = StringParameter.valueForStringParameter(this, '/boossti/frontend-url');
     const EMAIL_VERIFICATION_API = StringParameter.valueForStringParameter(
       this,
@@ -69,6 +73,7 @@ export default class MyStack extends sst.Stack {
           GRAPHQL_API_KEY: process.env.GRAPHQL_API_KEY || '',
           ONESIGNAL_API_KEY: process.env.ONESIGNAL_API_KEY || '',
           ONESIGNAL_APP_ID: process.env.ONESIGNAL_APP_ID || '',
+          DISTRIBUTION_ID: DISTRIBUTION_ID || '',
           FRONTEND_URL,
           STAGE: scope.stage,
           USERS_FORM_SLUG,

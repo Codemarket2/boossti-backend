@@ -5,7 +5,7 @@ import { createRecord } from './route53';
 
 const cloudfront = new AWS.CloudFront({ region: 'us-east-1', apiVersion: '2020-05-31' });
 
-const boosstiMasterDistributionId = 'E1ZM0L2I3H19C8'; //vivek
+const boosstiMasterDistributionId = process.env.DISTRIBUTION_ID || '';
 
 export const deleteDistribution = async (distributionId) => {
   const dis = await getDistributionConfig(distributionId);
@@ -30,13 +30,16 @@ export const updateDistribution = (payload) => {
 
 export const createDistribution = async (accountName: string) => {
   const domainName = slugify(accountName, { lower: true });
+  if (!boosstiMasterDistributionId) throw new Error('boosstiMasterDistributionId not found!');
   const res = await getDistributionConfig(boosstiMasterDistributionId);
   const lambdaFunctionARN =
     res.DistributionConfig?.DefaultCacheBehavior.LambdaFunctionAssociations?.Items?.[0]
       ?.LambdaFunctionARN;
   const payload = getCreateDistributionPayload(domainName, lambdaFunctionARN);
   const createResponse = await cloudfront.createDistribution(payload).promise();
+
   await createRecord(domainName, createResponse.Distribution?.DomainName);
+
   return createResponse;
 };
 

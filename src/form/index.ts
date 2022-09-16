@@ -13,6 +13,9 @@ import { runInTransaction } from '../utils/runInTransaction';
 import { IForm } from './types/form';
 import { authorization, AuthorizationActionTypes } from './permission/authorization';
 import { IResponse } from './types/response';
+import { resolveCondition } from './condition/resolveCondition';
+import { getUserAttributes } from './utils/actionHelper';
+import { systemForms } from './permission/systemFormsConfig';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -451,6 +454,19 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         }
         const response = await ResponseModel.findOne(filter);
         return Boolean(response?._id);
+      }
+      case 'resolveCondition': {
+        const { responseId, conditions } = args;
+        const userForm = await FormModel.findOne({ slug: systemForms.users.slug });
+        const userAttributes = getUserAttributes(userForm, user);
+        const response = await ResponseModel.findById(responseId).populate(responsePopulate).lean();
+        if (!response?._id) throw new Error('Response not found');
+        const conditionResult = await resolveCondition({
+          leftPartResponse: response,
+          authState: userAttributes,
+          conditions,
+        });
+        return conditionResult;
       }
       default:
         throw new Error('Something went wrong! Please check your Query or Mutation');
