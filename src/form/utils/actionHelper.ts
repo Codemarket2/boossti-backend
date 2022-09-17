@@ -3,6 +3,8 @@ import { ClientSession } from 'mongoose';
 import { FormModel } from './formModel';
 import { ResponseModel, responsePopulate } from './responseModel';
 import { getValue } from './variables';
+import generatePassword from 'generate-password';
+
 /**
  * @description Is used to get a Form Field's value by the fieldID of that field
  * @param1 fieldId is the field id of the form's field
@@ -150,4 +152,17 @@ export const replaceVariables = async ({
     }
   });
   return { subject, body, senderEmail } as const;
+};
+
+export const generateUserPassword = (options: Partial<generatePassword.GenerateOptions> = {}) => {
+  return generatePassword.generate({
+    length: 8,
+    strict: true,
+    uppercase: true,
+    lowercase: true,
+    numbers: false,
+    symbols: true,
+
+    ...options,
+  });
 };

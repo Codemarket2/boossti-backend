@@ -15,6 +15,7 @@ import {
   replaceVariables,
   replaceSchemaVariables,
   getUserAttributes,
+  generateUserPassword,
 } from './actionHelper';
 import { createDistribution } from '../../utils/cloudfront';
 import { createCognitoGroup, deleteCognitoGroup, updateCognitoGroup } from './cognitoGroupHandler';
@@ -317,48 +318,40 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
           'Last Name') as string;
         const uEmail = getFieldValue(action?.userEmail, response.values)?.value?.trim() as string;
 
-        const payload: Parameters<typeof createAWSUser>[0] = {
-          UserPoolId: action?.userPoolId,
-          Username: uEmail,
-          MessageAction: 'SUPPRESS',
-          UserAttributes: [
-            {
-              Name: 'email',
-              Value: uEmail,
-            },
-            {
-              Name: 'email_verified',
-              Value: 'False',
-            },
-            {
-              Name: 'name',
-              Value: `${fName} ${lName}`,
-            },
-            {
-              Name: 'custom:_id',
-              Value: `${response._id}`,
-            },
-          ],
-          email: uEmail,
-        };
-
         const checkUser = await isUserAlreadyExist({
-          Username: payload?.Username,
-          UserPoolId: payload.UserPoolId,
+          Username: uEmail,
+          UserPoolId: action?.userPoolId,
         });
 
-        const tempPassword = generatePassword.generate({
-          length: 8,
-          strict: true,
-          uppercase: true,
-          lowercase: true,
-          numbers: false,
-          symbols: true,
-        });
+        const TemporaryPassword = generateUserPassword();
 
         // USER DOES NOT EXISTS, SO CREATE THE USER
         if (!checkUser?.message && checkUser.error === null) {
-          payload['TemporaryPassword'] = tempPassword;
+          const payload: Parameters<typeof createAWSUser>[0] = {
+            UserPoolId: action?.userPoolId,
+            Username: uEmail,
+            MessageAction: 'SUPPRESS',
+            UserAttributes: [
+              {
+                Name: 'email',
+                Value: uEmail,
+              },
+              {
+                Name: 'email_verified',
+                Value: 'False',
+              },
+              {
+                Name: 'name',
+                Value: `${fName} ${lName}`,
+              },
+              {
+                Name: 'custom:_id',
+                Value: `${response._id}`,
+              },
+            ],
+            email: uEmail,
+            TemporaryPassword: TemporaryPassword,
+          };
 
           const createdUser = await createAWSUser(payload);
           // create response in users form before creating new user
@@ -411,22 +404,13 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
           }
         }
 
+        const TemporaryPasswordMessage = `\nUsername : <b>${uEmail}</b><br/>temporary password : <b>${TemporaryPassword}</b>`;
+
         // IF isAppUser === True then the request is for invitation
         if (isAppUser) {
-          // sendEmail({
-          //   from: action?.templateSenderEmail,
-          //   body: action?
-          // })
-          console.log(action, 'is a logged in user');
-        } else {
-          // IF isAppUser === False then the request is for user signup
-
-          // SEND SIGNUP EMAIL USING THE SIGNUP TEMPLATE
-          const tempPasswordMsg = `\nUsername : <b>${uEmail}</b><br/>temporary password : <b>${tempPassword}</b>`;
-
           const email = await replaceVariables({
-            subject: action?.signupEmailSubject || '',
-            body: action?.signupEmailBody,
+            subject: action?.inviteEmailSubject || '',
+            body: action?.inviteEmailBody,
             variables: action?.variables,
             fields: form?.fields,
             values: response?.values,
@@ -441,7 +425,31 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
             from: action?.templateSenderEmail,
             to: [uEmail],
             subject: email.subject,
-            body: email.body + tempPasswordMsg,
+            body: email.body + TemporaryPasswordMessage,
+          });
+        } else {
+          // IF isAppUser === False then the request is for user signup
+
+          // SEND SIGNUP EMAIL USING THE SIGNUP TEMPLATE
+
+          const email = await replaceVariables({
+            subject: action?.signupEmailSubject || '',
+            body: action?.signupEmailBody,
+            variables: action?.variables,
+            fields: form?.fields,
+            values: response?.values,
+            pageId,
+            session,
+            form,
+            response,
+          });
+
+          // SEND SIGNUP EMAIL TO THE USER
+          await sendEmail({
+            from: action?.templateSenderEmail,
+            to: [uEmail],
+            subject: email.subject,
+            body: email.body + TemporaryPasswordMessage,
           });
         }
 
