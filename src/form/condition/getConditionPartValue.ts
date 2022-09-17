@@ -53,6 +53,7 @@ export const getLeftPartValue = async ({
 
 export const getRightPartValue = ({ conditionPart, forms, responses, authState }) => {
   let rightValue;
+
   if (conditionPart?.value && conditionPart?.value?.includes('auth.')) {
     if (conditionPart?.value === 'auth._id') {
       rightValue = authState?._id;
@@ -78,12 +79,17 @@ export const getRightPartValue = ({ conditionPart, forms, responses, authState }
     } else if (conditionPart?.fieldId === '_id') {
       rightValue = response?._id?.toString();
     } else {
-      const field = form?.fields?.find((f) => f?._id === conditionPart?.fieldId);
-      const fieldValue = response?.values?.find((v) => v?.field === conditionPart?.fieldId);
+      const field = form?.fields?.find(
+        (f) => f?._id?.toString() === conditionPart?.fieldId?.toString(),
+      );
+      const fieldValue = response?.values?.find(
+        (v) => v?.field?.toString() === conditionPart?.fieldId?.toString(),
+      );
       if (field?._id && fieldValue) {
         rightValue = getValue(field, fieldValue);
       }
     }
   }
+
   return rightValue;
 };

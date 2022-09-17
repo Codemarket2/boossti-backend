@@ -466,6 +466,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           authState: userAttributes,
           conditions,
         });
+        // debugger;
         return conditionResult;
       }
       default:

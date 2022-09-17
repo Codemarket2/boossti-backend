@@ -23,7 +23,7 @@ type Query {
 }
 
 type Mutation {
-  resolveCondition(response: ID!, conditions: AWSJSON!): Boolean
+  resolveCondition(responseId: ID!, conditions: AWSJSON!): Boolean
   createResponse(
     formId: ID!
     appId: ID

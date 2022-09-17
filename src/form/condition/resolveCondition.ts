@@ -32,7 +32,6 @@ export const resolveCondition = async ({
       authState: authState,
     });
 
-    // debugger;
     let conditionResult = false;
     if (leftValue || rightValue) {
       if (condition?.conditionType === '==') {
