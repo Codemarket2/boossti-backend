@@ -47,9 +47,13 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       case 'getFormTabRelations': {
         return await FormModel.find({
           'settings.tabs': { $elemMatch: { 'form._id': args?._id } },
-          // settings: {
-          //   tabs: { $elemMatch: { 'form._id': args?._id } },
-          // },
+        }).populate(formPopulate);
+      }
+      case 'getFormAllTabs': {
+        const { formId } = args;
+        return await FormModel.find({
+          _id: { $ne: formId },
+          'settings.tabs': { $elemMatch: { 'options.addToAllForms': true } },
         }).populate(formPopulate);
       }
       case 'getFormBySlug': {
