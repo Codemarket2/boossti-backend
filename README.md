@@ -41,7 +41,7 @@ mongodump --uri mongodb+srv://<mongodb-username>:<mongodb-password>@codemarket-s
 ```
 
 ```bash
-mongorestore --uri mongodb+srv://vivekt:Codemarket.1234@codemarket-staging.k16z7.mongodb.net --db=<your-stage-name> dump/boossti-backend-vivekt
+mongorestore --uri mongodb+srv://<mongodb-username>:<mongodb-password>@codemarket-staging.k16z7.mongodb.net --db=<your-stage-name> dump/boossti-backend-vivekt
 ```
 
 ## Installation
