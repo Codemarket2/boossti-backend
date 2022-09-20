@@ -2,7 +2,7 @@ import * as AWS from 'aws-sdk';
 AWS.config.apiVersions = {
   cognitoidentityserviceprovider: '2016-04-18',
 };
-const cognitoidentityserviceprovider = new AWS.CognitoIdentityServiceProvider({
+const cisp = new AWS.CognitoIdentityServiceProvider({
   region: 'us-east-1',
 });
 
@@ -44,11 +44,13 @@ interface IAddRemoveUserToGroup {
 }
 
 interface ICreateUser {
-  UserPoolId: string;
-  Username: string;
-  DesiredDeliveryMediums?: any;
-  UserAttributes?: { Name: string; value?: string }[];
-  TemporaryPassword?: string;
+  UserPoolId: AWS.CognitoIdentityServiceProvider.AdminCreateUserRequest['UserPoolId'];
+  Username: AWS.CognitoIdentityServiceProvider.AdminCreateUserRequest['Username'];
+  DesiredDeliveryMediums?: AWS.CognitoIdentityServiceProvider.AdminCreateUserRequest['DesiredDeliveryMediums'];
+  UserAttributes?: AWS.CognitoIdentityServiceProvider.AdminCreateUserRequest['UserAttributes'];
+  TemporaryPassword: string;
+  MessageAction?: AWS.CognitoIdentityServiceProvider.AdminCreateUserRequest['MessageAction'];
+  email: string;
 }
 
 interface IUpdateUserAttributes {
@@ -80,7 +82,7 @@ export const createCognitoGroup = async (payload: ICreateCognitoGroup) => {
     Precedence: payload.Precedence,
     RoleArn: payload.RoleArn,
   };
-  return cognitoidentityserviceprovider.createGroup(params).promise();
+  return cisp.createGroup(params).promise();
 };
 
 export const updateCognitoGroup = async (payload: ICreateCognitoGroup) => {
@@ -91,7 +93,7 @@ export const updateCognitoGroup = async (payload: ICreateCognitoGroup) => {
     Precedence: payload.Precedence,
     RoleArn: payload.RoleArn,
   };
-  return cognitoidentityserviceprovider.updateGroup(params).promise();
+  return cisp.updateGroup(params).promise();
 };
 
 export const deleteCognitoGroup = async (payload: IDeleteCognitoGroup) => {
@@ -99,7 +101,7 @@ export const deleteCognitoGroup = async (payload: IDeleteCognitoGroup) => {
     GroupName: payload.GroupName,
     UserPoolId: payload.UserPoolId,
   };
-  return cognitoidentityserviceprovider.deleteGroup(params).promise();
+  return cisp.deleteGroup(params).promise();
 };
 
 export const getGroupList = async (payload: IGetGroupList) => {
@@ -108,7 +110,7 @@ export const getGroupList = async (payload: IGetGroupList) => {
     Limit: payload.Limit,
     NextToken: payload.NextToken,
   };
-  return cognitoidentityserviceprovider.listGroups(params).promise();
+  return cisp.listGroups(params).promise();
 };
 
 export const getUserPoolsList = async (payload: IGetUserPoolList) => {
@@ -116,7 +118,7 @@ export const getUserPoolsList = async (payload: IGetUserPoolList) => {
     MaxResults: payload.MaxResults,
     NextToken: payload.NextToken,
   };
-  return cognitoidentityserviceprovider.listUserPools(params).promise();
+  return cisp.listUserPools(params).promise();
 };
 
 export const getGroupUserList = async (payload: IGetUsersList) => {
@@ -126,16 +128,16 @@ export const getGroupUserList = async (payload: IGetUsersList) => {
     Limit: payload.Limit,
     NextToken: payload.NextToken,
   };
-  return cognitoidentityserviceprovider.listUsersInGroup(params).promise();
+  return cisp.listUsersInGroup(params).promise();
 };
 
 export const addUserToGroup = async (payload: IAddRemoveUserToGroup) => {
-  const params = {
+  const params: AWS.CognitoIdentityServiceProvider.AdminAddUserToGroupRequest = {
     GroupName: payload.GroupName,
     UserPoolId: payload.UserPoolId,
     Username: payload.Username,
   };
-  return cognitoidentityserviceprovider.adminAddUserToGroup(params).promise();
+  return cisp.adminAddUserToGroup(params).promise();
 };
 export const removeUserFromGroup = async (payload: IAddRemoveUserToGroup) => {
   const params = {
@@ -143,19 +145,41 @@ export const removeUserFromGroup = async (payload: IAddRemoveUserToGroup) => {
     UserPoolId: payload.UserPoolId,
     Username: payload.Username,
   };
-  return cognitoidentityserviceprovider.adminRemoveUserFromGroup(params).promise();
+  return cisp.adminRemoveUserFromGroup(params).promise();
 };
-
-export const createUser = async (payload: ICreateUser) => {
-  const params = {
+/** this function creates the user in the AWS Cognito pool */
+export const createAWSUser = async (payload: ICreateUser) => {
+  const params: AWS.CognitoIdentityServiceProvider.AdminCreateUserRequest = {
     UserPoolId: payload.UserPoolId,
     Username: payload.Username,
     DesiredDeliveryMediums: payload.DesiredDeliveryMediums,
     UserAttributes: payload.UserAttributes,
     TemporaryPassword: payload.TemporaryPassword,
+    MessageAction: payload.MessageAction,
   };
+  const res = await cisp.adminCreateUser(params).promise();
 
-  return cognitoidentityserviceprovider.adminCreateUser(params).promise();
+  // const res2 = await cisp
+  //   .respondToAuthChallenge({
+  //     ChallengeName: 'NEW_PASSWORD_REQUIRED',
+  //     ClientId: 'asdas',
+  //     ChallengeResponses: {
+  //       USERNAME: payload.Username,
+  //       NEW_PASSWORD: payload.TemporaryPassword,
+  //     },
+  //   })
+  //   .promise();
+
+  // const res2 = await cisp
+  //   .adminSetUserPassword({
+  //     Password: payload.TemporaryPassword,
+  //     Username: payload.Username,
+  //     UserPoolId: payload.UserPoolId,
+  //     Permanent: true,
+  //   })
+  //   .promise();
+
+  return res;
 };
 
 export const deleteUser = async (payload: IDeleteUser) => {
@@ -163,7 +187,7 @@ export const deleteUser = async (payload: IDeleteUser) => {
     UserPoolId: payload.UserPoolId,
     Username: payload.Username,
   };
-  return cognitoidentityserviceprovider.adminDeleteUser(params).promise();
+  return cisp.adminDeleteUser(params).promise();
 };
 
 export const updateUserAttributes = async (payload: IUpdateUserAttributes) => {
@@ -172,7 +196,7 @@ export const updateUserAttributes = async (payload: IUpdateUserAttributes) => {
     Username: payload.Username,
     UserAttributes: payload.UserAttributes,
   };
-  return cognitoidentityserviceprovider.adminUpdateUserAttributes(params).promise();
+  return cisp.adminUpdateUserAttributes(params).promise();
 };
 
 export const getUserByEmail = async (payload: IGetUsers) => {
@@ -180,7 +204,8 @@ export const getUserByEmail = async (payload: IGetUsers) => {
     UserPoolId: payload.UserPoolId,
     Username: payload.Username,
   };
-  return cognitoidentityserviceprovider.adminGetUser(params).promise();
+
+  return cisp.adminGetUser(params).promise();
 };
 
 export const isUserAlreadyExist = async (payload: IGetUsers) => {
@@ -214,5 +239,5 @@ export const getGroupListOfUser = async (payload: IGetGroupListOfUser) => {
     UserPoolId: payload.UserPoolId,
     Username: payload.Username,
   };
-  return cognitoidentityserviceprovider.adminListGroupsForUser(params).promise();
+  return cisp.adminListGroupsForUser(params).promise();
 };

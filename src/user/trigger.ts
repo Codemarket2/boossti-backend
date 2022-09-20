@@ -10,18 +10,12 @@ import {
 } from './utils/cognitoTriggers';
 
 export const handler = async (
-  event:
-    | PreSignUpTriggerEvent
-    | PostConfirmationTriggerEvent
-    | PostAuthenticationTriggerEvent
+  event: PreSignUpTriggerEvent | PostConfirmationTriggerEvent | PostAuthenticationTriggerEvent,
 ): Promise<any> => {
   if (event.triggerSource && event.triggerSource.includes('PreSignUp_')) {
     return await preSignUpTrigger(event);
   }
-  if (
-    event.triggerSource &&
-    event.triggerSource === 'PostAuthentication_Authentication'
-  ) {
+  if (event.triggerSource && event.triggerSource === 'PostAuthentication_Authentication') {
     return await postAuthenticationTrigger(event);
   }
   // if (
