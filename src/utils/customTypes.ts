@@ -1,5 +1,5 @@
 import { Schema } from 'mongoose';
-import { IResponse } from '../form/utils/responseType';
+import { IResponse } from '../form/types/response';
 
 interface AppSyncIdentityCognito {
   sub: string;
