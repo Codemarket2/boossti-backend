@@ -12,11 +12,11 @@ export const getCreateDistributionPayload = (domainName, lambdaFunctionARN) => {
         Items: [
           {
             Id: newId,
-            DomainName: 'j1ca2j2-5v4vbgo.s3.us-east-1.amazonaws.com',
+            DomainName: 'ixpkhv-g81wy7s.s3.us-east-1.amazonaws.com',
             OriginPath: '',
             CustomHeaders: { Quantity: 0, Items: [] },
             S3OriginConfig: {
-              OriginAccessIdentity: 'origin-access-identity/cloudfront/E1SV5SWC92J65D',
+              OriginAccessIdentity: 'origin-access-identity/cloudfront/E3LBJJZRS9A3PG',
             },
             ConnectionAttempts: 3,
             ConnectionTimeout: 10,
@@ -169,11 +169,11 @@ export const getCreateDistributionPayload = (domainName, lambdaFunctionARN) => {
       ViewerCertificate: {
         CloudFrontDefaultCertificate: false,
         ACMCertificateArn:
-          'arn:aws:acm:us-east-1:858116908646:certificate/0d96f851-4ac9-49a8-a9d5-d692ac47d1d8',
+          'arn:aws:acm:us-east-1:297944203549:certificate/72226dbe-7b94-473e-920a-a6b50df580ce',
         SSLSupportMethod: 'sni-only',
         MinimumProtocolVersion: 'TLSv1.2_2021',
         Certificate:
-          'arn:aws:acm:us-east-1:858116908646:certificate/0d96f851-4ac9-49a8-a9d5-d692ac47d1d8',
+          'arn:aws:acm:us-east-1:297944203549:certificate/72226dbe-7b94-473e-920a-a6b50df580ce',
         CertificateSource: 'acm',
       },
       Restrictions: { GeoRestriction: { RestrictionType: 'none', Quantity: 0, Items: [] } },

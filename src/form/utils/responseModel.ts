@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose';
 import { userPopulate } from '../../utils/populate';
 import { extendSchema } from '../../utils/extendSchema';
-import { IResponse, IValue } from './responseType';
+import { IResponse, IValue } from '../types/response';
 
 export const valueSchema = new Schema<IValue>({
   field: {
