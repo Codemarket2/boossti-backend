@@ -191,9 +191,6 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         let errorCount = 0;
         while (runLoop) {
           try {
-            if (data.length >= limit) {
-              runLoop = false;
-            }
             const response: any = await ResponseModel.findOne(filter)
               .populate(responsePopulate)
               .sort({ createdAt: -1 })
@@ -208,6 +205,9 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
                 response,
               });
               data.push(response);
+              if (data.length >= limit) {
+                runLoop = false;
+              }
             } else {
               runLoop = false;
             }
