@@ -170,8 +170,6 @@ export const adminConfirmSignUp = (username = '') => {
  * - User Pool Attributes : https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-settings-attributes.html
  * */
 export const updateEmailVerified = async (userAttributes: any) => {
-  console.log('Request GOTTEN');
-
   await DB();
   const userForm = await FormModel.findOne({
     slug: UserFormConfig.slug,
@@ -230,6 +228,16 @@ export const updateEmailVerified = async (userAttributes: any) => {
       {
         $set: {
           'values.$.valueBoolean': isEmailVerifiedinCongito,
+          'values.$.value': '',
+          'values.$.valueNumber': null,
+          'values.$.valueDate': null,
+          'values.$.media': [],
+          'values.$.values': [],
+          'values.$.template': null,
+          'values.$.page': null,
+          'values.$.form': null,
+          'values.$.response': null,
+          'values.$.options': { option: false },
         },
       },
     );
