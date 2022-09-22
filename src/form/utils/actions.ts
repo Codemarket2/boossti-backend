@@ -443,35 +443,8 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
 
             await ResponseModel.create(cretatePayload);
           }
-        }
 
-        const TemporaryPasswordMessage = `\nUsername : <b>${uEmail}</b><br/>temporary password : <b>${TemporaryPassword}</b>`;
-
-        // IF isAppUser === True then the request is for invitation
-        if (isAppUser) {
-          const email = await replaceVariables({
-            subject: action?.inviteEmailSubject || '',
-            body: action?.inviteEmailBody,
-            variables: action?.variables,
-            fields: form?.fields,
-            values: response?.values,
-            pageId,
-            session,
-            form,
-            response,
-          });
-
-          // SEND EMAIL TO THE USER
-          await sendEmail({
-            from: action?.templateSenderEmail,
-            to: [uEmail],
-            subject: email.subject,
-            body: email.body + TemporaryPasswordMessage,
-          });
-        } else {
-          // IF isAppUser === False then the request is for user signup
-
-          // SEND SIGNUP EMAIL USING THE SIGNUP TEMPLATE
+          const TemporaryPasswordMessage = `\nUsername : <b>${uEmail}</b><br/>temporary password : <b>${TemporaryPassword}</b>`;
 
           const email = await replaceVariables({
             subject: action?.signupEmailSubject || '',
