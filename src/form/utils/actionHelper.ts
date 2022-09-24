@@ -172,12 +172,12 @@ export const replaceVariables = async ({
 
 export const generateUserPassword = (options: Partial<generatePassword.GenerateOptions> = {}) => {
   return generatePassword.generate({
-    length: 8,
+    length: 6,
     strict: true,
     uppercase: true,
     lowercase: true,
     numbers: false,
-    symbols: true,
+    symbols: false,
 
     ...options,
   });
