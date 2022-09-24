@@ -49,7 +49,7 @@ export const responseSchema = extendSchema({
     type: Schema.Types.ObjectId,
     ref: 'Response',
   },
-  installId: {
+  instanceId: {
     type: Schema.Types.ObjectId,
     ref: 'Response',
   },

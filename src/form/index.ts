@@ -125,6 +125,8 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       }
       case 'getResponseByCount': {
         const response: any = await ResponseModel.findOne(args).populate(responsePopulate).lean();
+        // debugger;
+        if (!response?._id) throw new Error('response not found');
         await authorization({
           user,
           actionType: AuthorizationActionTypes.VIEW,
@@ -160,14 +162,14 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           workFlowFormResponseParentId = null,
           valueFilter,
           appId,
-          installId,
+          instanceId,
         } = args;
         let filter: any = { formId };
         if (appId) {
           filter = { ...filter, appId };
         }
-        if (installId) {
-          filter = { ...filter, installId };
+        if (instanceId) {
+          filter = { ...filter, instanceId };
         }
         if (workFlowFormResponseParentId) {
           filter = { ...filter, workFlowFormResponseParentId };
@@ -191,9 +193,6 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         let errorCount = 0;
         while (runLoop) {
           try {
-            if (data.length >= limit) {
-              runLoop = false;
-            }
             const response: any = await ResponseModel.findOne(filter)
               .populate(responsePopulate)
               .sort({ createdAt: -1 })
@@ -208,6 +207,9 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
                 response,
               });
               data.push(response);
+              if (data.length >= limit) {
+                runLoop = false;
+              }
             } else {
               runLoop = false;
             }
@@ -289,6 +291,12 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           });
           // await sendResponseNotification(form, response);
         };
+        if (args?.appId) {
+          delete args?.appId;
+        }
+        if (args?.instanceId) {
+          delete args?.instanceId;
+        }
         const response = await runInTransaction(
           {
             action: 'UPDATE',

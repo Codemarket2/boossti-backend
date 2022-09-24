@@ -32,6 +32,7 @@ export const authorization = async ({
     if (!actionType || !user?._id || !formId) {
       throw new Error('actionType, user, formId not found in payload');
     }
+
     // Get User Roles
     if (!user?._id) throw new Error('User not found');
     const { userForm, permissionsForm, actionPermissionsForm } = await getForms();
