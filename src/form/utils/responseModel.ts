@@ -49,10 +49,6 @@ export const responseSchema = extendSchema({
     type: Schema.Types.ObjectId,
     ref: 'Response',
   },
-  instanceId: {
-    type: Schema.Types.ObjectId,
-    ref: 'Response',
-  },
   count: {
     type: Number,
     required: true,

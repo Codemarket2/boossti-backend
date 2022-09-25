@@ -5,7 +5,6 @@ import { ICondition } from './form';
 export interface IResponse extends ISchema {
   formId: any;
   appId: string;
-  instanceId: string;
   count: number;
   values: IValue[];
 }
