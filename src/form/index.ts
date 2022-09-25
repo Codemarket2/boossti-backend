@@ -162,14 +162,10 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           workFlowFormResponseParentId = null,
           valueFilter,
           appId,
-          instanceId,
         } = args;
         let filter: any = { formId };
         if (appId) {
           filter = { ...filter, appId };
-        }
-        if (instanceId) {
-          filter = { ...filter, instanceId };
         }
         if (workFlowFormResponseParentId) {
           filter = { ...filter, workFlowFormResponseParentId };
@@ -293,9 +289,6 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         };
         if (args?.appId) {
           delete args?.appId;
-        }
-        if (args?.instanceId) {
-          delete args?.instanceId;
         }
         const response = await runInTransaction(
           {
