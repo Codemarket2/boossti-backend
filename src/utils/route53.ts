@@ -2,7 +2,7 @@ import * as AWS from 'aws-sdk';
 
 const route53 = new AWS.Route53({ region: 'us-east-1', apiVersion: '2013-04-01' });
 
-const hostedZoneId = 'Z073722310U42NI3TL3V9';
+const hostedZoneId = 'Z070537859VUC3HLYUSR';
 
 export const createRecord = (subDomain, cloudfrontUrl) => {
   const params = {
@@ -21,7 +21,7 @@ export const createRecord = (subDomain, cloudfrontUrl) => {
           },
         },
       ],
-      Comment: `Subdomain for ${subDomain} account`,
+      Comment: `Subdomain for ${subDomain} app`,
     },
     HostedZoneId: hostedZoneId,
   };

@@ -1,5 +1,6 @@
 type Query {
   getForm(_id: ID!): Form @aws_api_key @aws_cognito_user_pools
+  getFormAllTabs(formId: ID!): [Form]
   getFormRelations(_id: ID!): [Form] @aws_api_key @aws_cognito_user_pools
   getFormTabRelations(_id: ID!): [Form] @aws_api_key @aws_cognito_user_pools
   getFormBySlug(slug: String!): Form @aws_api_key @aws_cognito_user_pools

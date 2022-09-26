@@ -3,8 +3,8 @@ import { ClientSession } from 'mongoose';
 import { sendEmail } from '../../utils/email';
 import { getUserAttributes } from './actionHelper';
 import { FormModel } from './formModel';
-import { IForm } from './formType';
-import { IResponse } from './responseType';
+import { IForm } from '../types/form';
+import { IResponse } from '../types/response';
 
 interface IPayload {
   session: ClientSession;

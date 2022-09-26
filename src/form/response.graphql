@@ -1,10 +1,11 @@
 type Query {
   getResponse(_id: ID!): Response @aws_api_key @aws_cognito_user_pools
-  getResponseByCount(formId: ID!, count: Int!): Response @aws_api_key @aws_cognito_user_pools
+  getResponseByCount(formId: ID!, count: Int!, appId: ID): Response
+    @aws_api_key
+    @aws_cognito_user_pools
   getResponses(
     formId: ID!
     appId: ID
-    installId: ID
     workFlowFormResponseParentId: ID
     page: Int
     limit: Int
@@ -23,10 +24,10 @@ type Query {
 }
 
 type Mutation {
+  resolveCondition(responseId: ID!, conditions: AWSJSON!): Boolean
   createResponse(
     formId: ID!
     appId: ID
-    installId: ID
     workFlowFormResponseParentId: ID
     values: [ValueInput]
     options: AWSJSON
@@ -87,7 +88,6 @@ type Response @aws_api_key @aws_cognito_user_pools {
   count: Int
   formId: ID
   appId: ID
-  installId: ID
   workFlowFormResponseParentId: ID
   values: [Value]
   options: AWSJSON
@@ -102,7 +102,6 @@ type Response2 @aws_api_key @aws_cognito_user_pools {
   count: Int
   formId: Form
   appId: ID
-  installId: ID
   workFlowFormResponseParentId: ID
   values: [Value]
   createdBy: Response

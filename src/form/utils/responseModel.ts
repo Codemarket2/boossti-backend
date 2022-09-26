@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose';
 import { userPopulate } from '../../utils/populate';
 import { extendSchema } from '../../utils/extendSchema';
-import { IResponse, IValue } from './responseType';
+import { IResponse, IValue } from '../types/response';
 
 export const valueSchema = new Schema<IValue>({
   field: {
@@ -46,10 +46,6 @@ export const responseSchema = extendSchema({
     ref: 'Form',
   },
   appId: {
-    type: Schema.Types.ObjectId,
-    ref: 'Response',
-  },
-  installId: {
     type: Schema.Types.ObjectId,
     ref: 'Response',
   },

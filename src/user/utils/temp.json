@@ -1,0 +1,315 @@
+{
+  "_id": {
+    "$oid": "62e2e24a2e6ed14081dbd3dc"
+  },
+  "formId": {
+    "$oid": "62969ffb839ec50aaa6d4907"
+  },
+  "appId": null,
+  "count": 20,
+  "workFlowFormResponseParentId": null,
+  "values": [
+    {
+      "field": "62969ff967ee716d1d052fea",
+      "value": "sahilpshahane123@gmail.com",
+      "valueDate": null,
+      "valueNumber": null,
+      "valueBoolean": null,
+      "media": [],
+      "values": [],
+      "template": null,
+      "page": null,
+      "form": null,
+      "response": null,
+      "options": {
+        "option": false
+      },
+      "_id": {
+        "$oid": "62e2e24a2e6ed14081dbd3dd"
+      }
+    },
+    {
+      "field": "6296a2b0c0c34edd95d439b4",
+      "value": "Sahil",
+      "valueDate": null,
+      "valueNumber": null,
+      "valueBoolean": null,
+      "media": [],
+      "values": [],
+      "template": null,
+      "page": null,
+      "form": null,
+      "response": null,
+      "options": {
+        "option": false
+      },
+      "_id": {
+        "$oid": "62e2e24a2e6ed14081dbd3de"
+      }
+    },
+    {
+      "field": "6296a2b99a25767d06f4a8c9",
+      "value": "S",
+      "valueDate": null,
+      "valueNumber": null,
+      "valueBoolean": null,
+      "media": [],
+      "values": [],
+      "template": null,
+      "page": null,
+      "form": null,
+      "response": null,
+      "options": {
+        "option": false
+      },
+      "_id": {
+        "$oid": "62e2e24a2e6ed14081dbd3df"
+      }
+    }
+  ],
+  "options": {
+    "actions": [
+      {
+        "active": true,
+        "triggerType": "onCreate",
+        "actionType": "createCognitoUser",
+        "name": "Create cognito user",
+        "cognitoGroupName": "",
+        "cognitoGroupDesc": "",
+        "phoneFieldId": "",
+        "senderEmail": "",
+        "receiverType": "formOwner",
+        "emailFieldId": "",
+        "nameFieldId": "",
+        "receiverEmails": [],
+        "variables": [
+          {
+            "name": "",
+            "field": "",
+            "formId": null
+          }
+        ],
+        "colorValues": [
+          {
+            "name": "alternateMain",
+            "field": ""
+          },
+          {
+            "name": "alternateDark",
+            "field": ""
+          },
+          {
+            "name": "cardShadow",
+            "field": ""
+          },
+          {
+            "name": "mode",
+            "field": ""
+          },
+          {
+            "name": "primaryMain",
+            "field": ""
+          },
+          {
+            "name": "primaryContrastText",
+            "field": ""
+          },
+          {
+            "name": "secondaryLight",
+            "field": ""
+          },
+          {
+            "name": "secondaryMain",
+            "field": ""
+          },
+          {
+            "name": "secondaryDark",
+            "field": ""
+          },
+          {
+            "name": "secondaryContrastText",
+            "field": ""
+          },
+          {
+            "name": "textPrimary",
+            "field": ""
+          },
+          {
+            "name": "textSecondary",
+            "field": ""
+          },
+          {
+            "name": "divider",
+            "field": ""
+          },
+          {
+            "name": "backgroundPaper",
+            "field": ""
+          },
+          {
+            "name": "backgroundDefault",
+            "field": ""
+          },
+          {
+            "name": "backgroundLevel2",
+            "field": ""
+          },
+          {
+            "name": "backgroundLevel1",
+            "field": ""
+          },
+          {
+            "name": "backgroundFooter",
+            "field": ""
+          }
+        ],
+        "fields": [
+          {
+            "field": "",
+            "formId": null,
+            "value": null
+          }
+        ],
+        "subject": "",
+        "body": "",
+        "userPoolId": "us-east-1_uk8KNzt4X",
+        "firstName": "6296a2b0c0c34edd95d439b4",
+        "lastName": "6296a2b99a25767d06f4a8c9",
+        "userEmail": "62969ff967ee716d1d052fea",
+        "websiteUrl": "",
+        "report": "",
+        "responseLink": "",
+        "reportScreenshoot": "",
+        "domain": "",
+        "distributionId": ""
+      },
+      {
+        "active": false,
+        "triggerType": "onDelete",
+        "actionType": "deleteCognitoUser",
+        "name": "deleteCognitoUser",
+        "cognitoGroupName": "",
+        "cognitoGroupDesc": "",
+        "phoneFieldId": "",
+        "senderEmail": "",
+        "receiverType": "formOwner",
+        "emailFieldId": "",
+        "nameFieldId": "",
+        "receiverEmails": [],
+        "variables": [
+          {
+            "name": "",
+            "field": "",
+            "formId": null
+          }
+        ],
+        "colorValues": [
+          {
+            "name": "alternateMain",
+            "field": ""
+          },
+          {
+            "name": "alternateDark",
+            "field": ""
+          },
+          {
+            "name": "cardShadow",
+            "field": ""
+          },
+          {
+            "name": "mode",
+            "field": ""
+          },
+          {
+            "name": "primaryMain",
+            "field": ""
+          },
+          {
+            "name": "primaryContrastText",
+            "field": ""
+          },
+          {
+            "name": "secondaryLight",
+            "field": ""
+          },
+          {
+            "name": "secondaryMain",
+            "field": ""
+          },
+          {
+            "name": "secondaryDark",
+            "field": ""
+          },
+          {
+            "name": "secondaryContrastText",
+            "field": ""
+          },
+          {
+            "name": "textPrimary",
+            "field": ""
+          },
+          {
+            "name": "textSecondary",
+            "field": ""
+          },
+          {
+            "name": "divider",
+            "field": ""
+          },
+          {
+            "name": "backgroundPaper",
+            "field": ""
+          },
+          {
+            "name": "backgroundDefault",
+            "field": ""
+          },
+          {
+            "name": "backgroundLevel2",
+            "field": ""
+          },
+          {
+            "name": "backgroundLevel1",
+            "field": ""
+          },
+          {
+            "name": "backgroundFooter",
+            "field": ""
+          }
+        ],
+        "fields": [
+          {
+            "field": "",
+            "formId": null,
+            "value": null
+          }
+        ],
+        "subject": "",
+        "body": "",
+        "userPoolId": "us-east-1_eBnsz43bl",
+        "firstName": "6296a2b0c0c34edd95d439b4",
+        "lastName": "6296a2b99a25767d06f4a8c9",
+        "userEmail": "62969ff967ee716d1d052fea",
+        "websiteUrl": "",
+        "report": "",
+        "responseLink": "",
+        "reportScreenshoot": "",
+        "domain": "",
+        "distributionId": ""
+      }
+    ],
+    "password": "",
+    "generateNewUserEmail": true
+  },
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1659036234981"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1659036234981"
+    }
+  },
+  "__v": 0
+}

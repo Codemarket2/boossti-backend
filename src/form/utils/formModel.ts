@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose';
 import { userPopulate } from '../../utils/populate';
 import { extendSchema } from '../../utils/extendSchema';
-import { IField, IForm } from './formType';
+import { IField, IForm } from '../types/form';
 
 export const fieldSchema = new Schema<IField>({
   label: { type: String, required: true },
@@ -32,10 +32,6 @@ const formSchema = extendSchema({
     type: Boolean,
     default: false,
   },
-  // virtualForm: {
-  //   type: Boolean,
-  //   default: false,
-  // },
 });
 
 export const FormModel = model<IForm>('Form', formSchema);

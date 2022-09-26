@@ -1,9 +1,16 @@
 import moment from 'moment';
 import { ClientSession } from 'mongoose';
+import { systemForms } from '../permission/systemFormsConfig';
 import { FormModel } from './formModel';
 import { ResponseModel, responsePopulate } from './responseModel';
 import { getValue } from './variables';
+import generatePassword from 'generate-password';
 
+/**
+ * @description Is used to get a Form Field's value by the fieldID of that field
+ * @param1 fieldId is the field id of the form's field
+ * @param2 values ???
+ * */
 export const getFieldValue = (fieldId, values) => {
   return values.find((v) => v?.field === fieldId);
 };
@@ -43,19 +50,34 @@ export const replaceSchemaVariables = ({
   return variable;
 };
 
-export const getUserAttributes = (userForm: any, userResponse) => {
+export interface IUserAttributes {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  name: string;
+}
+export const getUserAttributes = (userForm: any, userResponse): IUserAttributes => {
   const firstName = getFieldValueByLabel(
-    'First Name',
+    systemForms.users.fields.firstName,
     userForm?.fields,
     userResponse?.values,
   )?.value;
-  const lastName = getFieldValueByLabel('Last Name', userForm?.fields, userResponse?.values)?.value;
-  const email = getFieldValueByLabel('email', userForm?.fields, userResponse?.values)?.value;
+  const lastName = getFieldValueByLabel(
+    systemForms.users.fields.lastName,
+    userForm?.fields,
+    userResponse?.values,
+  )?.value;
+  const email = getFieldValueByLabel(
+    systemForms.users.fields.email,
+    userForm?.fields,
+    userResponse?.values,
+  )?.value;
   let name = `${firstName}`;
   if (lastName) {
     name += ` ${lastName}`;
   }
-  return { firstName, lastName, email, name };
+  return { _id: userResponse?._id?.toString(), firstName, lastName, email, name };
 };
 
 interface IReplaceVariablePayload {
@@ -145,5 +167,18 @@ export const replaceVariables = async ({
       senderEmail = senderEmail.split(variableName).join(variableValue);
     }
   });
-  return { subject, body, senderEmail };
+  return { subject, body, senderEmail } as const;
+};
+
+export const generateUserPassword = (options: Partial<generatePassword.GenerateOptions> = {}) => {
+  return generatePassword.generate({
+    length: 6,
+    strict: true,
+    uppercase: true,
+    lowercase: true,
+    numbers: false,
+    symbols: false,
+
+    ...options,
+  });
 };

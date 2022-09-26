@@ -67,7 +67,9 @@ example - npx sst start --stage boossti-backend-sumij
 
 Runs your tests using Jest. Takes all the [Jest CLI options](https://jestjs.io/docs/en/cli).
 
-### `yarn test`
+```
+yarn test
+```
 
 Deploy all your stacks to AWS. Or optionally deploy a specific stack. (for deploy always use {repository-name}-{your-branchname} eg boossti-backend-sumij)
 

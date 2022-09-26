@@ -1,3 +1,9 @@
+// MONGOOSE
+import { ClientSession } from 'mongoose';
+
+import generatePassword from 'generate-password';
+
+// OTHERS
 import { sendEmail } from '../../utils/email';
 import { User } from '../../user/utils/userModel';
 import { FormModel } from './formModel';
@@ -9,19 +15,19 @@ import {
   replaceVariables,
   replaceSchemaVariables,
   getUserAttributes,
+  generateUserPassword,
 } from './actionHelper';
 import { createDistribution } from '../../utils/cloudfront';
 import { createCognitoGroup, deleteCognitoGroup, updateCognitoGroup } from './cognitoGroupHandler';
 import {
   addUserToGroup,
-  createUser,
+  createAWSUser,
   deleteUser,
   isUserAlreadyExist,
   removeUserFromGroup,
   updateUserAttributes,
   getGroupListOfUser,
 } from '../../permissions/utils/cognitoHandlers';
-import { ClientSession } from 'mongoose';
 import axios from 'axios';
 
 interface IPayload {
@@ -40,6 +46,9 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
   );
 
   const pageId = response?.pageId?._id || response?.pageId || null;
+
+  /**  indicates if the action is ran by user having a boossti account */
+  const isAppUser = Boolean(response?.createdBy?._id);
 
   if (actions?.length > 0 && response?._id && form?._id && !(process.env.NODE_ENV === 'test')) {
     for (const action of actions) {
@@ -344,40 +353,48 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
           value && RoleName.push(value);
         }
 
-        const fName =
-          getFieldValue(action?.firstName, response.values)?.value?.trim() || 'First Name';
-        const lName =
-          getFieldValue(action?.lastName, response.values)?.value?.trim() || 'Last Name';
-        const uEmail = getFieldValue(action?.userEmail, response.values)?.value?.trim();
+        const fName = (getFieldValue(action?.firstName, response.values)?.value?.trim() ||
+          'First Name') as string;
+        const lName = (getFieldValue(action?.lastName, response.values)?.value?.trim() ||
+          'Last Name') as string;
+        const uEmail = getFieldValue(action?.userEmail, response.values)?.value?.trim() as string;
 
-        const payload = {
-          UserPoolId: action?.userPoolId,
-          Username: uEmail,
-          UserAttributes: [
-            {
-              Name: 'email',
-              Value: uEmail,
-            },
-            {
-              Name: 'email_verified',
-              Value: 'True',
-            },
-            {
-              Name: 'name',
-              Value: `${fName} ${lName}`,
-            },
-            {
-              Name: 'custom:_id',
-              Value: `${response._id}`,
-            },
-          ],
-        };
         const checkUser = await isUserAlreadyExist({
-          Username: payload?.Username,
-          UserPoolId: payload.UserPoolId,
+          Username: uEmail,
+          UserPoolId: action?.userPoolId,
         });
+
+        const TemporaryPassword = generateUserPassword();
+
+        // USER DOES NOT EXISTS, SO CREATE THE USER
         if (!checkUser?.message && checkUser.error === null) {
-          const createdUser = await createUser(payload);
+          const payload: Parameters<typeof createAWSUser>[0] = {
+            UserPoolId: action?.userPoolId,
+            Username: uEmail,
+            MessageAction: 'SUPPRESS',
+            UserAttributes: [
+              {
+                Name: 'email',
+                Value: uEmail,
+              },
+              {
+                Name: 'email_verified',
+                Value: 'False',
+              },
+              {
+                Name: 'name',
+                Value: `${fName} ${lName}`,
+              },
+              {
+                Name: 'custom:_id',
+                Value: `${response._id}`,
+              },
+            ],
+            email: uEmail,
+            TemporaryPassword: TemporaryPassword,
+          };
+
+          const createdUser = await createAWSUser(payload);
           // create response in users form before creating new user
           // requirement: formid of users form
           // formId: ID!;
@@ -426,7 +443,30 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
 
             await ResponseModel.create(cretatePayload);
           }
+
+          const TemporaryPasswordMessage = `\nUsername : <b>${uEmail}</b><br/>temporary password : <b>${TemporaryPassword}</b>`;
+
+          const email = await replaceVariables({
+            subject: action?.signupEmailSubject || '',
+            body: action?.signupEmailBody,
+            variables: action?.variables,
+            fields: form?.fields,
+            values: response?.values,
+            pageId,
+            session,
+            form,
+            response,
+          });
+
+          // SEND SIGNUP EMAIL TO THE USER
+          await sendEmail({
+            from: action?.templateSenderEmail,
+            to: [uEmail],
+            subject: email.subject,
+            body: email.body + TemporaryPasswordMessage,
+          });
         }
+
         // add user to group
         for (let i = 0; i < RoleName?.length; i++) {
           const Cpayload = {

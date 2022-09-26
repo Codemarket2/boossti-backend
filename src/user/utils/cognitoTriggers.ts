@@ -12,21 +12,19 @@ import {
   markUserEmailAsVerified,
   adminUpdateUserAttribute,
   adminConfirmSignUp,
+  updateEmailVerified,
 } from './helper';
 import { User } from './userModel';
 import { DB } from '../../utils/DB';
 
 export const preSignUpTrigger = async (
-  event:
-    | PreSignUpTriggerEvent
-    | PostConfirmationTriggerEvent
-    | PostAuthenticationTriggerEvent
+  event: PreSignUpTriggerEvent | PostConfirmationTriggerEvent | PostAuthenticationTriggerEvent,
 ) => {
   await DB();
   event.request.userAttributes['custom:role'] = 'user';
   if (event.userName.includes('acebook')) {
     event.request.userAttributes.picture = JSON.parse(
-      event.request.userAttributes.picture
+      event.request.userAttributes.picture,
     ).data.url;
   }
 
@@ -52,13 +50,12 @@ export const preSignUpTrigger = async (
     let providerName: any = userName.split('_')[0];
     const providerUserId = userName.split('_')[1];
     providerName = ['Google', 'Facebook'].find(
-      (val) => providerName.toUpperCase() === val.toUpperCase()
+      (val) => providerName.toUpperCase() === val.toUpperCase(),
     );
 
     if (usersFilteredByEmail.Users && usersFilteredByEmail.Users.length > 0) {
       // user already has cognito account
-      const cognitoUsername =
-        usersFilteredByEmail.Users[0].Username || 'username-not-found';
+      const cognitoUsername = usersFilteredByEmail.Users[0].Username || 'username-not-found';
 
       if (usersFilteredByEmail.Users[0].UserStatus === 'UNCONFIRMED') {
         await adminConfirmSignUp(cognitoUsername);
@@ -106,10 +103,7 @@ export const preSignUpTrigger = async (
     }
   }
 
-  if (
-    triggerSource === 'PreSignUp_SignUp' ||
-    triggerSource === 'PreSignUp_AdminCreateUser'
-  ) {
+  if (triggerSource === 'PreSignUp_SignUp' || triggerSource === 'PreSignUp_AdminCreateUser') {
     const newUser = await User.create({
       userId: userName,
       name,
@@ -131,25 +125,23 @@ export const preSignUpTrigger = async (
 };
 
 export const postAuthenticationTrigger = async (
-  event:
-    | PreSignUpTriggerEvent
-    | PostConfirmationTriggerEvent
-    | PostAuthenticationTriggerEvent
+  event: PreSignUpTriggerEvent | PostConfirmationTriggerEvent | PostAuthenticationTriggerEvent,
 ) => {
-  const isEmailVerified = event.request.userAttributes.email_verified;
-  if (isEmailVerified === 'false') {
-    await markUserEmailAsVerified(event.userName, event.userPoolId);
-  }
-  if (!event.request.userAttributes.hasOwnProperty('custom:_id')) {
-    await DB();
-    const userId = event.userName;
-    const tempUser: any = await User.findOne({
-      userId: userId,
-    });
-    await adminUpdateUserAttribute(userId, {
-      Name: 'custom:_id',
-      Value: `${tempUser._id}`,
-    });
-  }
+  // if (!event.request.userAttributes.hasOwnProperty('custom:_id')) {
+  //   await DB();
+  //   const userId = event.userName;
+  //   const tempUser: any = await User.findOne({
+  //     userId: userId,
+  //   });
+  //   await adminUpdateUserAttribute(userId, {
+  //     Name: 'custom:_id',
+  //     Value: `${tempUser._id}`,
+  //   });
+  // }
+
+  // if the email is verified then also make emailVerified = true property of User in the Database
+
+  await updateEmailVerified(event.request.userAttributes);
+
   return event;
 };
