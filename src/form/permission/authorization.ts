@@ -29,40 +29,53 @@ export const authorization = async ({
 }: AuthorizationPayload) => {
   try {
     if (process?.env?.NODE_ENV === 'test') return true;
-    if (!actionType || !user?._id || !formId) {
-      throw new Error('actionType, user, formId not found in payload');
+    if (!actionType || !formId) {
+      throw new Error('actionType, formId not found in payload');
     }
 
     // Get User Roles
-    if (!user?._id) throw new Error('User not found');
     const { userForm, permissionsForm, actionPermissionsForm } = await getForms();
-
     const rolesField = getFieldByLabel(systemForms.users.fields.roles, userForm?.fields);
     if (!rolesField?._id) throw new Error('roles field not found in users form');
-
-    let isSuperAdmin = false;
     const userRoleIds: string[] = [];
-    user?.values?.forEach((value) => {
-      if (
-        value?.field?.toString() === rolesField?._id?.toString() &&
-        value?.response?._id &&
-        !userRoleIds.includes(value?.response?._id)
-      ) {
-        userRoleIds.push(value?.response?._id);
-        const roleName = value?.response?.values?.find(
-          (v) => v?.field === rolesField?.options?.formField,
-        )?.value;
-        if (roleName === 'superadmin') {
-          isSuperAdmin = true;
+    if (user?._id) {
+      // if (!user?._id) throw new Error('User not found');
+      let isSuperAdmin = false;
+      user?.values?.forEach((value) => {
+        if (
+          value?.field?.toString() === rolesField?._id?.toString() &&
+          value?.response?._id &&
+          !userRoleIds.includes(value?.response?._id)
+        ) {
+          userRoleIds.push(value?.response?._id);
+          const roleName = value?.response?.values?.find(
+            (v) => v?.field === rolesField?.options?.formField,
+          )?.value;
+          if (roleName === 'superadmin') {
+            isSuperAdmin = true;
+          }
         }
+      });
+      if (isSuperAdmin) {
+        return true;
       }
-    });
+    } else {
+      const rolesForm = await FormModel.findOne({ slug: systemForms.roles.slug }).lean();
+      if (!rolesForm?._id) throw new Error('roles form not found');
+
+      const roleNamField = getFieldByLabel(systemForms.roles.fields.name, rolesForm?.fields);
+      if (!roleNamField?._id) throw new Error('role name field not found in roles form');
+      const guestRole = await ResponseModel.findOne({
+        formId: rolesForm?._id,
+        'values.field': roleNamField?._id,
+        'values.value': 'guest',
+      }).lean();
+      if (!guestRole?._id) throw new Error('Guest role not found');
+      userRoleIds.push(guestRole?._id);
+    }
 
     if (!(userRoleIds?.length > 0)) {
       throw new Error("user doesn't have any roles");
-    }
-    if (isSuperAdmin) {
-      return true;
     }
 
     // Get User Permission By Roles
