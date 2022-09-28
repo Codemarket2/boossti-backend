@@ -438,27 +438,31 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         return null;
       }
       case 'getCheckUnique': {
-        const { formId, responseId, value, caseInsensitiveUnique = false } = args;
+        const { formId, responseId, value, caseInsensitiveUnique = false, fieldType } = args;
         let filter: any = {
           formId,
-          values: { $elemMatch: { value: value.value, field: value.field } },
         };
-        if (caseInsensitiveUnique) {
-          filter = {
-            ...filter,
-            values: {
-              $elemMatch: { value: { $regex: new RegExp(`^${value?.value}$`), $options: 'i' } },
-            },
-          };
+        const elemMatch: any = { field: value.field };
+        if (fieldType === 'response') {
+          elemMatch.response = value.response;
+        } else if (fieldType === 'form') {
+          elemMatch.form = value.form;
+        } else if (caseInsensitiveUnique) {
+          elemMatch.value = { $regex: new RegExp(`^${value?.value}$`), $options: 'i' };
+        } else {
+          elemMatch.value = value.value;
         }
+        filter.values = {
+          $elemMatch: elemMatch,
+        };
         if (responseId) {
           filter = {
             ...filter,
             _id: { $ne: responseId },
           };
         }
-        const response = await ResponseModel.findOne(filter);
-        return Boolean(response?._id);
+        const response = await ResponseModel.findOne(filter).lean();
+        return response?._id;
       }
       case 'resolveCondition': {
         const { responseId, conditions } = args;
