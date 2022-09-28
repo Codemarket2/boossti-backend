@@ -17,10 +17,11 @@ type Query {
   getMyResponses(page: Int, limit: Int): Responses2
   getCheckUnique(
     formId: ID!
+    fieldType: String!
     responseId: ID
     value: ValueInput
     caseInsensitiveUnique: Boolean
-  ): Boolean @aws_api_key @aws_cognito_user_pools
+  ): String @aws_api_key @aws_cognito_user_pools
 }
 
 type Mutation {

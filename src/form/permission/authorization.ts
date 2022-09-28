@@ -39,7 +39,6 @@ export const authorization = async ({
     if (!rolesField?._id) throw new Error('roles field not found in users form');
     const userRoleIds: string[] = [];
     if (user?._id) {
-      // if (!user?._id) throw new Error('User not found');
       let isSuperAdmin = false;
       user?.values?.forEach((value) => {
         if (
@@ -62,7 +61,6 @@ export const authorization = async ({
     } else {
       const rolesForm = await FormModel.findOne({ slug: systemForms.roles.slug }).lean();
       if (!rolesForm?._id) throw new Error('roles form not found');
-
       const roleNamField = getFieldByLabel(systemForms.roles.fields.name, rolesForm?.fields);
       if (!roleNamField?._id) throw new Error('role name field not found in roles form');
       const guestRole = await ResponseModel.findOne({
