@@ -15,13 +15,9 @@ type Query {
     valueFilter: AWSJSON
   ): Responses @aws_api_key @aws_cognito_user_pools
   getMyResponses(page: Int, limit: Int): Responses2
-  getCheckUnique(
-    formId: ID!
-    fieldType: String!
-    responseId: ID
-    value: ValueInput
-    caseInsensitiveUnique: Boolean
-  ): String @aws_api_key @aws_cognito_user_pools
+  getCheckUnique(formId: ID!, responseId: ID, valueFilter: AWSJSON!): String
+    @aws_api_key
+    @aws_cognito_user_pools
 }
 
 type Mutation {

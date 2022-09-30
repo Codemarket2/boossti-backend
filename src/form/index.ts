@@ -438,22 +438,11 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         return null;
       }
       case 'getCheckUnique': {
-        const { formId, responseId, value, caseInsensitiveUnique = false, fieldType } = args;
+        const { formId, responseId, valueFilter = {}, appId } = args;
         let filter: any = {
           formId,
-        };
-        const elemMatch: any = { field: value.field };
-        if (fieldType === 'response') {
-          elemMatch.response = value.response;
-        } else if (fieldType === 'form') {
-          elemMatch.form = value.form;
-        } else if (caseInsensitiveUnique) {
-          elemMatch.value = { $regex: new RegExp(`^${value?.value}$`), $options: 'i' };
-        } else {
-          elemMatch.value = value.value;
-        }
-        filter.values = {
-          $elemMatch: elemMatch,
+          ...valueFilter,
+          appId,
         };
         if (responseId) {
           filter = {
