@@ -21,4 +21,5 @@ export const formResolvers = {
   'Mutation updateSection': 'formLambda',
   'Query getCheckUnique': 'formLambda',
   'Mutation resolveCondition': 'formLambda',
+  'Mutation checkUniqueBetweenMultipleValues': 'formLambda',
 };
