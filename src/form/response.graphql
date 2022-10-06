@@ -22,6 +22,7 @@ type Query {
 
 type Mutation {
   resolveCondition(responseId: ID!, conditions: AWSJSON!): Boolean
+  checkUniqueBetweenMultipleValues(responseIds: [ID!], subField: AWSJSON!): Boolean
   createResponse(
     formId: ID!
     appId: ID

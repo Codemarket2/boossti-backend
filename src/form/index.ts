@@ -16,6 +16,8 @@ import { IResponse } from './types/response';
 import { resolveCondition } from './condition/resolveCondition';
 import { getUserAttributes } from './utils/actionHelper';
 import { systemForms } from './permission/systemFormsConfig';
+import { getFormIds, getFormsByIds } from './condition/getConditionForm';
+import { getLeftPartValue } from './condition/getConditionPartValue';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -466,6 +468,32 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         });
         // debugger;
         return conditionResult;
+      }
+      case 'checkUniqueBetweenMultipleValues': {
+        const { responseIds = [], subField } = args;
+        let isDuplicateValue = false;
+        if (responseIds?.length > 1) {
+          const formIds = getFormIds(subField);
+          const forms = await getFormsByIds(formIds);
+          const values: any = [];
+          for (const responseId of responseIds) {
+            const response = await ResponseModel.findById(responseId);
+            if (response?._id) {
+              const value = await getLeftPartValue({
+                conditionPart: subField,
+                forms,
+                response,
+              });
+              if (value) {
+                if (values?.includes(value)) {
+                  isDuplicateValue = true;
+                }
+                values.push(value);
+              }
+            }
+          }
+        }
+        return isDuplicateValue;
       }
       default:
         throw new Error('Something went wrong! Please check your Query or Mutation');
