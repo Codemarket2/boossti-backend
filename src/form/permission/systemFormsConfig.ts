@@ -18,8 +18,16 @@ export const systemForms = {
     slug: 'permissions',
     fields: {
       form: 'form',
+      roleActionCondition: 'role action condition',
+      // role: 'role',
+      // actionPermissions: 'Action Permissions',
+    },
+  },
+  roleActionCondition: {
+    slug: 'role-action-condition',
+    fields: {
       role: 'role',
-      actionPermissions: 'Action Permissions',
+      actionPermissions: 'Action Permission',
     },
   },
   actionPermissions: {
