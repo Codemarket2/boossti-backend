@@ -9,6 +9,7 @@ type Query {
 
 type Mutation {
   createForm(name: String!, fields: [FieldInput], settings: AWSJSON, virtualForm: Boolean): Form
+    @aws_cognito_user_pools(cognito_groups: ["superadmin"])
   updateForm(
     _id: ID!
     name: String
