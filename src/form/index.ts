@@ -7,7 +7,6 @@ import { getCurrentUser } from '../utils/authentication';
 import { AppSyncEvent } from '../utils/customTypes';
 import { runFormActions } from './utils/actions';
 import { sendResponseNotification } from './utils/responseNotification';
-import getAdminFilter from '../utils/adminFilter';
 import { fileParser } from './utils/readCsvFile';
 import { runInTransaction } from '../utils/runInTransaction';
 import { IForm } from './types/form';
@@ -18,6 +17,7 @@ import { getUserAttributes } from './utils/actionHelper';
 import { systemForms } from './permission/systemFormsConfig';
 import { getFormIds, getFormsByIds } from './condition/getConditionForm';
 import { getLeftPartValue } from './condition/getConditionPartValue';
+import { formAuthorization } from './permission/formAuthorization';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -63,18 +63,16 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       }
       case 'getForms': {
         const { page = 1, limit = 20, search = '' } = args;
-        const adminFilter = getAdminFilter(identity, user);
-        const data = await FormModel.find({
-          ...adminFilter,
-          name: { $regex: search, $options: 'i' },
-        })
+        const { isSuperAdmin, formIds } = await formAuthorization({ user });
+        const filter: any = { name: { $regex: search, $options: 'i' } };
+        if (!isSuperAdmin) {
+          filter._id = { $in: formIds };
+        }
+        const data = await FormModel.find(filter)
           .populate(formPopulate)
           .limit(limit * 1)
           .skip((page - 1) * limit);
-        const count = await FormModel.countDocuments({
-          ...adminFilter,
-          name: { $regex: search, $options: 'i' },
-        });
+        const count = await FormModel.countDocuments(filter);
         return {
           data,
           count,

@@ -6,6 +6,7 @@ import { resolveCondition } from '../condition/resolveCondition';
 import { systemForms } from './systemFormsConfig';
 import { ICondition } from '../types/form';
 import { getUserAttributes } from '../utils/actionHelper';
+import { getUserRoleIds } from './getUserRoleIds';
 
 export enum AuthorizationActionTypes {
   CREATE = 'CREATE',
@@ -34,45 +35,12 @@ export const authorization = async ({
     }
 
     const { userForm, permissionsForm, roleActionConditionForm, actionPermissionsForm } =
-      await getForms();
+      await getSystemForms();
 
-    // Get User Roles
-    const rolesField = getFieldByLabel(systemForms.users.fields.roles, userForm?.fields);
-    if (!rolesField?._id) throw new Error('roles field not found in users form');
-    const userRoleIds: string[] = [];
+    const { userRoleIds, isSuperAdmin } = await getUserRoleIds({ user, userForm });
 
-    if (user?._id) {
-      let isSuperAdmin = false;
-      user?.values?.forEach((value) => {
-        if (
-          value?.field?.toString() === rolesField?._id?.toString() &&
-          value?.response?._id &&
-          !userRoleIds.includes(value?.response?._id)
-        ) {
-          userRoleIds.push(value?.response?._id);
-          const roleName = value?.response?.values?.find(
-            (v) => v?.field === rolesField?.options?.formField,
-          )?.value;
-          if (roleName === 'superadmin') {
-            isSuperAdmin = true;
-          }
-        }
-      });
-      if (isSuperAdmin) {
-        return true;
-      }
-    } else {
-      const rolesForm = await FormModel.findOne({ slug: systemForms.roles.slug }).lean();
-      if (!rolesForm?._id) throw new Error('roles form not found');
-      const roleNamField = getFieldByLabel(systemForms.roles.fields.name, rolesForm?.fields);
-      if (!roleNamField?._id) throw new Error('role name field not found in roles form');
-      const guestRole = await ResponseModel.findOne({
-        formId: rolesForm?._id,
-        'values.field': roleNamField?._id,
-        'values.value': 'guest',
-      }).lean();
-      if (!guestRole?._id) throw new Error('Guest role not found');
-      userRoleIds.push(guestRole?._id);
+    if (isSuperAdmin) {
+      return true;
     }
 
     if (!(userRoleIds?.length > 0)) {
@@ -212,7 +180,7 @@ export const authorization = async ({
   }
 };
 
-const getForms = async () => {
+export const getSystemForms = async () => {
   const forms = await FormModel.find({
     slug: {
       $in: [
