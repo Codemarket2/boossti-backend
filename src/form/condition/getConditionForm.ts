@@ -17,17 +17,7 @@ export const getConditionFormsAndResponses = async (conditions: ICondition[]) =>
   formIds = [...new Set(formIds)];
   responseIds = [...new Set(responseIds)];
 
-  const forms: { [key: string]: IForm } = {};
-  const formsArray = await FormModel.find({ _id: { $in: formIds } })
-    .populate(formPopulate)
-    .lean();
-
-  formIds.forEach((formId) => {
-    const form = formsArray?.find((selectedForm) => selectedForm?._id?.toString() === formId);
-    if (form?._id) {
-      forms[formId] = form;
-    }
-  });
+  const forms = await getFormsByIds(formIds);
 
   const responses: { [key: string]: IResponse } = {};
   const responsesArray = await ResponseModel.find({ _id: { $in: responseIds } })
@@ -46,7 +36,7 @@ export const getConditionFormsAndResponses = async (conditions: ICondition[]) =>
   return { forms, responses };
 };
 
-const getFormIds = (part: ConditionPart) => {
+export const getFormIds = (part: ConditionPart) => {
   let formIds: string[] = [];
   if (part?.formId) {
     formIds.push(part?.formId);
@@ -72,4 +62,19 @@ const getResponseIds = (part: ConditionPart) => {
     }
   }
   return responseIds;
+};
+
+export const getFormsByIds = async (formIds) => {
+  const forms: { [key: string]: IForm } = {};
+  const formsArray = await FormModel.find({ _id: { $in: formIds } })
+    .populate(formPopulate)
+    .lean();
+
+  formIds.forEach((formId) => {
+    const form = formsArray?.find((selectedForm) => selectedForm?._id?.toString() === formId);
+    if (form?._id) {
+      forms[formId] = form;
+    }
+  });
+  return forms;
 };

@@ -7,7 +7,6 @@ import { getCurrentUser } from '../utils/authentication';
 import { AppSyncEvent } from '../utils/customTypes';
 import { runFormActions } from './utils/actions';
 import { sendResponseNotification } from './utils/responseNotification';
-import getAdminFilter from '../utils/adminFilter';
 import { fileParser } from './utils/readCsvFile';
 import { runInTransaction } from '../utils/runInTransaction';
 import { IForm } from './types/form';
@@ -16,6 +15,9 @@ import { IResponse } from './types/response';
 import { resolveCondition } from './condition/resolveCondition';
 import { getUserAttributes } from './utils/actionHelper';
 import { systemForms } from './permission/systemFormsConfig';
+import { getFormIds, getFormsByIds } from './condition/getConditionForm';
+import { getLeftPartValue } from './condition/getConditionPartValue';
+import { formAuthorization } from './permission/formAuthorization';
 
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
@@ -61,18 +63,16 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       }
       case 'getForms': {
         const { page = 1, limit = 20, search = '' } = args;
-        const adminFilter = getAdminFilter(identity, user);
-        const data = await FormModel.find({
-          ...adminFilter,
-          name: { $regex: search, $options: 'i' },
-        })
+        const { isSuperAdmin, formIds } = await formAuthorization({ user });
+        const filter: any = { name: { $regex: search, $options: 'i' } };
+        if (!isSuperAdmin) {
+          filter._id = { $in: formIds };
+        }
+        const data = await FormModel.find(filter)
           .populate(formPopulate)
           .limit(limit * 1)
           .skip((page - 1) * limit);
-        const count = await FormModel.countDocuments({
-          ...adminFilter,
-          name: { $regex: search, $options: 'i' },
-        });
+        const count = await FormModel.countDocuments(filter);
         return {
           data,
           count,
@@ -438,27 +438,20 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         return null;
       }
       case 'getCheckUnique': {
-        const { formId, responseId, value, caseInsensitiveUnique = false } = args;
+        const { formId, responseId, valueFilter = {}, appId } = args;
         let filter: any = {
           formId,
-          values: { $elemMatch: { value: value.value, field: value.field } },
+          ...valueFilter,
+          appId,
         };
-        if (caseInsensitiveUnique) {
-          filter = {
-            ...filter,
-            values: {
-              $elemMatch: { value: { $regex: new RegExp(`^${value?.value}$`), $options: 'i' } },
-            },
-          };
-        }
         if (responseId) {
           filter = {
             ...filter,
             _id: { $ne: responseId },
           };
         }
-        const response = await ResponseModel.findOne(filter);
-        return Boolean(response?._id);
+        const response = await ResponseModel.findOne(filter).lean();
+        return response?._id;
       }
       case 'resolveCondition': {
         const { responseId, conditions } = args;
@@ -473,6 +466,32 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         });
         // debugger;
         return conditionResult;
+      }
+      case 'checkUniqueBetweenMultipleValues': {
+        const { responseIds = [], subField } = args;
+        let isDuplicateValue = false;
+        if (responseIds?.length > 1) {
+          const formIds = getFormIds(subField);
+          const forms = await getFormsByIds(formIds);
+          const values: any = [];
+          for (const responseId of responseIds) {
+            const response = await ResponseModel.findById(responseId);
+            if (response?._id) {
+              const value = await getLeftPartValue({
+                conditionPart: subField,
+                forms,
+                response,
+              });
+              if (value) {
+                if (values?.includes(value)) {
+                  isDuplicateValue = true;
+                }
+                values.push(value);
+              }
+            }
+          }
+        }
+        return isDuplicateValue;
       }
       default:
         throw new Error('Something went wrong! Please check your Query or Mutation');
