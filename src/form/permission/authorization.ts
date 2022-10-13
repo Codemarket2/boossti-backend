@@ -84,21 +84,31 @@ export const authorization = async ({
       .lean();
     if (!formPermission?._id) throw new Error(`No permission found for the form ${formId}`);
     const roleActionConditionValues = formPermission?.values?.filter(
-      (value) => value?.field?.toString() === permissionFormRACField?._id?.toString(),
+      (value) =>
+        value?.field?.toString() === permissionFormRACField?._id?.toString() &&
+        value?.response?._id,
     );
+
     const actionPermissionsIds: string[] = [];
     roleActionConditionValues?.forEach((value) => {
       value?.response?.values?.forEach((v) => {
-        const isTrue3 = userRoleIds?.some((_id) => _id?.toString() == v?.response?.toString());
-        if (isTrue3 && v?.field?.toString() === roleActionConditionFormRoleField?._id?.toString()) {
-          const actionPermissionId = value?.response?.values?.find(
-            (v2) =>
+        const useHasThisRole = userRoleIds?.some(
+          (_id) => _id?.toString() == v?.response?.toString(),
+        );
+        if (
+          useHasThisRole &&
+          v?.field?.toString() === roleActionConditionFormRoleField?._id?.toString()
+        ) {
+          value?.response?.values?.forEach((v2) => {
+            if (
               v2?.field?.toString() ===
-              roleActionConditionFormActionPermissionField?._id?.toString(),
-          )?.response;
-          if (actionPermissionId) {
-            actionPermissionsIds.push(actionPermissionId);
-          }
+              roleActionConditionFormActionPermissionField?._id?.toString()
+            ) {
+              if (v2?.response) {
+                actionPermissionsIds.push(v2?.response);
+              }
+            }
+          });
         }
       });
     });
