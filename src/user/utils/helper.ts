@@ -5,6 +5,7 @@ import { UserFormConfig } from '../../form/utils/userFormConfig';
 import { FormModel } from '../../form/utils/formModel';
 import { ResponseModel } from '../../form/utils/responseModel';
 import { IValue as ResponseValueType } from '../../form/utils/responseType';
+import { PostAuthenticationTriggerEvent } from 'aws-lambda';
 
 const { USER_POOL_ID } = process.env;
 
@@ -169,7 +170,24 @@ export const adminConfirmSignUp = (username = '') => {
  * Links :
  * - User Pool Attributes : https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-settings-attributes.html
  * */
-export const updateEmailVerified = async (userAttributes: any) => {
+export const updateEmailVerified = async (event: PostAuthenticationTriggerEvent) => {
+  const { userAttributes } = event.request;
+
+  if (!userAttributes['custom:email_verified'] || userAttributes['custom:email_verified'] === '0') {
+    await cognitoIdp
+      .adminUpdateUserAttributes({
+        UserAttributes: [
+          {
+            Name: 'custom:email_verified',
+            Value: '1',
+          },
+        ],
+        UserPoolId: event.userPoolId,
+        Username: userAttributes.email,
+      })
+      .promise();
+  }
+
   await DB();
   const userForm = await FormModel.findOne({
     slug: UserFormConfig.slug,
@@ -181,9 +199,7 @@ export const updateEmailVerified = async (userAttributes: any) => {
 
   const userResponseId = userAttributes['custom:_id'];
   const isEmailVerifiedinCongito =
-    userAttributes['email_verified'] === 'True' ||
-    userAttributes['email_verified'] === 'true' ||
-    userAttributes['email_verified'] === true;
+    userAttributes['email_verified'] === 'True' || userAttributes['email_verified'] === 'true';
 
   const emailVerifiedFieldId = userForm.fields
     .find((val) => val.label === UserFormConfig.fields.emailVerified)
@@ -191,7 +207,7 @@ export const updateEmailVerified = async (userAttributes: any) => {
 
   if (!emailVerifiedFieldId) {
     throw new Error(
-      `'${UserFormConfig.fields.emailVerified}' field not foud in the user's form in database`,
+      `'${UserFormConfig.fields.emailVerified}' field not found in the user's form in database`,
     );
   }
 

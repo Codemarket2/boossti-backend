@@ -3,6 +3,7 @@ import {
   PreSignUpTriggerEvent,
   PostConfirmationTriggerEvent,
   PostAuthenticationTriggerEvent,
+  PostConfirmationConfirmSignUpTriggerEvent,
 } from 'aws-lambda';
 import {
   listUsersByEmail,
@@ -124,9 +125,9 @@ export const preSignUpTrigger = async (
   return event;
 };
 
-export const postAuthenticationTrigger = async (
-  event: PreSignUpTriggerEvent | PostConfirmationTriggerEvent | PostAuthenticationTriggerEvent,
-) => {
+export const postAuthenticationTrigger = async (event: PostAuthenticationTriggerEvent) => {
+  const { userAttributes } = event.request;
+  console.log('Post Authentication SignIn Triggered');
   // if (!event.request.userAttributes.hasOwnProperty('custom:_id')) {
   //   await DB();
   //   const userId = event.userName;
@@ -139,9 +140,20 @@ export const postAuthenticationTrigger = async (
   //   });
   // }
 
-  // if the email is verified then also make emailVerified = true property of User in the Database
+  if (!userAttributes['custom:email_verified'] || userAttributes['custom:email_verified'] === '0') {
+    // if the email is verified then also make emailVerified = true property of User in the Database
+    await updateEmailVerified(event);
+  }
 
-  await updateEmailVerified(event.request.userAttributes);
+  return event;
+};
+
+export const postConfirmationSignupTrigger = async (
+  event: PostConfirmationConfirmSignUpTriggerEvent,
+) => {
+  console.log('Post Confirmation Signup Triggered');
+  // if the email is verified in cognito then also make emailVerified = true property of User in the Database
+  // await updateEmailVerified(event);
 
   return event;
 };
