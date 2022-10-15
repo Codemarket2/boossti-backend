@@ -120,18 +120,19 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           actionType: AuthorizationActionTypes.VIEW,
           formId: response?.formId,
           response,
+          appId: args?.appId,
         });
         return response;
       }
       case 'getResponseByCount': {
         const response: any = await ResponseModel.findOne(args).populate(responsePopulate).lean();
-        // debugger;
         if (!response?._id) throw new Error('response not found');
         await authorization({
           user,
           actionType: AuthorizationActionTypes.VIEW,
           formId: response?.formId,
           response,
+          appId: args?.appId,
         });
         // const oldOptions = { ...args.options };
         // if (!(process.env.NODE_ENV === 'test')) {
@@ -201,6 +202,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
                 actionType: AuthorizationActionTypes.VIEW,
                 formId: response?.formId,
                 response,
+                appId: args?.appId,
               });
               data.push(response);
               if (data.length >= limit) {
@@ -226,6 +228,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           actionType: AuthorizationActionTypes.CREATE,
           formId: args.formId,
           // response: null,
+          appId: args?.appId,
         });
         const lastResponse = await ResponseModel.findOne({ formId: args.formId }).sort('-count');
         if (lastResponse) {
@@ -271,6 +274,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           actionType: AuthorizationActionTypes.EDIT,
           formId: tempResponse?.formId,
           response: tempResponse,
+          appId: args?.appId,
         });
         const callback = async (session, response) => {
           const res: any = await FormModel.findById(response.formId).populate(formPopulate);
@@ -311,6 +315,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           actionType: AuthorizationActionTypes.DELETE,
           formId: tempResponse?.formId,
           response: tempResponse,
+          appId: args?.appId,
         });
         const callback = async (session, response) => {
           const res: any = await FormModel.findById(response.formId).populate(formPopulate);

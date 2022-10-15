@@ -6,7 +6,7 @@ import { resolveCondition } from '../condition/resolveCondition';
 import { systemForms } from './systemFormsConfig';
 import { ICondition } from '../types/form';
 import { getUserAttributes } from '../utils/actionHelper';
-import { getUserRoleIds } from './getUserRoleIds';
+import { getAppUserRoleIds, getUserRoleIds } from './getUserRoleIds';
 
 export enum AuthorizationActionTypes {
   CREATE = 'CREATE',
@@ -20,6 +20,7 @@ interface AuthorizationPayload {
   user: IResponse;
   response?: IResponse;
   formId: string;
+  appId?: string;
 }
 
 export const authorization = async ({
@@ -27,8 +28,10 @@ export const authorization = async ({
   user,
   formId,
   response,
+  appId,
 }: AuthorizationPayload) => {
   try {
+    // debugger;
     if (process?.env?.NODE_ENV === 'test') return true;
     if (!actionType || !formId) {
       throw new Error('actionType, formId not found in payload');
@@ -37,7 +40,21 @@ export const authorization = async ({
     const { userForm, permissionsForm, roleActionConditionForm, actionPermissionsForm } =
       await getSystemForms();
 
-    const { userRoleIds, isSuperAdmin } = await getUserRoleIds({ user, userForm });
+    let userRoleIds: string[] = [];
+    let isSuperAdmin;
+
+    if (appId) {
+      const { userRoleIds: tempUserRoleIds, isSuperAdmin: tempIsSuperAdmin } =
+        await getAppUserRoleIds({ appId, userId: user?._id });
+      userRoleIds = tempUserRoleIds;
+      isSuperAdmin = tempIsSuperAdmin;
+    } else {
+      const { userRoleIds: tempUserRoleIds, isSuperAdmin: tempIsSuperAdmin } = await getUserRoleIds(
+        { user, userForm },
+      );
+      userRoleIds = tempUserRoleIds;
+      isSuperAdmin = tempIsSuperAdmin;
+    }
 
     if (isSuperAdmin) {
       return true;
@@ -76,6 +93,7 @@ export const authorization = async ({
       throw new Error('action field not found in permission form');
 
     const formPermission = await ResponseModel.findOne({
+      appId,
       formId: permissionsForm?._id,
       'values.field': permissionFormFormField?._id,
       'values.form': formId,
@@ -122,6 +140,7 @@ export const authorization = async ({
     if (!actionTypeField?._id) throw new Error(`actionTypeField not found`);
 
     const actionPermissionResponses = await ResponseModel.find({
+      appId,
       formId: actionPermissionsForm?._id,
       _id: { $in: actionPermissionsIds },
       'values.field': actionTypeField?._id,
