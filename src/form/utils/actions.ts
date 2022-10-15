@@ -1,8 +1,6 @@
 // MONGOOSE
 import { ClientSession } from 'mongoose';
 
-import generatePassword from 'generate-password';
-
 // OTHERS
 import { sendEmail } from '../../utils/email';
 import { User } from '../../user/utils/userModel';
@@ -377,9 +375,14 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
                 Name: 'email',
                 Value: uEmail,
               },
+              // AUTO VERIFY THE EMAIL | THIS WILL BE REMOVED IN THE FUTURE
               {
                 Name: 'email_verified',
-                Value: 'False',
+                Value: 'True',
+              },
+              {
+                Name: 'custom:email_verified',
+                Value: '0',
               },
               {
                 Name: 'name',

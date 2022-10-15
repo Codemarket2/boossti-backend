@@ -170,6 +170,8 @@ export const createAWSUser = async (payload: ICreateUser) => {
   //   })
   //   .promise();
 
+  // SETS THE TEMPORARY PASSWORD AS USER'S PERMANENT PASSWORD
+  // SO WHEN CREATING USER WITH adminCreateUser() the "FORCE_RESET_PASSWORD" Challenge is removed
   // const res2 = await cisp
   //   .adminSetUserPassword({
   //     Password: payload.TemporaryPassword,
