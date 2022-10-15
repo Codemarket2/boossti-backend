@@ -15,8 +15,13 @@ import {
   adminConfirmSignUp,
   updateEmailVerified,
 } from './helper';
+
+import { postAuthenticationTrigger } from './PostAuthenticationTrigger';
+
 import { User } from './userModel';
 import { DB } from '../../utils/DB';
+
+export { postAuthenticationTrigger };
 
 export const preSignUpTrigger = async (
   event: PreSignUpTriggerEvent | PostConfirmationTriggerEvent | PostAuthenticationTriggerEvent,
@@ -120,29 +125,6 @@ export const preSignUpTrigger = async (
   if (triggerSource === 'PreSignUp_ExternalProvider') {
     const providerName = userName.split('_')[0].toUpperCase();
     throw new Error(`${providerName}_ACCOUNT_LINKED`);
-  }
-
-  return event;
-};
-
-export const postAuthenticationTrigger = async (event: PostAuthenticationTriggerEvent) => {
-  const { userAttributes } = event.request;
-  console.log('Post Authentication SignIn Triggered');
-  // if (!event.request.userAttributes.hasOwnProperty('custom:_id')) {
-  //   await DB();
-  //   const userId = event.userName;
-  //   const tempUser: any = await User.findOne({
-  //     userId: userId,
-  //   });
-  //   await adminUpdateUserAttribute(userId, {
-  //     Name: 'custom:_id',
-  //     Value: `${tempUser._id}`,
-  //   });
-  // }
-
-  if (!userAttributes['custom:email_verified'] || userAttributes['custom:email_verified'] === '0') {
-    // if the email is verified then also make emailVerified = true property of User in the Database
-    await updateEmailVerified(event);
   }
 
   return event;

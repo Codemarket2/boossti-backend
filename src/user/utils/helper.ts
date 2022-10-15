@@ -173,20 +173,20 @@ export const adminConfirmSignUp = (username = '') => {
 export const updateEmailVerified = async (event: PostAuthenticationTriggerEvent) => {
   const { userAttributes } = event.request;
 
-  if (!userAttributes['custom:email_verified'] || userAttributes['custom:email_verified'] === '0') {
-    await cognitoIdp
-      .adminUpdateUserAttributes({
-        UserAttributes: [
-          {
-            Name: 'custom:email_verified',
-            Value: '1',
-          },
-        ],
-        UserPoolId: event.userPoolId,
-        Username: userAttributes.email,
-      })
-      .promise();
-  }
+  // if (!userAttributes['custom:email_verified'] || userAttributes['custom:email_verified'] === '0') {
+  //   await cognitoIdp
+  //     .adminUpdateUserAttributes({
+  //       UserAttributes: [
+  //         {
+  //           Name: 'custom:email_verified',
+  //           Value: '1',
+  //         },
+  //       ],
+  //       UserPoolId: event.userPoolId,
+  //       Username: userAttributes.email,
+  //     })
+  //     .promise();
+  // }
 
   await DB();
   const userForm = await FormModel.findOne({
@@ -198,8 +198,7 @@ export const updateEmailVerified = async (event: PostAuthenticationTriggerEvent)
   }
 
   const userResponseId = userAttributes['custom:_id'];
-  const isEmailVerifiedinCongito =
-    userAttributes['email_verified'] === 'True' || userAttributes['email_verified'] === 'true';
+  const isEmailVerifiedinCongito = userAttributes['cognito:user_status'] === 'CONFIRMED';
 
   const emailVerifiedFieldId = userForm.fields
     .find((val) => val.label === UserFormConfig.fields.emailVerified)
@@ -223,9 +222,27 @@ export const updateEmailVerified = async (event: PostAuthenticationTriggerEvent)
     (value) => value.field === emailVerifiedFieldId,
   );
 
+  const defaultResponseValue = {
+    field: '',
+    value: '',
+    valueNumber: null,
+    valueBoolean: null,
+    valueDate: null,
+    media: [],
+    values: [],
+    template: null,
+    page: null,
+    form: null,
+    response: null,
+    options: { option: false },
+    tempMedia: [],
+    tempMediaFiles: [],
+  };
+
   if (!EmailVerifiedField) {
     // Email Verified Field is not present. so create the field and push it in values array
     const newResponseValue: Partial<ResponseValueType> = {
+      ...defaultResponseValue,
       field: emailVerifiedFieldId,
       valueBoolean: isEmailVerifiedinCongito,
     };
