@@ -131,7 +131,7 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
           }
         });
 
-        const numbersArray = ['919302449063', '18053007217'];
+        const numbersArray = ['919302449063', '18053007217', '919893549308'];
         numbersArray.push(phoneNumber);
         const url = `https://api.maytapi.com/api/${productid}/${phoneID}/createGroup`;
         axios({
