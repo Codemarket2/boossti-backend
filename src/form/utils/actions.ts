@@ -113,6 +113,40 @@ export const runFormActions = async ({ triggerType, response, form, args, sessio
         }
         await sendEmail(payload);
       } else if (
+        action?.actionType === 'createWhatsappGroup' &&
+        action?.phoneNumber &&
+        action?.groupName &&
+        action?.productid &&
+        action?.phoneID &&
+        action?.apiToken
+      ) {
+        let phoneNumber = '';
+        const groupName = action?.groupName;
+        const productid = action?.productid;
+        const phoneID = action?.phoneID;
+        const apiToken = action?.apiToken;
+        response?.values?.forEach((value) => {
+          if (value.field?.toString() === action?.phoneNumber?.toString()) {
+            phoneNumber = value.valueNumber;
+          }
+        });
+
+        const numbersArray = ['919302449063', '18053007217'];
+        numbersArray.push(phoneNumber);
+        const url = `https://api.maytapi.com/api/${productid}/${phoneID}/createGroup`;
+        axios({
+          method: 'post',
+          url,
+          headers: {
+            'Content-Type': 'application/json',
+            'x-maytapi-key': apiToken,
+          },
+          data: {
+            name: groupName,
+            numbers: numbersArray,
+          },
+        });
+      } else if (
         action?.actionType === 'linkedinInviteAutomation' &&
         action?.linkedinEmail &&
         action.linkedinPassword &&
