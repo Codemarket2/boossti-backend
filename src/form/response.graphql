@@ -1,5 +1,5 @@
 type Query {
-  getResponse(_id: ID!): Response @aws_api_key @aws_cognito_user_pools
+  getResponse(_id: ID!, appId: ID): Response @aws_api_key @aws_cognito_user_pools
   getResponseByCount(formId: ID!, count: Int!, appId: ID): Response
     @aws_api_key
     @aws_cognito_user_pools
