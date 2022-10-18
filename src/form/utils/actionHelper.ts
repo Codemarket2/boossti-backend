@@ -57,6 +57,7 @@ export interface IUserAttributes {
   email: string;
   name: string;
 }
+
 export const getUserAttributes = (userForm: any, userResponse): IUserAttributes => {
   const firstName = getFieldValueByLabel(
     systemForms.users.fields.firstName,
