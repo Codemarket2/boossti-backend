@@ -380,23 +380,32 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         const fileData = await fileParser(fileUrl, filter);
 
         const responses: any = [];
+        const responsesPresentInDB = await ResponseModel.count();
 
-        fileData.map((file) => {
+        fileData.map((file, idx) => {
           const response = {
             formId: formId,
             parentId: parentId,
             values: [{}],
             createdBy: createdBy,
+            count: responsesPresentInDB + idx + 1,
           };
           for (let i = 0; i < fields.length; i++) {
             const value = {
-              field: fields[i],
-              value: file[filter[i]],
-              valueNumber: null,
+              value: '',
               valueBoolean: null,
               valueDate: null,
-              page: null,
               media: [],
+              values: [],
+              template: null,
+              page: null,
+              form: null,
+              response: null,
+              options: { option: false },
+              tempMedia: [],
+              tempMediaFiles: [],
+              field: fields[i],
+              valueNumber: file[filter[i]],
             };
             response.values.push(value);
             if (i === fields.length - 1) response.values.shift();
