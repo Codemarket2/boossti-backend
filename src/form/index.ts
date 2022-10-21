@@ -12,9 +12,7 @@ import { runInTransaction } from '../utils/runInTransaction';
 import { IForm } from './types/form';
 import { authorization, AuthorizationActionTypes } from './permission/authorization';
 import { IResponse } from './types/response';
-import { resolveCondition } from './condition/resolveCondition';
-import { getUserAttributes } from './utils/actionHelper';
-import { systemForms } from './permission/systemFormsConfig';
+import { resolveConditionHelper } from './condition/resolveCondition';
 import { getFormIds, getFormsByIds } from './condition/getConditionForm';
 import { getLeftPartValue } from './condition/getConditionPartValue';
 import { formAuthorization } from './permission/formAuthorization';
@@ -120,18 +118,19 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           actionType: AuthorizationActionTypes.VIEW,
           formId: response?.formId,
           response,
+          appId: args?.appId,
         });
         return response;
       }
       case 'getResponseByCount': {
         const response: any = await ResponseModel.findOne(args).populate(responsePopulate).lean();
-        // debugger;
         if (!response?._id) throw new Error('response not found');
         await authorization({
           user,
           actionType: AuthorizationActionTypes.VIEW,
           formId: response?.formId,
           response,
+          appId: args?.appId,
         });
         // const oldOptions = { ...args.options };
         // if (!(process.env.NODE_ENV === 'test')) {
@@ -162,10 +161,14 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           workFlowFormResponseParentId = null,
           valueFilter,
           appId,
+          parentResponseId,
         } = args;
         let filter: any = { formId };
         if (appId) {
           filter = { ...filter, appId };
+        }
+        if (parentResponseId) {
+          filter = { ...filter, parentResponseId };
         }
         if (workFlowFormResponseParentId) {
           filter = { ...filter, workFlowFormResponseParentId };
@@ -201,6 +204,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
                 actionType: AuthorizationActionTypes.VIEW,
                 formId: response?.formId,
                 response,
+                appId: args?.appId,
               });
               data.push(response);
               if (data.length >= limit) {
@@ -226,6 +230,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           actionType: AuthorizationActionTypes.CREATE,
           formId: args.formId,
           // response: null,
+          appId: args?.appId,
         });
         const lastResponse = await ResponseModel.findOne({ formId: args.formId }).sort('-count');
         if (lastResponse) {
@@ -246,6 +251,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
             response,
             args,
             session,
+            user,
           });
 
           await sendResponseNotification({ session, form, response });
@@ -271,6 +277,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           actionType: AuthorizationActionTypes.EDIT,
           formId: tempResponse?.formId,
           response: tempResponse,
+          appId: tempResponse?.appId,
         });
         const callback = async (session, response) => {
           const res: any = await FormModel.findById(response.formId).populate(formPopulate);
@@ -284,6 +291,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
             response,
             args,
             session,
+            user,
           });
           // await sendResponseNotification(form, response);
         };
@@ -311,6 +319,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           actionType: AuthorizationActionTypes.DELETE,
           formId: tempResponse?.formId,
           response: tempResponse,
+          appId: tempResponse?.appId,
         });
         const callback = async (session, response) => {
           const res: any = await FormModel.findById(response.formId).populate(formPopulate);
@@ -345,6 +354,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
             response,
             args,
             session,
+            user,
           });
           // await sendResponseNotification(form, response);
         };
@@ -464,16 +474,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       }
       case 'resolveCondition': {
         const { responseId, conditions } = args;
-        const userForm = await FormModel.findOne({ slug: systemForms.users.slug });
-        const userAttributes = getUserAttributes(userForm, user);
-        const response = await ResponseModel.findById(responseId).populate(responsePopulate).lean();
-        if (!response?._id) throw new Error('Response not found');
-        const conditionResult = await resolveCondition({
-          leftPartResponse: response,
-          authState: userAttributes,
-          conditions,
-        });
-        // debugger;
+        const conditionResult = await resolveConditionHelper({ responseId, conditions, user });
         return conditionResult;
       }
       case 'checkUniqueBetweenMultipleValues': {
@@ -501,6 +502,26 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           }
         }
         return isDuplicateValue;
+      }
+      case 'checkPermission': {
+        const { actionType, responseId, formId, appId } = args;
+        let hasPermission = false;
+        let response;
+        if (actionType !== 'CREATE') {
+          response = await ResponseModel.findById(responseId).populate(responsePopulate).lean();
+          if (!response?._id) {
+            throw new Error('Response not found');
+          }
+        }
+        await authorization({
+          actionType,
+          user,
+          response,
+          formId: response?.formId || formId,
+          appId,
+        });
+        hasPermission = true;
+        return hasPermission;
       }
       default:
         throw new Error('Something went wrong! Please check your Query or Mutation');

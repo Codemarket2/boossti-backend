@@ -3,6 +3,7 @@ import {
   PreSignUpTriggerEvent,
   PostConfirmationTriggerEvent,
   PostAuthenticationTriggerEvent,
+  PostConfirmationConfirmSignUpTriggerEvent,
 } from 'aws-lambda';
 import {
   listUsersByEmail,
@@ -14,8 +15,13 @@ import {
   adminConfirmSignUp,
   updateEmailVerified,
 } from './helper';
+
+import { postAuthenticationTrigger } from './PostAuthenticationTrigger';
+
 import { User } from './userModel';
 import { DB } from '../../utils/DB';
+
+export { postAuthenticationTrigger };
 
 export const preSignUpTrigger = async (
   event: PreSignUpTriggerEvent | PostConfirmationTriggerEvent | PostAuthenticationTriggerEvent,
@@ -124,24 +130,12 @@ export const preSignUpTrigger = async (
   return event;
 };
 
-export const postAuthenticationTrigger = async (
-  event: PreSignUpTriggerEvent | PostConfirmationTriggerEvent | PostAuthenticationTriggerEvent,
+export const postConfirmationSignupTrigger = async (
+  event: PostConfirmationConfirmSignUpTriggerEvent,
 ) => {
-  // if (!event.request.userAttributes.hasOwnProperty('custom:_id')) {
-  //   await DB();
-  //   const userId = event.userName;
-  //   const tempUser: any = await User.findOne({
-  //     userId: userId,
-  //   });
-  //   await adminUpdateUserAttribute(userId, {
-  //     Name: 'custom:_id',
-  //     Value: `${tempUser._id}`,
-  //   });
-  // }
-
-  // if the email is verified then also make emailVerified = true property of User in the Database
-
-  await updateEmailVerified(event.request.userAttributes);
+  console.log('Post Confirmation Signup Triggered');
+  // if the email is verified in cognito then also make emailVerified = true property of User in the Database
+  // await updateEmailVerified(event);
 
   return event;
 };

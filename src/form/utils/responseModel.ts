@@ -53,6 +53,10 @@ export const responseSchema = extendSchema({
     type: Number,
     required: true,
   },
+  parentResponseId: {
+    type: Schema.Types.ObjectId,
+    default: null,
+  },
   workFlowFormResponseParentId: {
     type: Schema.Types.ObjectId,
     default: null,

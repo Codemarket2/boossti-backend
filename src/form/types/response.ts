@@ -7,6 +7,7 @@ export interface IResponse extends ISchema {
   appId: string;
   count: number;
   values: IValue[];
+  parentResponseId?: Schema.Types.ObjectId | any; // for dependent relationship
 }
 
 export interface IValue {

@@ -14,6 +14,13 @@ export const systemForms = {
       roles: 'roles',
     },
   },
+  appUsers: {
+    slug: 'app-users',
+    fields: {
+      user: 'user',
+      roles: 'roles',
+    },
+  },
   permissions: {
     slug: 'permissions',
     fields: {
