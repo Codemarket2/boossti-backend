@@ -6,6 +6,7 @@ type Query {
   getResponses(
     formId: ID!
     appId: ID
+    parentResponseId: ID
     workFlowFormResponseParentId: ID
     page: Int
     limit: Int
@@ -18,12 +19,21 @@ type Query {
   getCheckUnique(formId: ID!, responseId: ID, valueFilter: AWSJSON!, appId: ID): String
     @aws_api_key
     @aws_cognito_user_pools
+  checkPermission(actionType: actionType, formId: ID, responseId: ID, appId: ID): Boolean
+}
+
+enum actionType {
+  CREATE
+  VIEW
+  EDIT
+  DELETE
 }
 
 type Mutation {
   createResponse(
     formId: ID!
     appId: ID
+    parentResponseId: ID
     workFlowFormResponseParentId: ID
     values: [ValueInput]
     options: AWSJSON
@@ -86,6 +96,7 @@ type Response @aws_api_key @aws_cognito_user_pools {
   count: Int
   formId: ID
   appId: ID
+  parentResponseId: ID
   workFlowFormResponseParentId: ID
   values: [Value]
   options: AWSJSON
@@ -100,6 +111,7 @@ type Response2 @aws_api_key @aws_cognito_user_pools {
   count: Int
   formId: Form
   appId: ID
+  parentResponseId: ID
   workFlowFormResponseParentId: ID
   values: [Value]
   createdBy: Response
