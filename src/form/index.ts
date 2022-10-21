@@ -12,9 +12,7 @@ import { runInTransaction } from '../utils/runInTransaction';
 import { IForm } from './types/form';
 import { authorization, AuthorizationActionTypes } from './permission/authorization';
 import { IResponse } from './types/response';
-import { resolveCondition, resolveConditionHelper } from './condition/resolveCondition';
-import { getUserAttributes } from './utils/actionHelper';
-import { systemForms } from './permission/systemFormsConfig';
+import { resolveConditionHelper } from './condition/resolveCondition';
 import { getFormIds, getFormsByIds } from './condition/getConditionForm';
 import { getLeftPartValue } from './condition/getConditionPartValue';
 import { formAuthorization } from './permission/formAuthorization';
@@ -163,10 +161,14 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           workFlowFormResponseParentId = null,
           valueFilter,
           appId,
+          parentResponseId,
         } = args;
         let filter: any = { formId };
         if (appId) {
           filter = { ...filter, appId };
+        }
+        if (parentResponseId) {
+          filter = { ...filter, parentResponseId };
         }
         if (workFlowFormResponseParentId) {
           filter = { ...filter, workFlowFormResponseParentId };
@@ -502,6 +504,26 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           }
         }
         return isDuplicateValue;
+      }
+      case 'checkPermission': {
+        const { actionType, responseId, formId, appId } = args;
+        let hasPermission = false;
+        let response;
+        if (actionType !== 'CREATE') {
+          response = await ResponseModel.findById(responseId).populate(responsePopulate).lean();
+          if (!response?._id) {
+            throw new Error('Response not found');
+          }
+        }
+        await authorization({
+          actionType,
+          user,
+          response,
+          formId: response?.formId || formId,
+          appId,
+        });
+        hasPermission = true;
+        return hasPermission;
       }
       default:
         throw new Error('Something went wrong! Please check your Query or Mutation');
