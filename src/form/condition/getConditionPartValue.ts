@@ -37,10 +37,19 @@ export const getLeftPartValue = async ({
       (v) => v?.field?.toString() === conditionPart?.fieldId,
     );
     if (conditionPart?.subField?.fieldId) {
+      let responseId = fieldValue?.response?._id;
+      if (!field?.options?.selectItem && field?.options?.dependentRelationship) {
+        const dependantResponse = await ResponseModel.findOne({
+          parentResponseId: response?._id,
+        })?.lean();
+        if (dependantResponse?._id) {
+          responseId = dependantResponse?._id;
+        }
+      }
       value = await getLeftPartValue({
         forms,
         conditionPart: conditionPart?.subField,
-        responseId: fieldValue?.response?._id,
+        responseId: responseId,
       });
     } else {
       if (field?._id && fieldValue) {
