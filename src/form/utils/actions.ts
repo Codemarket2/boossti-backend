@@ -140,34 +140,55 @@ export const runFormActions = async ({
           action?.groupName &&
           action?.productid &&
           action?.phoneID &&
-          action?.apiToken
+          action?.apiToken &&
+          action?.whatsappMessage
         ) {
           let phoneNumber = '';
           const groupName = action?.groupName;
           const productid = action?.productid;
           const phoneID = action?.phoneID;
           const apiToken = action?.apiToken;
+          const whatsappMessage = action?.whatsappMessage;
+
           response?.values?.forEach((value) => {
             if (value.field?.toString() === action?.phoneNumber?.toString()) {
               phoneNumber = value.valueNumber;
             }
           });
 
-          const numbersArray = ['919302449063', '18053007217', '919893549308'];
-          numbersArray.push(phoneNumber);
+          const numbersArray = ['919302449063', '18053007217'];
+          numbersArray.push(phoneNumber.toString());
           const url = `https://api.maytapi.com/api/${productid}/${phoneID}/createGroup`;
-          axios({
-            method: 'post',
+
+          const data3 = await axios.post(
             url,
-            headers: {
-              'Content-Type': 'application/json',
-              'x-maytapi-key': apiToken,
-            },
-            data: {
+            {
               name: groupName,
               numbers: numbersArray,
             },
-          });
+            {
+              headers: {
+                'Content-Type': 'application/json',
+                'x-maytapi-key': apiToken,
+              },
+            },
+          );
+          if (data3?.data?.data?.id) {
+            const url2 = `https://api.maytapi.com/api/${productid}/${phoneID}/sendMessage`;
+            const data2 = await axios({
+              method: 'post',
+              url: url2,
+              headers: {
+                'Content-Type': 'application/json',
+                'x-maytapi-key': apiToken,
+              },
+              data: {
+                to_number: data3?.data?.data?.id,
+                type: 'text',
+                message: whatsappMessage,
+              },
+            });
+          }
         } else if (
           action?.actionType === 'linkedinInviteAutomation' &&
           action?.linkedinEmail &&
