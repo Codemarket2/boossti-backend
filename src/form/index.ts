@@ -16,7 +16,8 @@ import { resolveConditionHelper } from './condition/resolveCondition';
 import { getFormIds, getFormsByIds } from './condition/getConditionForm';
 import { getLeftPartValue } from './condition/getConditionPartValue';
 import { formAuthorization } from './permission/formAuthorization';
-
+import * as mongoose from 'mongoose';
+import { ClientSession } from 'mongoose';
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
     await DB();
@@ -250,6 +251,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           form.settings = form.settings || {};
           form.settings.actions = args?.options?.actions || form.settings?.actions;
           response.options = args.options;
+
           await runFormActions({
             triggerType: 'onCreate',
             form,
@@ -261,6 +263,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
 
           await sendResponseNotification({ session, form, response });
         };
+
         const response = await runInTransaction(
           {
             action: 'CREATE',
@@ -389,23 +392,79 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       }
       case 'createBulkResponses': {
         const { formId, fileUrl, map, parentId, createdBy } = args;
-
+        // const session: ClientSession = await mongoose.startSession();
         const filter: any = Object.values(map);
         const fields = Object.keys(map);
         const fileData = await fileParser(fileUrl, filter);
 
-        const responses: any = [];
-        const responsesPresentInDB = await ResponseModel.count();
+        // const responses: any = [];
 
-        fileData.map((file, idx) => {
-          const response = {
-            formId: formId,
-            parentId: parentId,
-            values: [{}],
-            createdBy: createdBy,
-            count: responsesPresentInDB + idx + 1,
-          };
-          for (let i = 0; i < fields.length; i++) {
+        args.values = [];
+
+        const callback = async (session, response) => {
+          // Run Actions
+          const res: any = await FormModel.findById(args.formId)
+            .populate(formPopulate)
+            .session(session);
+          const form: any = { ...res.toObject() };
+          form.settings = form.settings || {};
+          form.settings.actions = args?.options?.actions || form.settings?.actions;
+          response.options = args.options;
+
+          await runFormActions({
+            triggerType: 'onCreate',
+            form,
+            response,
+            args,
+            session,
+            user,
+          });
+
+          // await sendResponseNotification({ session, form, response });
+        };
+
+        // for (let i = 0; i < fileData.length; i++) {
+        //   debugger;
+        //   const file = fileData[i];
+        //   const value = {
+        //     value: '',
+        //     valueBoolean: null,
+        //     valueDate: null,
+        //     media: [],
+        //     values: [],
+        //     template: null,
+        //     page: null,
+        //     form: null,
+        //     response: null,
+        //     options: { option: false },
+        //     tempMedia: [],
+        //     tempMediaFiles: [],
+        //     field: fields[i],
+        //     valueNumber: file[filter[i]],
+        //   };
+        //   args.values.push(value);
+        //   const response = await runInTransaction(
+        //     {
+        //       action: 'CREATE',
+        //       Model: ResponseModel,
+        //       args,
+        //       populate: responsePopulate,
+        //       user,
+        //     },
+        //     callback,
+        //   );
+        //   debugger;
+        // }
+        for (let i = 0; i < fileData.length; i++) {
+          const lastResponse = await ResponseModel.findOne({ formId: args.formId }).sort('-count');
+          if (lastResponse) {
+            args = { ...args, count: lastResponse?.count + 1 };
+          }
+
+          const file = fileData[i];
+          for (let j = 0; j < fields.length; j++) {
+            let number = file[filter[j]];
+            number = '91' + number;
             const value = {
               value: '',
               valueBoolean: null,
@@ -419,18 +478,73 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
               options: { option: false },
               tempMedia: [],
               tempMediaFiles: [],
-              field: fields[i],
-              valueNumber: file[filter[i]],
+              field: fields[j],
+              valueNumber: number,
             };
-            response.values.push(value);
-            if (i === fields.length - 1) response.values.shift();
+            args.values.push(value);
+            // debugger;
           }
-          responses.push(response);
-        });
-        // 6350551d911fb8293490f50a
-        // '6350551d911fb8293490f50a'
+          // debugger;
+          const response = await runInTransaction(
+            {
+              action: 'CREATE',
+              Model: ResponseModel,
+              args,
+              populate: responsePopulate,
+              user,
+            },
+            callback,
+          );
+        }
+        // debugger;
+        // const x = await Promise.all(
+        //   fileData.map(async (file, idx) => {
+        //     debugger;
+        //     const response = {
+        //       formId: formId,
+        //       parentId: parentId,
+        //       values: [{}],
+        //       createdBy: createdBy,
+        //       count: responsesPresentInDB + idx + 1,
+        //     };
+        //     for (let i = 0; i < fields.length; i++) {
+        //       const value = {
+        //         value: '',
+        //         valueBoolean: null,
+        //         valueDate: null,
+        //         media: [],
+        //         values: [],
+        //         template: null,
+        //         page: null,
+        //         form: null,
+        //         response: null,
+        //         options: { option: false },
+        //         tempMedia: [],
+        //         tempMediaFiles: [],
+        //         field: fields[i],
+        //         valueNumber: file[filter[i]],
+        //       };
+        //       response.values.push(value);
+        //       if (i === fields.length - 1) response.values.shift();
+        //     }
+        //     const res: any = await FormModel.findById(response.formId).populate(formPopulate);
+        //     const form = { ...res.toObject() };
+        //     form.settings = form.settings || {};
+        //     form.settings.actions = args?.options?.actions || form.settings?.actions;
+        //     debugger;
+        //     await runFormActions({
+        //       triggerType: 'onCreate',
+        //       form,
+        //       response,
+        //       args,
+        //       session,
+        //       user,
+        //     });
+        //     responses.push(response);
+        //   }),
+        // );
 
-        const responseCreated = await ResponseModel.create(responses);
+        // const responseCreated = await ResponseModel.create(responses);
         // responseCreated = await responseCreated.populate(responsePopulate) //.execPopulate();
         // Run Actions
         // const form = await FormModel.findById(responseCreated.formId);
