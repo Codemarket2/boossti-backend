@@ -21,7 +21,7 @@ export const getLeftPartValue = async ({
   if (tempResponse?._id) {
     response = tempResponse;
   } else if (responseId) {
-    response = await ResponseModel.findOne({ _id: responseId });
+    response = await ResponseModel.findOne({ _id: responseId }).lean();
   }
 
   if (conditionPart?.fieldId === 'createdBy') {
@@ -37,19 +37,20 @@ export const getLeftPartValue = async ({
       (v) => v?.field?.toString() === conditionPart?.fieldId,
     );
     if (conditionPart?.subField?.fieldId) {
-      let responseId = fieldValue?.response?._id;
+      let childResponseId = fieldValue?.response?._id;
       if (!field?.options?.selectItem && field?.options?.dependentRelationship) {
         const dependantResponse = await ResponseModel.findOne({
+          formId: conditionPart?.subField?.formId,
           parentResponseId: response?._id,
         })?.lean();
         if (dependantResponse?._id) {
-          responseId = dependantResponse?._id;
+          childResponseId = dependantResponse?._id;
         }
       }
       value = await getLeftPartValue({
         forms,
         conditionPart: conditionPart?.subField,
-        responseId: responseId,
+        responseId: childResponseId,
       });
     } else {
       if (field?._id && fieldValue) {

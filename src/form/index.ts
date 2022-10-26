@@ -124,14 +124,19 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         return response;
       }
       case 'getResponseByCount': {
-        const response: any = await ResponseModel.findOne(args).populate(responsePopulate).lean();
+        const { formId, count } = args;
+        const filter: any = { formId, count };
+        if (args?.appId) {
+          filter.appId = args?.appId;
+        }
+        const response: any = await ResponseModel.findOne(filter).populate(responsePopulate).lean();
         if (!response?._id) throw new Error('response not found');
         await authorization({
           user,
           actionType: AuthorizationActionTypes.VIEW,
           formId: response?.formId,
           response,
-          appId: args?.appId,
+          appId: filter?.appId,
         });
         // const oldOptions = { ...args.options };
         // if (!(process.env.NODE_ENV === 'test')) {
@@ -590,6 +595,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       }
       case 'resolveCondition': {
         const { responseId, conditions } = args;
+        // debugger;
         const conditionResult = await resolveConditionHelper({ responseId, conditions, user });
         return conditionResult;
       }
