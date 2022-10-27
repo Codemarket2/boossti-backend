@@ -16,8 +16,6 @@ import { resolveConditionHelper } from './condition/resolveCondition';
 import { getFormIds, getFormsByIds } from './condition/getConditionForm';
 import { getLeftPartValue } from './condition/getConditionPartValue';
 import { formAuthorization } from './permission/formAuthorization';
-import * as mongoose from 'mongoose';
-import { ClientSession } from 'mongoose';
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
     await DB();
