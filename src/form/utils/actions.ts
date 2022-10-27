@@ -145,7 +145,6 @@ export const runFormActions = async ({
           action?.apiToken &&
           action?.whatsappMessage
         ) {
-          console.log('createWhatsappGroup');
           try {
             let phoneNumber = '';
             const groupName = action?.groupName;
