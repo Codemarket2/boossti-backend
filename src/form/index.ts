@@ -389,16 +389,13 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         };
       }
       case 'createBulkResponses': {
+        // debugger;
         const { formId, fileUrl, map, parentId, createdBy } = args;
-        // const session: ClientSession = await mongoose.startSession();
+
         const filter: any = Object.values(map);
         const fields = Object.keys(map);
         const fileData = await fileParser(fileUrl, filter);
-
-        // const responses: any = [];
-
-        args.values = [];
-
+        // debugger;
         const callback = async (session, response) => {
           // Run Actions
           const res: any = await FormModel.findById(args.formId)
@@ -421,39 +418,9 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           // await sendResponseNotification({ session, form, response });
         };
 
-        // for (let i = 0; i < fileData.length; i++) {
-        //   debugger;
-        //   const file = fileData[i];
-        //   const value = {
-        //     value: '',
-        //     valueBoolean: null,
-        //     valueDate: null,
-        //     media: [],
-        //     values: [],
-        //     template: null,
-        //     page: null,
-        //     form: null,
-        //     response: null,
-        //     options: { option: false },
-        //     tempMedia: [],
-        //     tempMediaFiles: [],
-        //     field: fields[i],
-        //     valueNumber: file[filter[i]],
-        //   };
-        //   args.values.push(value);
-        //   const response = await runInTransaction(
-        //     {
-        //       action: 'CREATE',
-        //       Model: ResponseModel,
-        //       args,
-        //       populate: responsePopulate,
-        //       user,
-        //     },
-        //     callback,
-        //   );
-        //   debugger;
-        // }
         for (let i = 0; i < fileData.length; i++) {
+          args.values = [];
+          // debugger;
           const lastResponse = await ResponseModel.findOne({ formId: args.formId }).sort('-count');
           if (lastResponse) {
             args = { ...args, count: lastResponse?.count + 1 };
@@ -480,9 +447,8 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
               valueNumber: number,
             };
             args.values.push(value);
-            // debugger;
           }
-          // debugger;
+
           const response = await runInTransaction(
             {
               action: 'CREATE',
@@ -493,6 +459,8 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
             },
             callback,
           );
+          delete args.values; // after creating response delete values from args otherwise multiple value will be creted in single response
+          // debugger;
         }
         // debugger;
         // const x = await Promise.all(

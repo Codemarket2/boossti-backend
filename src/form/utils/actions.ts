@@ -74,8 +74,9 @@ export const runFormActions = async ({
         }
       }
       if (triggerConditionResult) {
-        console.log('triggerConditionResult', triggerConditionResult);
+        // console.log('triggerConditionResult', triggerConditionResult);
         const variableValues = await getActionVariableValues2(action, response);
+        // debugger;
         if (
           action?.actionType === 'sendEmail' &&
           action?.senderEmail &&
@@ -147,12 +148,18 @@ export const runFormActions = async ({
         ) {
           try {
             let phoneNumber = '';
-            const groupName = action?.groupName;
+            let groupName = action?.groupName;
             const productid = action?.productid;
             const phoneID = action?.phoneID;
             const apiToken = action?.apiToken;
             const whatsappMessage = action?.whatsappMessage;
-
+            if (variableValues) {
+              groupName = replaceVariableValue2({
+                text: groupName,
+                variableValues,
+              });
+            }
+            // debugger;
             response?.values?.forEach((value) => {
               if (value.field?.toString() === action?.phoneNumber?.toString()) {
                 phoneNumber = value.valueNumber;
