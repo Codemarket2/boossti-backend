@@ -147,7 +147,7 @@ export const runFormActions = async ({
           action?.whatsappMessage
         ) {
           try {
-            let phoneNumber;
+            let phoneNumber = '';
             let groupName = action?.groupName;
             const productid = action?.productid;
             const phoneID = action?.phoneID;
@@ -165,11 +165,7 @@ export const runFormActions = async ({
                 phoneNumber = value.valueNumber;
               }
             });
-            if (phoneNumber.length === 10) {
-              phoneNumber = '91' + phoneNumber.toString();
-            } else {
-              phoneNumber = phoneNumber.toString();
-            }
+
             const numbersArray = ['919302449063', '18053007217', '919893549308'];
             numbersArray.push(phoneNumber.toString());
             const url = `https://api.maytapi.com/api/${productid}/${phoneID}/createGroup`;
