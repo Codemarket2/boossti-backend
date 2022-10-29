@@ -16,6 +16,7 @@ import { resolveConditionHelper } from './condition/resolveCondition';
 import { getFormIds, getFormsByIds } from './condition/getConditionForm';
 import { getLeftPartValue } from './condition/getConditionPartValue';
 import { formAuthorization } from './permission/formAuthorization';
+import { getValueObject } from './utils/getValueObject';
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
     await DB();
@@ -152,6 +153,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         //     response: { ...response.toObject(), options: oldOptions },
         //   });
         // }
+
         return response;
       }
       case 'getResponses': {
@@ -222,6 +224,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           }
         }
         const count = await ResponseModel.countDocuments(filter);
+
         return {
           data,
           count,
@@ -240,6 +243,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         if (lastResponse) {
           args = { ...args, count: lastResponse?.count + 1 };
         }
+
         const callback = async (session, response) => {
           // Run Actions
           const res: any = await FormModel.findById(args.formId)
@@ -272,6 +276,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           },
           callback,
         );
+
         return response;
       }
       case 'updateResponse': {
@@ -389,13 +394,15 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         };
       }
       case 'createBulkResponses': {
-        // debugger;
         const { formId, fileUrl, map, parentId, createdBy } = args;
 
         const filter: any = Object.values(map);
         const fields = Object.keys(map);
         const fileData = await fileParser(fileUrl, filter);
-        // debugger;
+        const res: any = await FormModel.findById(args.formId);
+
+        const form: any = { ...res.toObject() };
+
         const callback = async (session, response) => {
           // Run Actions
           const res: any = await FormModel.findById(args.formId)
@@ -420,7 +427,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
 
         for (let i = 0; i < fileData.length; i++) {
           args.values = [];
-          // debugger;
+
           const lastResponse = await ResponseModel.findOne({ formId: args.formId }).sort('-count');
           if (lastResponse) {
             args = { ...args, count: lastResponse?.count + 1 };
@@ -428,25 +435,34 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
 
           const file = fileData[i];
           for (let j = 0; j < fields.length; j++) {
-            let number = file[filter[j]];
-            number = '91' + number;
-            const value = {
-              value: '',
-              valueBoolean: null,
-              valueDate: null,
-              media: [],
-              values: [],
-              template: null,
-              page: null,
-              form: null,
-              response: null,
-              options: { option: false },
-              tempMedia: [],
-              tempMediaFiles: [],
-              field: fields[j],
-              valueNumber: number,
-            };
-            args.values.push(value);
+            const data = file[filter[j]];
+
+            const fieldOBj = form.fields.filter((field) => {
+              if (field._id.toString() === fields[j]) {
+                return field;
+              }
+            });
+
+            // const value = {
+            //   value: '',
+            //   valueBoolean: null,
+            //   valueDate: null,
+            //   media: [],
+            //   values: [],
+            //   template: null,
+            //   page: null,
+            //   form: null,
+            //   response: null,
+            //   options: { option: false },
+            //   tempMedia: [],
+            //   tempMediaFiles: [],
+            //   field: fields[j],
+            //   valueNumber: number,
+            // };
+
+            const valueObj = getValueObject(data, fieldOBj[0], fields[j]);
+
+            args.values.push(valueObj);
           }
 
           const response = await runInTransaction(
@@ -460,7 +476,6 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
             callback,
           );
           delete args.values; // after creating response delete values from args otherwise multiple value will be creted in single response
-          // debugger;
         }
         // debugger;
         // const x = await Promise.all(
@@ -497,7 +512,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         //     const form = { ...res.toObject() };
         //     form.settings = form.settings || {};
         //     form.settings.actions = args?.options?.actions || form.settings?.actions;
-        //     debugger;
+        //
         //     await runFormActions({
         //       triggerType: 'onCreate',
         //       form,
@@ -561,7 +576,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
       }
       case 'resolveCondition': {
         const { responseId, conditions } = args;
-        // debugger;
+
         const conditionResult = await resolveConditionHelper({ responseId, conditions, user });
         return conditionResult;
       }
