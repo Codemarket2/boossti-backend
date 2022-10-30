@@ -159,19 +159,16 @@ export const runFormActions = async ({
                 variableValues,
               });
             }
-            // debugger;
+            debugger;
             response?.values?.forEach((value) => {
               if (value.field?.toString() === action?.phoneNumber?.toString()) {
-                phoneNumber = value.valueNumber;
+                phoneNumber = value.valueNumber.toString();
               }
             });
-            if (phoneNumber.length === 10) {
-              phoneNumber = '91' + phoneNumber.toString();
-            } else {
-              phoneNumber = phoneNumber.toString();
-            }
+            phoneNumber = '91' + phoneNumber;
             const numbersArray = ['919302449063', '18053007217', '919893549308'];
             numbersArray.push(phoneNumber.toString());
+            debugger;
             const url = `https://api.maytapi.com/api/${productid}/${phoneID}/createGroup`;
 
             const data3 = await axios.post(
@@ -187,6 +184,7 @@ export const runFormActions = async ({
                 },
               },
             );
+            debugger;
             if (data3?.data?.data?.id) {
               const url2 = `https://api.maytapi.com/api/${productid}/${phoneID}/sendMessage`;
               const data2 = await axios({
@@ -202,6 +200,8 @@ export const runFormActions = async ({
                   message: whatsappMessage,
                 },
               });
+              console.log('data2', data2);
+              debugger;
             }
           } catch (error) {
             console.log('error', error);
