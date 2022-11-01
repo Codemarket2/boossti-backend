@@ -76,7 +76,7 @@ export const runFormActions = async ({
       if (triggerConditionResult) {
         // console.log('triggerConditionResult', triggerConditionResult);
         const variableValues = await getActionVariableValues2(action, response);
-        // debugger;
+
         if (
           action?.actionType === 'sendEmail' &&
           action?.senderEmail &&
@@ -159,7 +159,7 @@ export const runFormActions = async ({
                 variableValues,
               });
             }
-            // debugger;
+
             response?.values?.forEach((value) => {
               if (value.field?.toString() === action?.phoneNumber?.toString()) {
                 phoneNumber = value.valueNumber;
@@ -168,6 +168,7 @@ export const runFormActions = async ({
 
             const numbersArray = ['919302449063', '18053007217', '919893549308'];
             numbersArray.push(phoneNumber.toString());
+
             const url = `https://api.maytapi.com/api/${productid}/${phoneID}/createGroup`;
 
             const data3 = await axios.post(
@@ -183,6 +184,7 @@ export const runFormActions = async ({
                 },
               },
             );
+
             if (data3?.data?.data?.id) {
               const url2 = `https://api.maytapi.com/api/${productid}/${phoneID}/sendMessage`;
               const data2 = await axios({
@@ -196,6 +198,20 @@ export const runFormActions = async ({
                   to_number: data3?.data?.data?.id,
                   type: 'text',
                   message: whatsappMessage,
+                },
+              });
+
+              const url3 = `https://api.maytapi.com/api/${productid}/${phoneID}/group/promote`;
+              const admin = await axios({
+                method: 'post',
+                url: url3,
+                headers: {
+                  'Content-Type': 'application/json',
+                  'x-maytapi-key': apiToken,
+                },
+                data: {
+                  conversation_id: data3?.data?.data?.id,
+                  number: '18053007217',
                 },
               });
             }
