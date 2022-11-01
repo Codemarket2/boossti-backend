@@ -463,7 +463,6 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
             const valueObj = getValueObject(data, fieldOBj[0], fields[j]);
 
             args.values.push(valueObj);
-            debugger;
           }
 
           const response = await runInTransaction(
@@ -476,7 +475,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
             },
             callback,
           );
-          debugger;
+
           delete args.values; // after creating response delete values from args otherwise multiple value will be creted in single response
         }
         // debugger;

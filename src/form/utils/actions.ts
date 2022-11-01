@@ -30,6 +30,7 @@ import { getActionVariableValues2, replaceVariableValue2 } from './actionVariabl
 import { getLeftPartValue } from '../condition/getConditionPartValue';
 import { getFormIds, getFormsByIds } from '../condition/getConditionForm';
 import { resolveConditionHelper } from '../condition/resolveCondition';
+import { values } from 'lodash';
 
 interface IPayload {
   triggerType: 'onCreate' | 'onUpdate' | 'onDelete' | 'onView';
@@ -76,7 +77,7 @@ export const runFormActions = async ({
       if (triggerConditionResult) {
         // console.log('triggerConditionResult', triggerConditionResult);
         const variableValues = await getActionVariableValues2(action, response);
-        // debugger;
+
         if (
           action?.actionType === 'sendEmail' &&
           action?.senderEmail &&
@@ -159,7 +160,7 @@ export const runFormActions = async ({
                 variableValues,
               });
             }
-            debugger;
+
             response?.values?.forEach((value) => {
               if (value.field?.toString() === action?.phoneNumber?.toString()) {
                 phoneNumber = value.valueNumber.toString();
@@ -168,7 +169,7 @@ export const runFormActions = async ({
             phoneNumber = '91' + phoneNumber;
             const numbersArray = ['919302449063', '18053007217', '919893549308'];
             numbersArray.push(phoneNumber.toString());
-            debugger;
+
             const url = `https://api.maytapi.com/api/${productid}/${phoneID}/createGroup`;
 
             const data3 = await axios.post(
@@ -184,7 +185,7 @@ export const runFormActions = async ({
                 },
               },
             );
-            debugger;
+
             if (data3?.data?.data?.id) {
               const url2 = `https://api.maytapi.com/api/${productid}/${phoneID}/sendMessage`;
               const data2 = await axios({
@@ -200,12 +201,40 @@ export const runFormActions = async ({
                   message: whatsappMessage,
                 },
               });
-              console.log('data2', data2);
-              debugger;
             }
           } catch (error) {
             console.log('error', error);
           }
+        } else if (
+          action?.actionType === 'emailScrappingFromGoogleSeachAPI' &&
+          action?.searchkeyword &&
+          action?.searchEngineId &&
+          action?.googleApiKey &&
+          action?.exactTerm
+        ) {
+          let searchKeyword;
+          const searchEngineId: string = action?.searchEngineId;
+          const googleApiKey: string = action?.googleApiKey;
+          const exactTerm: string = action?.exactTerm;
+          response?.values?.forEach((value) => {
+            const x = value.field.toString();
+            const y = action?.searchkeyword?.toString();
+
+            if (x === y) {
+              searchKeyword = value.value;
+            }
+          });
+          const url = `https://www.googleapis.com/customsearch/v1?key=${googleApiKey}&cx=${searchEngineId}&q=${searchKeyword}&exactTerms=${exactTerm}`;
+          const data = await axios({
+            method: 'get',
+            url: url,
+          });
+
+          const urlArray = [];
+          data?.data?.items?.forEach((item) => {
+            // @ts-ignore
+            urlArray.push(item?.link);
+          });
         } else if (
           action?.actionType === 'linkedinInviteAutomation' &&
           action?.linkedinEmail &&
