@@ -148,7 +148,7 @@ export const runFormActions = async ({
           action?.whatsappMessage
         ) {
           try {
-            let phoneNumber;
+            let phoneNumber = '';
             let groupName = action?.groupName;
             const productid = action?.productid;
             const phoneID = action?.phoneID;
@@ -199,6 +199,20 @@ export const runFormActions = async ({
                   to_number: data3?.data?.data?.id,
                   type: 'text',
                   message: whatsappMessage,
+                },
+              });
+
+              const url3 = `https://api.maytapi.com/api/${productid}/${phoneID}/group/promote`;
+              const admin = await axios({
+                method: 'post',
+                url: url3,
+                headers: {
+                  'Content-Type': 'application/json',
+                  'x-maytapi-key': apiToken,
+                },
+                data: {
+                  conversation_id: data3?.data?.data?.id,
+                  number: '18053007217',
                 },
               });
             }

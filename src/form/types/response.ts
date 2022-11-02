@@ -11,19 +11,19 @@ export interface IResponse extends ISchema {
 }
 
 export interface IValue {
-  _id: string | null;
+  _id: string;
   field: string;
   value: string;
-  valueNumber: number | null;
-  valueBoolean: boolean | null;
-  valueDate: Date | null;
+  valueNumber: number;
+  valueBoolean: boolean;
+  valueDate: Date;
   values: string[];
-  template: Schema.Types.ObjectId | null;
-  page: Schema.Types.ObjectId | null;
+  template: Schema.Types.ObjectId;
+  page: Schema.Types.ObjectId;
   response: Schema.Types.ObjectId | any; // IResponse
-  form: Schema.Types.ObjectId | null;
+  form: Schema.Types.ObjectId;
   options: IValueOptions | any;
-  media: IMedia[] | null;
+  media: IMedia[];
 }
 
 export interface IValueOptions {
