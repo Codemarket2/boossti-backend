@@ -74,19 +74,18 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         };
       }
       case 'createComment': {
-        const callback = async (session, comment) => {
-          await sendCommentNotification(session, comment);
-        };
-        return await runInTransaction(
-          {
-            action: 'CREATE',
-            Model: CommentModel,
-            args,
-            populate: userPopulate,
-            user,
-          },
-          callback,
-        );
+        // const callback = async (session, comment) => {
+        //   await sendCommentNotification(session, comment);
+        // };
+        const comment = await runInTransaction({
+          action: 'CREATE',
+          Model: CommentModel,
+          args,
+          populate: userPopulate,
+          user,
+        });
+        await sendCommentNotification(comment, args?.path);
+        return comment;
       }
       case 'updateComment': {
         return await runInTransaction({

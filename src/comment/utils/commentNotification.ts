@@ -4,10 +4,22 @@ import { sendEmail } from '../../utils/email';
 import { userPopulate } from '../../utils/populate';
 import { CommentModel } from './commentModel';
 import { getUserAttributes } from '../../form/utils/actionHelper';
+import { createFeed } from '../../form/feed/createFeed';
 
-export const sendCommentNotification = async (session, comment) => {
+export const sendCommentNotification = async (comment, path = '') => {
   if (process.env.NODE_ENV === 'test') {
     return;
+  }
+  let commentLink = path?.split('?')?.[0] || '';
+  if (commentLink && comment?.parentIds?.length > 0) {
+    comment?.parentIds?.forEach((parentId, index) => {
+      if (index === 0) {
+        commentLink += `?threadId=${parentId}`;
+      } else {
+        commentLink += `&childThreadId=${parentId}`;
+      }
+    });
+    commentLink += `&commentId=${comment?._id}`;
   }
   const receivers: any[] = [];
   let response, form;
@@ -15,17 +27,16 @@ export const sendCommentNotification = async (session, comment) => {
     try {
       let parentComment;
       if (parentIdIndex === 0) {
-        response = await ResponseModel.findOne({ 'values._id': parentId })
-          .populate(userPopulate)
-          .session(session);
+        response = await ResponseModel.findOne({ 'values._id': parentId }).populate(userPopulate);
+        // .session(session);
         parentComment = response;
         if (response?.formId) {
-          form = await FormModel.findById(response?.formId).session(session);
+          form = await FormModel.findById(response?.formId);
+          // .session(session);
         }
       } else {
-        parentComment = await CommentModel.findById(parentId)
-          .populate(userPopulate)
-          .session(session);
+        parentComment = await CommentModel.findById(parentId).populate(userPopulate);
+        // .session(session);
       }
       const commentString = comment?.createdBy?._id?.toString();
       const parentCommentString = parentComment?.createdBy?._id?.toString();
@@ -43,9 +54,10 @@ export const sendCommentNotification = async (session, comment) => {
     }
   }
   if (receivers?.length > 0) {
-    const userForm = await FormModel.findOne({ slug: process.env.USERS_FORM_SLUG }).session(
-      session,
-    );
+    const userForm = await FormModel.findOne({ slug: process.env.USERS_FORM_SLUG });
+    // .session(
+    //   session,
+    // );
     const to: string[] = [];
     receivers?.map((receiver) => {
       const userEmail = getUserAttributes(userForm, receiver)?.email;
@@ -54,7 +66,7 @@ export const sendCommentNotification = async (session, comment) => {
     const createdBy = getUserAttributes(userForm, comment?.createdBy);
     let linkToComment = ``;
     if (form?.slug && response?.count) {
-      linkToComment = `<p><a href="${process.env.FRONTEND_URL}/forms/${form?.slug}/response/${response?.count}?threadId=${comment.parentIds[0]}"><button>View Comment</button></a></p>`;
+      linkToComment = `<p><a href="${process.env.FRONTEND_URL}${commentLink}"><button>View Comment</button></a></p>`;
     }
     const body = `
       Hi there,<br/>
@@ -72,5 +84,15 @@ export const sendCommentNotification = async (session, comment) => {
       subject: `New Comment`,
     };
     if (emailPayload?.to?.length > 0 && emailPayload?.from) await sendEmail(emailPayload);
+    for (const receiver of receivers) {
+      await createFeed({
+        message: `${createdBy?.name} just ${
+          comment.parentIds?.length > 1 ? 'replied to a comment' : 'commented on your response'
+        }`,
+        link: `${commentLink}`,
+        createdBy: comment?.createdBy?._id,
+        receiver: receiver?._id,
+      });
+    }
   }
 };
