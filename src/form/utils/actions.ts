@@ -342,7 +342,7 @@ export const runFormActions = async ({
               text: body,
               variableValues,
             });
-            payload.link = `/forms/${form.slug}/response/${response.count}`;
+            payload.link = `/form/${form.slug}/response/${response.count}`;
             payload.responseId = response._id;
             const responsePayload: any = {
               formId: notificationForm._id,
