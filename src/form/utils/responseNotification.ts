@@ -30,7 +30,7 @@ export const sendResponseNotification = async ({ session, form, response }: IPay
       <p>
       <b>${responseOwnerName}</b> has submitted response on your <b>${form?.name} form</b>.
       <br/>
-      <a href="${process.env.FRONTEND_URL}/forms/${form?.slug}/response/${response?.count}"><button>View Response</button></a>
+      <a href="${process.env.FRONTEND_URL}/form/${form?.slug}/response/${response?.count}"><button>View Response</button></a>
       </p>`;
   const to: string[] = [];
   if (formOwner?.email) {

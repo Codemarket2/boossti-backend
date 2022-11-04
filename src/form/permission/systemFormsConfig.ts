@@ -45,4 +45,24 @@ export const systemForms = {
       condition: 'condition',
     },
   },
+  feed: {
+    slug: 'feed',
+    fields: {
+      message: 'message',
+      link: 'link',
+      status: 'status',
+      receiver: 'receiver',
+    },
+  },
 };
+
+export interface ISystemForms {
+  [key: string]: ISystemForm;
+}
+
+export interface ISystemForm {
+  slug: string;
+  fields: {
+    [key: string]: string;
+  };
+}

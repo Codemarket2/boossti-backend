@@ -7,7 +7,7 @@ type Query {
 }
 
 type Mutation {
-  createComment(threadId: ID!, parentIds: [ID], body: String!): Comment
+  createComment(threadId: ID!, parentIds: [ID], body: String!, path: String): Comment
   updateComment(_id: ID!, body: String): Comment
   deleteComment(_id: ID!): ID!
 }
