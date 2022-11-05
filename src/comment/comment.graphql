@@ -13,7 +13,7 @@ type Mutation {
 }
 
 type Subscription {
-  addedComment(threadId: ID!): Comment @aws_subscribe(mutations: ["createComment", "updateComment"])
+  addedComment(threadId: ID): Comment @aws_subscribe(mutations: ["createComment", "updateComment"])
 }
 
 type Comment @aws_api_key @aws_cognito_user_pools {
