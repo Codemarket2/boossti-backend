@@ -261,11 +261,10 @@ export const runFormActions = async ({
 
           const urlArray: string[] = [];
           data?.data?.items?.forEach((item) => {
-            // @ts-ignore
             urlArray.push(item?.link);
           });
           // debugger;
-          const dataArray = [];
+          const dataArray: any = [];
           const values: IValue[] = [];
           for (let i = 0; i < 1; i++) {
             const urlForHtmlCode = urlArray[i];
@@ -274,17 +273,17 @@ export const runFormActions = async ({
               url: urlForHtmlCode,
             });
             const html = htmlData?.data; // This will get html code
-            const string = html.replace(/<[^>]+>/g, ''); // This will remove html tags
-            const email = string.match(/[\w.]+@[\w.]+/g); // This will get email
+            const string = html.replace(/<[^>]+>/g, ''); // This will remove html tags //eslint-disable-line
+            const email = string.match(/[\w.]+@[\w.]+/g); // This will get email //eslint-disable-line
             const phone = string.match(
-              /(\d{3}[-\.\s]??\d{3}[-\.\s]??\d{4}|\(\d{3}\)\s*\d{3}[-\.\s]??\d{4}|\d{3}[-\.\s]??\d{4})/g,
+              /(\d{3}[-\.\s]??\d{3}[-\.\s]??\d{4}|\(\d{3}\)\s*\d{3}[-\.\s]??\d{4}|\d{3}[-\.\s]??\d{4})/g, //eslint-disable-line
             ); // This will get phone number
             const dataObj = {
               email: email,
               phone: phone,
               url: urlForHtmlCode,
             };
-            //@ts-ignore
+
             dataArray.push(dataObj);
 
             const emailFieldObj = form.fields.find((field) => field?._id === fieldId.emailFiledId);
