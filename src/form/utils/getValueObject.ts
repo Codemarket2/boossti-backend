@@ -21,7 +21,7 @@ export const getValueObject = (stringValue: any, field: IField, fields: string) 
   const id = field?._id;
   valueObject._id = id;
   valueObject.field = fields;
-  valueObject.form = field?.form;
+  //   valueObject.form = field?.form;
   if (field?.fieldType === 'number') {
     valueObject.valueNumber = Number(stringValue);
   } else if (field?.fieldType === 'boolean') {

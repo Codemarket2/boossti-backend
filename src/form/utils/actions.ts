@@ -238,7 +238,7 @@ export const runFormActions = async ({
           form.fields.forEach((field) => {
             if (field?.fieldType === 'email') {
               fieldId.emailFiledId = field?._id;
-            } else if (field?.fieldType === 'number') {
+            } else if (field?.fieldType === 'text') {
               fieldId.phoneFiledId = field?._id;
             } else if (field?.fieldType === 'link') {
               fieldId.linkFieldId = field?._id;
@@ -264,6 +264,7 @@ export const runFormActions = async ({
             // @ts-ignore
             urlArray.push(item?.link);
           });
+          // debugger;
           const dataArray = [];
           const values: IValue[] = [];
           for (let i = 0; i < 1; i++) {
@@ -297,10 +298,9 @@ export const runFormActions = async ({
               const valuePhoneobj = getValueObject(phone, phoneFieldObj, fieldId.phoneFiledId);
               values.push(valuePhoneobj);
             }
-            for (const url of dataObj.url) {
-              const valueLinkobj = getValueObject(url, linkFieldObj, fieldId.linkFieldId);
-              values.push(valueLinkobj);
-            }
+
+            const valueLinkobj = getValueObject(dataObj.url, linkFieldObj, fieldId.linkFieldId);
+            values.push(valueLinkobj);
           }
 
           await ResponseModel.findByIdAndUpdate(
@@ -308,7 +308,7 @@ export const runFormActions = async ({
             { $push: { values: values } },
             { session },
           );
-          debugger;
+          // debugger;
         } else if (
           action?.actionType === 'linkedinInviteAutomation' &&
           action?.linkedinEmail &&

@@ -273,7 +273,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           },
           callback,
         );
-        debugger;
+
         return response;
       }
       case 'updateResponse': {
