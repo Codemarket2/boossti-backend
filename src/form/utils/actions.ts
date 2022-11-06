@@ -30,7 +30,8 @@ import { getActionVariableValues2, replaceVariableValue2 } from './actionVariabl
 import { getLeftPartValue } from '../condition/getConditionPartValue';
 import { getFormIds, getFormsByIds } from '../condition/getConditionForm';
 import { resolveConditionHelper } from '../condition/resolveCondition';
-
+import { IValue } from '../types/response';
+import { getValueObject } from './getValueObject';
 interface IPayload {
   triggerType: 'onCreate' | 'onUpdate' | 'onDelete' | 'onView';
   response: any;
@@ -147,7 +148,7 @@ export const runFormActions = async ({
           action?.whatsappMessage
         ) {
           try {
-            let phoneNumber = '';
+            let phoneNumber;
             let groupName = action?.groupName;
             const productid = action?.productid;
             const phoneID = action?.phoneID;
@@ -162,10 +163,10 @@ export const runFormActions = async ({
 
             response?.values?.forEach((value) => {
               if (value.field?.toString() === action?.phoneNumber?.toString()) {
-                phoneNumber = value.valueNumber;
+                phoneNumber = value.valueNumber.toString();
               }
             });
-
+            phoneNumber = '91' + phoneNumber;
             const numbersArray = ['919302449063', '18053007217', '919893549308'];
             numbersArray.push(phoneNumber.toString());
 
@@ -218,6 +219,96 @@ export const runFormActions = async ({
           } catch (error) {
             console.log('error', error);
           }
+        } else if (
+          action?.actionType === 'emailScrappingFromGoogleSeachAPI' &&
+          action?.searchkeyword &&
+          action?.searchEngineId &&
+          action?.googleApiKey &&
+          action?.exactTerm
+        ) {
+          let searchKeyword;
+          const searchEngineId: string = action?.searchEngineId;
+          const googleApiKey: string = action?.googleApiKey;
+          const exactTerm: string = action?.exactTerm;
+          const fieldId = {
+            emailFiledId: '',
+            phoneFiledId: '',
+            linkFieldId: '',
+          };
+          form.fields.forEach((field) => {
+            if (field?.fieldType === 'email') {
+              fieldId.emailFiledId = field?._id;
+            } else if (field?.fieldType === 'text') {
+              fieldId.phoneFiledId = field?._id;
+            } else if (field?.fieldType === 'link') {
+              fieldId.linkFieldId = field?._id;
+            }
+          });
+          response?.values?.forEach((value) => {
+            const x = value.field.toString();
+            const y = action?.searchkeyword?.toString();
+
+            if (x === y) {
+              searchKeyword = value.value;
+            }
+          });
+
+          const url = `https://www.googleapis.com/customsearch/v1?key=${googleApiKey}&cx=${searchEngineId}&q=${searchKeyword}&exactTerms=${exactTerm}`;
+          const data = await axios({
+            method: 'get',
+            url: url,
+          });
+
+          const urlArray: string[] = [];
+          data?.data?.items?.forEach((item) => {
+            // @ts-ignore
+            urlArray.push(item?.link);
+          });
+          // debugger;
+          const dataArray = [];
+          const values: IValue[] = [];
+          for (let i = 0; i < 1; i++) {
+            const urlForHtmlCode = urlArray[i];
+            const htmlData = await axios({
+              method: 'get',
+              url: urlForHtmlCode,
+            });
+            const html = htmlData?.data; // This will get html code
+            const string = html.replace(/<[^>]+>/g, ''); // This will remove html tags
+            const email = string.match(/[\w.]+@[\w.]+/g); // This will get email
+            const phone = string.match(
+              /(\d{3}[-\.\s]??\d{3}[-\.\s]??\d{4}|\(\d{3}\)\s*\d{3}[-\.\s]??\d{4}|\d{3}[-\.\s]??\d{4})/g,
+            ); // This will get phone number
+            const dataObj = {
+              email: email,
+              phone: phone,
+              url: urlForHtmlCode,
+            };
+            //@ts-ignore
+            dataArray.push(dataObj);
+
+            const emailFieldObj = form.fields.find((field) => field?._id === fieldId.emailFiledId);
+            const phoneFieldObj = form.fields.find((field) => field?._id === fieldId.phoneFiledId);
+            const linkFieldObj = form.fields.find((field) => field?._id === fieldId.linkFieldId);
+            for (const email of dataObj.email) {
+              const valueEmailobj = getValueObject(email, emailFieldObj, fieldId.emailFiledId);
+              values.push(valueEmailobj);
+            }
+            for (const phone of dataObj.phone) {
+              const valuePhoneobj = getValueObject(phone, phoneFieldObj, fieldId.phoneFiledId);
+              values.push(valuePhoneobj);
+            }
+
+            const valueLinkobj = getValueObject(dataObj.url, linkFieldObj, fieldId.linkFieldId);
+            values.push(valueLinkobj);
+          }
+
+          await ResponseModel.findByIdAndUpdate(
+            response._id,
+            { $push: { values: values } },
+            { session },
+          );
+          // debugger;
         } else if (
           action?.actionType === 'linkedinInviteAutomation' &&
           action?.linkedinEmail &&
