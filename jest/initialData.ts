@@ -1,4 +1,5 @@
 import { mock_id } from './defaultArguments';
+import { systemForms } from '../src/form/permission/systemFormsConfig';
 
 export const usersForm = {
   _id: '622bc445f256f600095a52fd',
@@ -53,6 +54,24 @@ export const usersForm = {
   ],
   slug: 'users',
   createdBy: '60fc5c20d96c6100092a663c',
+};
+
+export const getActivityFormLog = () => {
+  return {
+    _id: systemForms?.activityLogCard?.formId,
+    published: false,
+    parentId: null,
+    name: systemForms?.activityLogCard?.slug,
+    slug: systemForms?.activityLogCard?.slug,
+    createdBy: '60fc5c20d96c6100092a663c',
+    fields: Object.keys(systemForms?.activityLogCard?.fields)?.map((key) => {
+      return {
+        label: systemForms?.activityLogCard?.fields[key],
+        fieldType: 'text',
+        options: { required: true },
+      };
+    }),
+  };
 };
 
 export const userResponse = {
