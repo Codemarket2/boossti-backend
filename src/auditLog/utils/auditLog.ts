@@ -1,6 +1,6 @@
 import { ClientSession } from 'mongoose';
 import { AuditLogModel } from './auditLogModel';
-import { getDiff } from './getDiff';
+import { getDiff } from '../../form/activityLog/getDiff';
 
 interface IPayload {
   documentId: string;

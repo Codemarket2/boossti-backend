@@ -1,10 +1,7 @@
 import * as mongoose from 'mongoose';
 import { ClientSession } from 'mongoose';
-import {
-  createActionAuditLog,
-  deleteActionAuditLog,
-  updateAuctionAuditLog,
-} from '../auditLog/utils/auditLog';
+import { getDiff } from '../form/activityLog/getDiff';
+import { createActivityLog } from '../form/activityLog/createActivityLog';
 
 type TransactionCallback = (session: ClientSession, payload: any) => Promise<any>;
 
@@ -29,12 +26,13 @@ export const runInTransaction = async (operation: IOperation, callback?: Transac
       case 'CREATE': {
         data = await Model.create([args], { session: session });
         data = data[0];
-        await createActionAuditLog({
+        await createActivityLog({
           session,
           documentId: data._id,
           model: modelName,
-          newDoc: data,
+          difference: data,
           createdBy: user?._id,
+          action,
         });
         if (populate) {
           data = await Model.findById(data._id).populate(populate).session(session);
@@ -47,13 +45,14 @@ export const runInTransaction = async (operation: IOperation, callback?: Transac
           session: session,
         });
         data = await Model.findById(args._id).session(session);
-        await updateAuctionAuditLog({
+        const diff = getDiff(oldDoc?.toObject(), data?.toObject());
+        await createActivityLog({
           session,
           documentId: data._id,
           model: modelName,
-          oldDoc,
-          newDoc: data,
+          difference: diff,
           createdBy: user?._id,
+          action,
         });
         if (populate) {
           data = await Model.findById(data._id).populate(populate).session(session);
@@ -64,12 +63,13 @@ export const runInTransaction = async (operation: IOperation, callback?: Transac
         data = await Model.findByIdAndDelete(args._id, {
           session: session,
         });
-        await deleteActionAuditLog({
+        await createActivityLog({
           session,
           documentId: data._id,
           model: modelName,
-          oldDoc: data,
+          difference: data,
           createdBy: user?._id,
+          action,
         });
         break;
       }
