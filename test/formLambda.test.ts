@@ -242,8 +242,8 @@ describe('List Lambda Tests', () => {
     await handler(createFormEvent);
     await handler(createResponseEvent);
     const responses = await handler(createMockEvent('getMyResponses'));
-    expect(responses.data.length).toBeGreaterThan(1);
-    expect(responses.count).toBeGreaterThan(1);
+    expect(responses.data.length).toBeGreaterThan(0);
+    expect(responses.count).toBeGreaterThan(0);
     const response = responses.data?.pop();
     expect(response._id).toBeDefined();
     // expect(response.parentId._id.toString()).toBe(mockResponse.parentId);

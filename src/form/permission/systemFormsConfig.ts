@@ -65,6 +65,18 @@ export const systemForms = {
       documentId: 'Document ID',
     },
   },
+  model: {
+    slug: 'model',
+    fields: {
+      name: 'name',
+    },
+  },
+  actionTypes: {
+    slug: 'form-user-action-types',
+    fields: {
+      name: 'name',
+    },
+  },
 };
 
 export interface ISystemForms {
