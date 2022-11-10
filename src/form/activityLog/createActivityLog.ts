@@ -22,7 +22,9 @@ export const createActivityLog = async ({
   createdBy,
   action,
 }: ICreateActivityLogPayload) => {
-  return null;
+  if (process.env.NODE_ENV === 'test') {
+    return;
+  }
   const activityLogForm = await FormModel.findOne({ slug: systemForms?.activityLogCard?.slug });
 
   if (!activityLogForm?._id) {
@@ -79,7 +81,7 @@ const getModelResponseId = async (modelName) => {
 };
 
 const getActionTypeResponseId = async (actionType) => {
-  const actionTypesForm = await FormModel.findOne({ slug: systemForms?.actionTypes?.slug });
+  const actionTypesForm = await FormModel.findOne({ slug: systemForms?.userActionTypes?.slug });
   if (!actionTypesForm?._id) throw new Error('Action Types Form not found');
   const nameField = actionTypesForm?.fields?.find(
     (field) => field?.label?.toLowerCase() === systemForms?.model?.fields?.name,

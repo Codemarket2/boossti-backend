@@ -71,7 +71,7 @@ export const systemForms = {
       name: 'name',
     },
   },
-  actionTypes: {
+  userActionTypes: {
     slug: 'form-user-action-types',
     fields: {
       name: 'name',

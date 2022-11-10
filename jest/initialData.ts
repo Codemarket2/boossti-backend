@@ -74,6 +74,23 @@ export const getActivityFormLog = () => {
   };
 };
 
+export const getModelFormObject = () => {
+  return {
+    published: false,
+    parentId: null,
+    name: systemForms?.model?.slug,
+    slug: systemForms?.model?.slug,
+    createdBy: '60fc5c20d96c6100092a663c',
+    fields: Object.keys(systemForms?.model?.fields)?.map((key) => {
+      return {
+        label: systemForms?.model?.fields[key],
+        fieldType: 'text',
+        options: { required: true },
+      };
+    }),
+  };
+};
+
 export const userResponse = {
   _id: mock_id,
   count: 1,

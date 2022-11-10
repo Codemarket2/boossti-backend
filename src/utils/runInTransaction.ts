@@ -1,6 +1,6 @@
 import * as mongoose from 'mongoose';
 import { ClientSession } from 'mongoose';
-import { getDiff } from '../form/activityLog/getDiff';
+// import { getDiff } from '../form/activityLog/getDiff';
 import { createActivityLog } from '../form/activityLog/createActivityLog';
 
 type TransactionCallback = (session: ClientSession, payload: any) => Promise<any>;
@@ -45,12 +45,12 @@ export const runInTransaction = async (operation: IOperation, callback?: Transac
           session: session,
         });
         data = await Model.findById(args._id).session(session);
-        const diff = getDiff(oldDoc?.toObject(), data?.toObject());
+        // const diff = getDiff(oldDoc?.toObject(), data?.toObject());
         await createActivityLog({
           session,
           documentId: data._id,
           model: modelName,
-          difference: diff,
+          difference: data,
           createdBy: user?._id,
           action,
         });
