@@ -141,7 +141,7 @@ describe('List Lambda Tests', () => {
     const forms = await handler(createMockEvent('getForms'));
     expect(forms.data.length).toBe(2);
     expect(forms.count).toBe(2);
-    const form = forms.data[0];
+    const form = forms.data?.find((f) => f?.name === mockForm.name);
     expect(form._id).toBeDefined();
     expect(form.name).toBe(mockForm.name);
     expect(form.fields.length).toBe(mockForm.fields.length);
@@ -242,8 +242,8 @@ describe('List Lambda Tests', () => {
     await handler(createFormEvent);
     await handler(createResponseEvent);
     const responses = await handler(createMockEvent('getMyResponses'));
-    expect(responses.data.length).toBeGreaterThan(1);
-    expect(responses.count).toBeGreaterThan(1);
+    expect(responses.data.length).toBeGreaterThan(0);
+    expect(responses.count).toBeGreaterThan(0);
     const response = responses.data?.pop();
     expect(response._id).toBeDefined();
     // expect(response.parentId._id.toString()).toBe(mockResponse.parentId);
