@@ -31,23 +31,14 @@ export const createActivityLog = async ({
     throw new Error('activityLogForm not found');
   }
 
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
   const activityLogFormFields = getSystemFormFields(systemForms?.activityLogCard, activityLogForm);
   const actionField = activityLogFormFields?.[systemForms?.activityLogCard?.fields?.action];
   const modelField = activityLogFormFields?.[systemForms?.activityLogCard?.fields?.model];
   const differenceField = activityLogFormFields?.[systemForms?.activityLogCard?.fields?.difference];
-  const messageField = activityLogFormFields?.[systemForms?.activityLogCard?.fields?.message];
   const documentIdField = activityLogFormFields?.[systemForms?.activityLogCard?.fields?.documentId];
-  if (
-    !actionField?._id ||
-    !modelField?._id ||
-    !differenceField?._id ||
-    !messageField?._id ||
-    !documentIdField?._id
-  ) {
+  if (!actionField?._id || !modelField?._id || !differenceField?._id || !documentIdField?._id) {
     throw new Error(
-      `actionField, modelField, differenceField, messageField, documentIdField fields not found in ${activityLogForm?.name} form`,
+      `actionField, modelField, differenceField, documentIdField fields not found in ${activityLogForm?.name} form`,
     );
   }
   const payload: any = { formId: activityLogForm?._id, createdBy, values: [] };
@@ -56,7 +47,6 @@ export const createActivityLog = async ({
     value: JSON.stringify(difference),
     options: { json: difference },
   });
-  payload.values?.push({ field: messageField?._id, value: `${action} ${model}` });
   payload.values?.push({ field: documentIdField?._id, value: documentId });
   const modelResponseId = await getModelResponseId(model);
   payload.values?.push({ field: modelField?._id, value: '', response: modelResponseId });
@@ -91,8 +81,6 @@ const getActionTypeResponseId = async (actionType) => {
     'values.field': nameField?._id,
     'values.value': actionType,
   });
-
   if (!actionTypeResponse?._id) throw new Error(`"${actionType}" Action Type Response not found`);
-
   return actionTypeResponse?._id;
 };

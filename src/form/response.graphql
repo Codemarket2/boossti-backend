@@ -54,9 +54,10 @@ type Mutation {
 }
 
 type Subscription {
-  responseSub(formId: ID!): Response @aws_subscribe(mutations: ["createResponse", "updateResponse"])
+  responseSub(formId: ID): Response @aws_subscribe(mutations: ["createResponse", "updateResponse"])
   updatedResponse(_id: ID!): Response @aws_subscribe(mutations: ["updateResponse"])
   deletedResponse: ID @aws_subscribe(mutations: ["deleteResponse"])
+  feedDeleteSub: ID @aws_subscribe(mutations: ["deleteForm", "deleteResponse", "deleteComment"])
 }
 
 type Value @aws_api_key @aws_cognito_user_pools {

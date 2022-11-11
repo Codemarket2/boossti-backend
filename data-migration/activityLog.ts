@@ -6,7 +6,8 @@ import { ResponseModel } from '../src/form/utils/responseModel';
 const deleteOldActivityLog = async () => {
   const activityLog = await FormModel.findOne({ slug: systemForms?.activityLogCard?.slug }).lean();
   const responses = await ResponseModel.countDocuments({ formId: activityLog?._id });
-  // const res= await ResponseModel.deleteMany({ formId: activityLog?._id });
+
+  // const res = await ResponseModel.deleteMany({ formId: activityLog?._id });
 };
 
 (async () => {

@@ -61,7 +61,6 @@ export const systemForms = {
       action: 'Action',
       model: 'Model',
       difference: 'Difference',
-      message: 'Message',
       documentId: 'Document ID',
     },
   },
