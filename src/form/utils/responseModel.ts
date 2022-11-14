@@ -8,7 +8,7 @@ export const valueSchema = new Schema<IValue>({
     type: String,
     required: true,
   },
-  value: { type: String, default: null },
+  value: { type: String, default: '' },
   valueDate: Date,
   valueNumber: Number,
   valueBoolean: Boolean,
