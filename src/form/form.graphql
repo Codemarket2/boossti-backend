@@ -4,7 +4,7 @@ type Query {
   getFormRelations(_id: ID!): [Form] @aws_api_key @aws_cognito_user_pools
   getFormTabRelations(_id: ID!): [Form] @aws_api_key @aws_cognito_user_pools
   getFormBySlug(slug: String!): Form @aws_api_key @aws_cognito_user_pools
-  getForms(page: Int, limit: Int, search: String): Forms
+  getForms(page: Int, limit: Int, search: String, isWorkflow: Boolean): Forms
 }
 
 type Mutation {

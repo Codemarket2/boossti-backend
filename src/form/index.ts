@@ -60,9 +60,19 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         return await FormModel.findOne({ slug: args.slug }).populate(formPopulate);
       }
       case 'getForms': {
-        const { page = 1, limit = 20, search = '' } = args;
+        const { page = 1, limit = 20, search = '', isWorkflow = false } = args;
         const { isSuperAdmin, formIds } = await formAuthorization({ user });
-        const filter: any = { name: { $regex: search, $options: 'i' } };
+
+        let filter: any = {
+          name: { $regex: search, $options: 'i' },
+        };
+
+        if (isWorkflow) {
+          filter = { ...filter, 'settings.isWorkflow': isWorkflow };
+        } else {
+          filter = { ...filter, 'settings.isWorkflow': { $ne: true } };
+        }
+
         if (!isSuperAdmin) {
           filter._id = { $in: formIds };
         }
