@@ -7,7 +7,7 @@ type Query {
     formId: ID!
     appId: ID
     parentResponseId: ID
-    workFlowFormResponseParentId: ID
+    workflowId: ID
     page: Int
     limit: Int
     search: String
@@ -34,7 +34,7 @@ type Mutation {
     formId: ID!
     appId: ID
     parentResponseId: ID
-    workFlowFormResponseParentId: ID
+    workflowId: ID
     values: [ValueInput]
     options: AWSJSON
   ): Response @aws_api_key @aws_cognito_user_pools
@@ -98,7 +98,7 @@ type Response @aws_api_key @aws_cognito_user_pools {
   formId: ID
   appId: ID
   parentResponseId: ID
-  workFlowFormResponseParentId: ID
+  workflowId: ID
   values: [Value]
   options: AWSJSON
   createdBy: Response
@@ -113,7 +113,7 @@ type Response2 @aws_api_key @aws_cognito_user_pools {
   formId: Form
   appId: ID
   parentResponseId: ID
-  workFlowFormResponseParentId: ID
+  workflowId: ID
   values: [Value]
   createdBy: Response
   updatedBy: ID

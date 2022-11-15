@@ -57,7 +57,7 @@ export const responseSchema = extendSchema({
     type: Schema.Types.ObjectId,
     default: null,
   },
-  workFlowFormResponseParentId: {
+  workflowId: {
     type: Schema.Types.ObjectId,
     default: null,
   },
