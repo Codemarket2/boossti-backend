@@ -7,6 +7,7 @@ import { systemForms } from './systemFormsConfig';
 import { ICondition } from '../types/form';
 import { getUserAttributes } from '../utils/actionHelper';
 import { getAppUserRoleIds, getUserRoleIds } from './getUserRoleIds';
+import { modelIds } from './modelConfig';
 
 export enum AuthorizationActionTypes {
   CREATE = 'CREATE',
@@ -15,11 +16,18 @@ export enum AuthorizationActionTypes {
   DELETE = 'DELETE',
 }
 
+export enum ModelTypes {
+  RESPONSE = 'Response',
+  FORM = 'Form',
+  COMMENT = 'Comment',
+}
+
 interface AuthorizationPayload {
   actionType: AuthorizationActionTypes;
   user: IResponse;
   response?: IResponse;
   formId: string;
+  model: ModelTypes;
   appId?: string;
 }
 
@@ -28,13 +36,15 @@ export const authorization = async ({
   user,
   formId,
   response,
+  model,
   appId,
 }: AuthorizationPayload) => {
   try {
     // debugger;
     if (process?.env?.NODE_ENV === 'test') return true;
-    if (!actionType || !formId) {
-      throw new Error('actionType, formId not found in payload');
+    const modelId = modelIds?.[model];
+    if (!actionType || !formId || !modelId) {
+      throw new Error('actionType, formId, modelId not found in payload');
     }
 
     const { userForm, permissionsForm, roleActionConditionForm, actionPermissionsForm } =
@@ -78,6 +88,13 @@ export const authorization = async ({
     );
     if (!permissionFormFormField?._id) throw new Error('form field not found in permissions form');
 
+    const permissionFormModelField = getFieldByLabel(
+      systemForms.permissions.fields.model,
+      permissionsForm?.fields,
+    );
+    if (!permissionFormModelField?._id)
+      throw new Error('model field not found in permissions form');
+
     const roleActionConditionFormActionPermissionField = getFieldByLabel(
       systemForms.roleActionCondition.fields.actionPermissions,
       roleActionConditionForm?.fields,
@@ -95,8 +112,16 @@ export const authorization = async ({
     const formPermission = await ResponseModel.findOne({
       appId,
       formId: permissionsForm?._id,
-      'values.field': permissionFormFormField?._id,
-      'values.form': formId,
+      $and: [
+        {
+          'values.field': permissionFormFormField?._id,
+          'values.form': formId,
+        },
+        {
+          'values.field': permissionFormModelField?._id,
+          'values.response': modelId,
+        },
+      ],
     })
       .populate(responsePopulate)
       .lean();

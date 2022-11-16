@@ -10,7 +10,7 @@ import { sendResponseNotification } from './utils/responseNotification';
 import { fileParser } from './utils/readCsvFile';
 import { runInTransaction } from '../utils/runInTransaction';
 import { IForm } from './types/form';
-import { authorization, AuthorizationActionTypes } from './permission/authorization';
+import { authorization, AuthorizationActionTypes, ModelTypes } from './permission/authorization';
 import { IResponse } from './types/response';
 import { resolveConditionHelper } from './condition/resolveCondition';
 import { getFormIds, getFormsByIds } from './condition/getConditionForm';
@@ -129,6 +129,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           formId: response?.formId,
           response,
           appId: args?.appId,
+          model: ModelTypes?.RESPONSE,
         });
         return response;
       }
@@ -146,6 +147,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           formId: response?.formId,
           response,
           appId: filter?.appId,
+          model: ModelTypes?.RESPONSE,
         });
         // const oldOptions = { ...args.options };
         // if (!(process.env.NODE_ENV === 'test')) {
@@ -220,6 +222,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
                 formId: response?.formId,
                 response,
                 appId: args?.appId,
+                model: ModelTypes?.RESPONSE,
               });
               data.push(response);
               if (data.length >= limit) {
@@ -244,8 +247,8 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           user,
           actionType: AuthorizationActionTypes.CREATE,
           formId: args.formId,
-          // response: null,
           appId: args?.appId,
+          model: ModelTypes?.RESPONSE,
         });
         const lastResponse = await ResponseModel.findOne({ formId: args.formId }).sort('-count');
         if (lastResponse) {
@@ -296,6 +299,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           formId: tempResponse?.formId,
           response: tempResponse,
           appId: tempResponse?.appId,
+          model: ModelTypes?.RESPONSE,
         });
         const callback = async (session, response) => {
           const res: any = await FormModel.findById(response.formId).populate(formPopulate);
@@ -338,6 +342,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           formId: tempResponse?.formId,
           response: tempResponse,
           appId: tempResponse?.appId,
+          model: ModelTypes?.RESPONSE,
         });
         const callback = async (session, response) => {
           const res: any = await FormModel.findById(response.formId).populate(formPopulate);
@@ -633,6 +638,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           response,
           formId: response?.formId || formId,
           appId,
+          model: ModelTypes?.RESPONSE,
         });
         hasPermission = true;
         return hasPermission;

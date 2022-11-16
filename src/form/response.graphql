@@ -19,7 +19,13 @@ type Query {
   getCheckUnique(formId: ID!, responseId: ID, valueFilter: AWSJSON!, appId: ID): String
     @aws_api_key
     @aws_cognito_user_pools
-  checkPermission(actionType: actionType, formId: ID, responseId: ID, appId: ID): Boolean
+  checkPermission(
+    actionType: actionType
+    modelType: modelType
+    formId: ID
+    responseId: ID
+    appId: ID
+  ): Boolean
 }
 
 enum actionType {
@@ -27,6 +33,12 @@ enum actionType {
   VIEW
   EDIT
   DELETE
+}
+
+enum modelType {
+  Form
+  Response
+  Comment
 }
 
 type Mutation {

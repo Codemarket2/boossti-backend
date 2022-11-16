@@ -26,8 +26,7 @@ export const systemForms = {
     fields: {
       form: 'form',
       roleActionCondition: 'role action condition',
-      // role: 'role',
-      // actionPermissions: 'Action Permissions',
+      model: 'model',
     },
   },
   roleActionCondition: {
