@@ -9,7 +9,7 @@ import { runFormActions } from './utils/actions';
 import { sendResponseNotification } from './utils/responseNotification';
 import { fileParser } from './utils/readCsvFile';
 import { runInTransaction } from '../utils/runInTransaction';
-import { IForm } from './types/form';
+import { IField, IForm } from './types/form';
 import { authorization, AuthorizationActionTypes } from './permission/authorization';
 import { IResponse } from './types/response';
 import { resolveConditionHelper } from './condition/resolveCondition';
@@ -87,13 +87,42 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         };
       }
       case 'createForm': {
-        return await runInTransaction({
-          action: 'CREATE',
-          Model: FormModel,
-          args,
-          populate: formPopulate,
-          user,
-        });
+        const callback = async (session, payload) => {
+          const childFormFields: IField[] = [];
+          payload.fields.forEach((field) => {
+            if (field?.fieldType === 'response' && field?.form?._id) {
+              childFormFields.push(field);
+            }
+          });
+          if (childFormFields?.length > 0) {
+            for (let i = 0; i < childFormFields.length; i++) {
+              const field = childFormFields[i];
+              FormModel.findOneAndUpdate(
+                { _id: field?.form?._id },
+                {
+                  $push: {
+                    fields: {
+                      label: `${payload?.name}_parent`,
+                      fieldType: 'response',
+                      form: payload?._id,
+                      options: { relationField: true, parentFormFieldId: field?._id },
+                    },
+                  },
+                },
+              ).session(session);
+            }
+          }
+        };
+        return await runInTransaction(
+          {
+            action: 'CREATE',
+            Model: FormModel,
+            args,
+            populate: formPopulate,
+            user,
+          },
+          callback,
+        );
       }
       case 'updateForm': {
         return await runInTransaction({
