@@ -97,7 +97,7 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           if (childFormFields?.length > 0) {
             for (let i = 0; i < childFormFields.length; i++) {
               const field = childFormFields[i];
-              FormModel.findOneAndUpdate(
+              await FormModel.findOneAndUpdate(
                 { _id: field?.form?._id },
                 {
                   $push: {
@@ -125,6 +125,9 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         );
       }
       case 'updateForm': {
+        const callback = async () => {
+          //
+        };
         return await runInTransaction({
           action: 'UPDATE',
           Model: FormModel,
