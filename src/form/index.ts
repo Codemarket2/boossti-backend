@@ -17,6 +17,7 @@ import { getFormIds, getFormsByIds } from './condition/getConditionForm';
 import { getLeftPartValue } from './condition/getConditionPartValue';
 import { formAuthorization } from './permission/formAuthorization';
 import { getValueObject } from './utils/getValueObject';
+import { createRelationField } from './utils/createRelationField';
 export const handler = async (event: AppSyncEvent): Promise<any> => {
   try {
     await DB();
@@ -87,33 +88,13 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
         };
       }
       case 'createForm': {
-        const callback = async (session, payload) => {
-          const childFormFields: IField[] = [];
-          payload.fields.forEach((field) => {
-            if (field?.fieldType === 'response' && field?.form?._id) {
-              childFormFields.push(field);
-            }
+        let form;
+        const callback = async (session, updatedForm) => {
+          await createRelationField(session, updatedForm, (newForm) => {
+            form = newForm;
           });
-          if (childFormFields?.length > 0) {
-            for (let i = 0; i < childFormFields.length; i++) {
-              const field = childFormFields[i];
-              await FormModel.findOneAndUpdate(
-                { _id: field?.form?._id },
-                {
-                  $push: {
-                    fields: {
-                      label: `${payload?.name}_parent`,
-                      fieldType: 'response',
-                      form: payload?._id,
-                      options: { relationField: true, parentFormFieldId: field?._id },
-                    },
-                  },
-                },
-              ).session(session);
-            }
-          }
         };
-        return await runInTransaction(
+        await runInTransaction(
           {
             action: 'CREATE',
             Model: FormModel,
@@ -123,18 +104,26 @@ export const handler = async (event: AppSyncEvent): Promise<any> => {
           },
           callback,
         );
+        return form;
       }
       case 'updateForm': {
-        const callback = async () => {
-          //
+        let form;
+        const callback = async (session, updatedForm) => {
+          await createRelationField(session, updatedForm, (newForm) => {
+            form = newForm;
+          });
         };
-        return await runInTransaction({
-          action: 'UPDATE',
-          Model: FormModel,
-          args,
-          populate: formPopulate,
-          user,
-        });
+        await runInTransaction(
+          {
+            action: 'UPDATE',
+            Model: FormModel,
+            args,
+            populate: formPopulate,
+            user,
+          },
+          callback,
+        );
+        return form;
       }
       case 'deleteForm': {
         const callback = async (session, form) => {
