@@ -44,6 +44,11 @@ export interface IFieldOptions {
   tabField?: boolean;
   hidden?: boolean;
   hiddenConditions?: ICondition[];
+  createRelationField?: boolean;
+  deleteRelationField?: boolean;
+  oldFormId?: string;
+  parentFormFieldId?: string;
+  updateRelationField?: string;
 }
 
 export interface IField {
