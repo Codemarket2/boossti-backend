@@ -202,7 +202,7 @@ export const authorization = async ({
     return;
   } catch (error) {
     console.log(error);
-    debugger;
+    // debugger;
     throw new Error(
       // `You are not authorized to perform this action, you don't have enough permission.`,
       error,
