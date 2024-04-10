@@ -1,3 +1,70 @@
+directive @aws_subscribe(mutations: [String!]!) on FIELD_DEFINITION
+directive @aws_cognito_user_pools(cognito_groups: [String]) on OBJECT | FIELD_DEFINITION
+directive @aws_api_key on OBJECT | FIELD_DEFINITION
+
+scalar AWSDateTime
+scalar AWSJSON
+
+type Media @aws_api_key @aws_cognito_user_pools {
+  url: String
+  caption: String
+}
+
+type Field2 @aws_api_key @aws_cognito_user_pools {
+  _id: ID
+  label: String
+  fieldType: String
+  options: AWSJSON
+  template: Template
+  form: Form
+}
+
+type Value @aws_api_key @aws_cognito_user_pools {
+  _id: ID
+  field: String
+  value: String
+  valueNumber: Float
+  valueBoolean: Boolean
+  valueDate: AWSDateTime
+  media: [Media]
+  values: [String]
+  template: Template
+  page: Page
+  form: Form
+  response: Response
+  options: AWSJSON
+}
+
+type Response @aws_api_key @aws_cognito_user_pools {
+  _id: ID
+  count: Int
+  formId: ID
+  appId: ID
+  parentResponseId: ID
+  workflowId: ID
+  values: [Value]
+  options: AWSJSON
+  createdBy: Response
+  updatedBy: ID
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+type Template @aws_api_key @aws_cognito_user_pools {
+  _id: ID
+  title: String
+  slug: String
+  description: String
+  media: [Media]
+  fields: [Field2]
+  active: Boolean
+  inUse: Boolean
+  showInMenu: Boolean
+  options: AWSJSON
+  createdAt: AWSDateTime
+  createdBy: Response
+}
+
 type Query {
   getResponse(_id: ID!, appId: ID): Response @aws_api_key @aws_cognito_user_pools
   getResponseByCount(formId: ID!, count: Int!, appId: ID): Response
@@ -60,20 +127,52 @@ type Subscription {
   feedDeleteSub: ID @aws_subscribe(mutations: ["deleteForm", "deleteResponse", "deleteComment"])
 }
 
-type Value @aws_api_key @aws_cognito_user_pools {
+type User @aws_api_key @aws_cognito_user_pools {
+  _id: ID!
+  userId: String!
+  name: String!
+  email: String!
+  picture: String
+  active: Boolean!
+  confirmed: Boolean!
+  createdAt: String
+  createdBy: String
+  updatedAt: String
+  updatedBy: String
+}
+
+type Page @aws_api_key @aws_cognito_user_pools {
   _id: ID
-  field: String
-  value: String
-  valueNumber: Float
-  valueBoolean: Boolean
-  valueDate: AWSDateTime
+  title: String
+  slug: String
+  authenticateUser: Boolean
+  description: String
+  active: Boolean
   media: [Media]
-  values: [String]
+  fields: [Field2]
   template: Template
-  page: Page
-  form: Form
-  response: Response
   options: AWSJSON
+  createdBy: User
+  createdAt: AWSDateTime
+  values: [Value]
+}
+
+type Form @aws_api_key @aws_cognito_user_pools {
+  _id: ID!
+  name: String
+  slug: String
+  fields: [Field2]
+  settings: AWSJSON
+  published: Boolean
+  createdBy: Response
+  updatedBy: ID
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+input MediaInput {
+  url: String
+  caption: String
 }
 
 input ValueInput {
@@ -90,21 +189,6 @@ input ValueInput {
   form: ID
   response: ID
   options: AWSJSON
-}
-
-type Response @aws_api_key @aws_cognito_user_pools {
-  _id: ID
-  count: Int
-  formId: ID
-  appId: ID
-  parentResponseId: ID
-  workflowId: ID
-  values: [Value]
-  options: AWSJSON
-  createdBy: Response
-  updatedBy: ID
-  createdAt: AWSDateTime
-  updatedAt: AWSDateTime
 }
 
 type Response2 @aws_api_key @aws_cognito_user_pools {

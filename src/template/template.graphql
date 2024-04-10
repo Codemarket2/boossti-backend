@@ -1,3 +1,98 @@
+directive @aws_subscribe(mutations: [String!]!) on FIELD_DEFINITION
+directive @aws_cognito_user_pools(cognito_groups: [String]) on OBJECT | FIELD_DEFINITION
+directive @aws_api_key on OBJECT | FIELD_DEFINITION
+
+scalar AWSDateTime
+scalar AWSJSON
+
+type Media @aws_api_key @aws_cognito_user_pools {
+  url: String
+  caption: String
+}
+
+type Form @aws_api_key @aws_cognito_user_pools {
+  _id: ID!
+  name: String
+  slug: String
+  fields: [Field2]
+  settings: AWSJSON
+  published: Boolean
+  createdBy: Response
+  updatedBy: ID
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+type Field2 @aws_api_key @aws_cognito_user_pools {
+  _id: ID
+  label: String
+  fieldType: String
+  options: AWSJSON
+  template: Template
+  form: Form
+}
+
+type Template @aws_api_key @aws_cognito_user_pools {
+  _id: ID
+  title: String
+  slug: String
+  description: String
+  media: [Media]
+  fields: [Field2]
+  active: Boolean
+  inUse: Boolean
+  showInMenu: Boolean
+  options: AWSJSON
+  createdAt: AWSDateTime
+  createdBy: Response
+}
+
+type Value @aws_api_key @aws_cognito_user_pools {
+  _id: ID
+  field: String
+  value: String
+  valueNumber: Float
+  valueBoolean: Boolean
+  valueDate: AWSDateTime
+  media: [Media]
+  values: [String]
+  template: Template
+  page: Page
+  form: Form
+  response: Response
+  options: AWSJSON
+}
+
+type User @aws_api_key @aws_cognito_user_pools {
+  _id: ID!
+  userId: String!
+  name: String!
+  email: String!
+  picture: String
+  active: Boolean!
+  confirmed: Boolean!
+  createdAt: String
+  createdBy: String
+  updatedAt: String
+  updatedBy: String
+}
+
+type Page @aws_api_key @aws_cognito_user_pools {
+  _id: ID
+  title: String
+  slug: String
+  authenticateUser: Boolean
+  description: String
+  active: Boolean
+  media: [Media]
+  fields: [Field2]
+  template: Template
+  options: AWSJSON
+  createdBy: User
+  createdAt: AWSDateTime
+  values: [Value]
+}
+
 type Query {
   getTemplates(page: Int, limit: Int, active: Boolean, search: String): Templates
   getMenuTemplates: [Template]
@@ -10,6 +105,25 @@ type Query {
   getPageBySlug(slug: String!): Page @aws_api_key @aws_cognito_user_pools
   getMentionItems(search: String): [MentionItems]
   getPageMentions(_id: ID!, page: Int, limit: Int, active: Boolean, search: String): Pages
+}
+
+input MediaInput {
+  url: String
+  caption: String
+}
+
+type ValueInput {
+  value: String!
+  fieldId: ID
+}
+
+input FieldInput {
+  _id: ID
+  label: String!
+  fieldType: String!
+  options: AWSJSON
+  template: ID
+  form: ID
 }
 
 type Mutation {
@@ -66,19 +180,19 @@ type Templates {
   count: Int
 }
 
-type Template @aws_api_key @aws_cognito_user_pools {
+type Response @aws_api_key @aws_cognito_user_pools {
   _id: ID
-  title: String
-  slug: String
-  description: String
-  media: [Media]
-  fields: [Field2]
-  active: Boolean
-  inUse: Boolean
-  showInMenu: Boolean
+  count: Int
+  formId: ID
+  appId: ID
+  parentResponseId: ID
+  workflowId: ID
+  values: [Value]
   options: AWSJSON
-  createdAt: AWSDateTime
   createdBy: Response
+  updatedBy: ID
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
 }
 
 type Pages @aws_api_key @aws_cognito_user_pools {
@@ -91,20 +205,4 @@ type MentionItems {
   _id: ID
   category: String
   type: String
-}
-
-type Page @aws_api_key @aws_cognito_user_pools {
-  _id: ID
-  title: String
-  slug: String
-  authenticateUser: Boolean
-  description: String
-  active: Boolean
-  media: [Media]
-  fields: [Field2]
-  template: Template
-  options: AWSJSON
-  createdBy: User
-  createdAt: AWSDateTime
-  values: [Value]
 }

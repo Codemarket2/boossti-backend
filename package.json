@@ -15,6 +15,7 @@
     ]
   },
   "devDependencies": {
+    "@graphql-tools/merge": "^9.0.3",
     "@shelf/jest-mongodb": "^2.2.2",
     "@types/aws-lambda": "^8.10.70",
     "husky": "^7.0.1",
@@ -23,12 +24,11 @@
     "ts-jest": "^27.0.3"
   },
   "dependencies": {
-    "@aws-cdk/aws-appsync": "1.126.0",
-    "@aws-cdk/aws-cognito": "1.126.0",
-    "@aws-cdk/core": "1.126.0",
-    "@serverless-stack/cli": "0.50.3",
-    "@serverless-stack/resources": "0.50.3",
+    "@aws-cdk/aws-appsync-alpha": "2.50.0-alpha.0",
+    "@serverless-stack/cli": "1.18.4",
+    "@serverless-stack/resources": "1.18.4",
     "@types/lodash": "^4.14.182",
+    "aws-cdk-lib": "2.50.0",
     "aws-sdk": "^2.863.0",
     "axios": "^0.24.0",
     "email-validator": "^2.0.4",

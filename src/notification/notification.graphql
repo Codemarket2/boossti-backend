@@ -1,3 +1,39 @@
+directive @aws_subscribe(mutations: [String!]!) on FIELD_DEFINITION
+directive @aws_cognito_user_pools(cognito_groups: [String]) on OBJECT | FIELD_DEFINITION
+directive @aws_api_key on OBJECT | FIELD_DEFINITION
+
+scalar AWSDateTime
+scalar AWSJSON
+
+type Media @aws_api_key @aws_cognito_user_pools {
+  url: String
+  caption: String
+}
+
+type Field2 @aws_api_key @aws_cognito_user_pools {
+  _id: ID
+  label: String
+  fieldType: String
+  options: AWSJSON
+  template: Template
+  form: Form
+}
+
+type Template @aws_api_key @aws_cognito_user_pools {
+  _id: ID
+  title: String
+  slug: String
+  description: String
+  media: [Media]
+  fields: [Field2]
+  active: Boolean
+  inUse: Boolean
+  showInMenu: Boolean
+  options: AWSJSON
+  createdAt: AWSDateTime
+  createdBy: Response
+}
+
 type Notification @aws_api_key @aws_cognito_user_pools {
   _id: ID
   userId: ID
@@ -9,6 +45,80 @@ type Notification @aws_api_key @aws_cognito_user_pools {
   formId: ID
   createdAt: AWSDateTime
   isClicked: Boolean
+}
+
+type User @aws_api_key @aws_cognito_user_pools {
+  _id: ID!
+  userId: String!
+  name: String!
+  email: String!
+  picture: String
+  active: Boolean!
+  confirmed: Boolean!
+  createdAt: String
+  createdBy: String
+  updatedAt: String
+  updatedBy: String
+}
+
+type Page @aws_api_key @aws_cognito_user_pools {
+  _id: ID
+  title: String
+  slug: String
+  authenticateUser: Boolean
+  description: String
+  active: Boolean
+  media: [Media]
+  fields: [Field2]
+  template: Template
+  options: AWSJSON
+  createdBy: User
+  createdAt: AWSDateTime
+  values: [Value]
+}
+
+type Value @aws_api_key @aws_cognito_user_pools {
+  _id: ID
+  field: String
+  value: String
+  valueNumber: Float
+  valueBoolean: Boolean
+  valueDate: AWSDateTime
+  media: [Media]
+  values: [String]
+  template: Template
+  page: Page
+  form: Form
+  response: Response
+  options: AWSJSON
+}
+
+type Response @aws_api_key @aws_cognito_user_pools {
+  _id: ID
+  count: Int
+  formId: ID
+  appId: ID
+  parentResponseId: ID
+  workflowId: ID
+  values: [Value]
+  options: AWSJSON
+  createdBy: Response
+  updatedBy: ID
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
+}
+
+type Form @aws_api_key @aws_cognito_user_pools {
+  _id: ID!
+  name: String
+  slug: String
+  fields: [Field2]
+  settings: AWSJSON
+  published: Boolean
+  createdBy: Response
+  updatedBy: ID
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
 }
 
 type Notification2 @aws_api_key @aws_cognito_user_pools {

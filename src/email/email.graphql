@@ -1,3 +1,7 @@
+directive @aws_subscribe(mutations: [String!]!) on FIELD_DEFINITION
+directive @aws_cognito_user_pools(cognito_groups: [String]) on OBJECT | FIELD_DEFINITION
+directive @aws_api_key on OBJECT | FIELD_DEFINITION
+
 type Mutation {
   createSendEmail(
     senderEmail: String!
@@ -50,6 +54,20 @@ type Query {
   getOneEmailCampaign(id: ID!): EmailCampaign
   getAllEmailCampaignsByUserId(userId: String!): [EmailCampaign]
   getAllEmailCampaigns: [EmailCampaign]
+}
+
+type User @aws_api_key @aws_cognito_user_pools {
+  _id: ID!
+  userId: String!
+  name: String!
+  email: String!
+  picture: String
+  active: Boolean!
+  confirmed: Boolean!
+  createdAt: String
+  createdBy: String
+  updatedAt: String
+  updatedBy: String
 }
 
 type Email @aws_api_key @aws_cognito_user_pools {

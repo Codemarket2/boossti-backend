@@ -1,3 +1,9 @@
+directive @aws_subscribe(mutations: [String!]!) on FIELD_DEFINITION
+directive @aws_cognito_user_pools(cognito_groups: [String]) on OBJECT | FIELD_DEFINITION
+directive @aws_api_key on OBJECT | FIELD_DEFINITION
+
+scalar AWSDateTime
+
 type Query {
   getStarRating(_id: ID!): StarRating
   getStarRatingsByParentId(parentId: ID!, page: Int, limit: Int): StarRatings
@@ -12,6 +18,20 @@ type Mutation {
 
 type Subscription {
   addedStarRating: StarRating @aws_subscribe(mutations: ["createStarRating"])
+}
+
+type User @aws_api_key @aws_cognito_user_pools {
+  _id: ID!
+  userId: String!
+  name: String!
+  email: String!
+  picture: String
+  active: Boolean!
+  confirmed: Boolean!
+  createdAt: String
+  createdBy: String
+  updatedAt: String
+  updatedBy: String
 }
 
 type StarRating {

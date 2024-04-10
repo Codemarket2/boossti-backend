@@ -1,8 +1,15 @@
+directive @aws_subscribe(mutations: [String!]!) on FIELD_DEFINITION
+directive @aws_cognito_user_pools(cognito_groups: [String]) on OBJECT | FIELD_DEFINITION
+directive @aws_api_key on OBJECT | FIELD_DEFINITION
+
 type Query {
   getAllContacts(page: Int, limit: Int): Contacts @aws_api_key @aws_cognito_user_pools
   getContact(_id: ID!): Contact
   getAllMailingList(page: Int, limit: Int): [MailingList]
 }
+
+scalar AWSDateTime
+scalar AWSJSON
 
 type Mutation {
   createContact(
