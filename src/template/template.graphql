@@ -10,6 +10,15 @@ type Media @aws_api_key @aws_cognito_user_pools {
   caption: String
 }
 
+type Field2 @aws_api_key @aws_cognito_user_pools {
+  _id: ID
+  label: String
+  fieldType: String
+  options: AWSJSON
+  template: Template
+  form: Form
+}
+
 type Form @aws_api_key @aws_cognito_user_pools {
   _id: ID!
   name: String
@@ -21,30 +30,6 @@ type Form @aws_api_key @aws_cognito_user_pools {
   updatedBy: ID
   createdAt: AWSDateTime
   updatedAt: AWSDateTime
-}
-
-type Field2 @aws_api_key @aws_cognito_user_pools {
-  _id: ID
-  label: String
-  fieldType: String
-  options: AWSJSON
-  template: Template
-  form: Form
-}
-
-type Template @aws_api_key @aws_cognito_user_pools {
-  _id: ID
-  title: String
-  slug: String
-  description: String
-  media: [Media]
-  fields: [Field2]
-  active: Boolean
-  inUse: Boolean
-  showInMenu: Boolean
-  options: AWSJSON
-  createdAt: AWSDateTime
-  createdBy: Response
 }
 
 type Value @aws_api_key @aws_cognito_user_pools {
@@ -77,20 +62,19 @@ type User @aws_api_key @aws_cognito_user_pools {
   updatedBy: String
 }
 
-type Page @aws_api_key @aws_cognito_user_pools {
+type Response @aws_api_key @aws_cognito_user_pools {
   _id: ID
-  title: String
-  slug: String
-  authenticateUser: Boolean
-  description: String
-  active: Boolean
-  media: [Media]
-  fields: [Field2]
-  template: Template
-  options: AWSJSON
-  createdBy: User
-  createdAt: AWSDateTime
+  count: Int
+  formId: ID
+  appId: ID
+  parentResponseId: ID
+  workflowId: ID
   values: [Value]
+  options: AWSJSON
+  createdBy: Response
+  updatedBy: ID
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
 }
 
 type Query {
@@ -112,9 +96,20 @@ input MediaInput {
   caption: String
 }
 
-type ValueInput {
-  value: String!
-  fieldId: ID
+input ValueInput {
+  _id: ID
+  field: String
+  value: String
+  valueNumber: Float
+  valueBoolean: Boolean
+  valueDate: AWSDateTime
+  media: [MediaInput]
+  values: [String]
+  template: ID
+  page: ID
+  form: ID
+  response: ID
+  options: AWSJSON
 }
 
 input FieldInput {
@@ -180,19 +175,19 @@ type Templates {
   count: Int
 }
 
-type Response @aws_api_key @aws_cognito_user_pools {
+type Template @aws_api_key @aws_cognito_user_pools {
   _id: ID
-  count: Int
-  formId: ID
-  appId: ID
-  parentResponseId: ID
-  workflowId: ID
-  values: [Value]
+  title: String
+  slug: String
+  description: String
+  media: [Media]
+  fields: [Field2]
+  active: Boolean
+  inUse: Boolean
+  showInMenu: Boolean
   options: AWSJSON
-  createdBy: Response
-  updatedBy: ID
   createdAt: AWSDateTime
-  updatedAt: AWSDateTime
+  createdBy: Response
 }
 
 type Pages @aws_api_key @aws_cognito_user_pools {
@@ -205,4 +200,20 @@ type MentionItems {
   _id: ID
   category: String
   type: String
+}
+
+type Page @aws_api_key @aws_cognito_user_pools {
+  _id: ID
+  title: String
+  slug: String
+  authenticateUser: Boolean
+  description: String
+  active: Boolean
+  media: [Media]
+  fields: [Field2]
+  template: Template
+  options: AWSJSON
+  createdBy: User
+  createdAt: AWSDateTime
+  values: [Value]
 }

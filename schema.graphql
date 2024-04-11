@@ -43,15 +43,6 @@ type Form @aws_api_key @aws_cognito_user_pools {
   updatedAt: AWSDateTime
 }
 
-type Field2 @aws_api_key @aws_cognito_user_pools {
-  _id: ID
-  label: String
-  fieldType: String
-  options: AWSJSON
-  template: Template
-  form: Form
-}
-
 type Template @aws_api_key @aws_cognito_user_pools {
   _id: ID
   title: String
@@ -65,6 +56,15 @@ type Template @aws_api_key @aws_cognito_user_pools {
   options: AWSJSON
   createdAt: AWSDateTime
   createdBy: Response
+}
+
+type Field2 @aws_api_key @aws_cognito_user_pools {
+  _id: ID
+  label: String
+  fieldType: String
+  options: AWSJSON
+  template: Template
+  form: Form
 }
 
 type Value @aws_api_key @aws_cognito_user_pools {

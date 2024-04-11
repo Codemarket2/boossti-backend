@@ -10,6 +10,53 @@ type Media @aws_api_key @aws_cognito_user_pools {
   caption: String
 }
 
+type Page @aws_api_key @aws_cognito_user_pools {
+  _id: ID
+  title: String
+  slug: String
+  authenticateUser: Boolean
+  description: String
+  active: Boolean
+  media: [Media]
+  fields: [Field2]
+  template: Template
+  options: AWSJSON
+  createdBy: User
+  createdAt: AWSDateTime
+  values: [Value]
+}
+
+type Value @aws_api_key @aws_cognito_user_pools {
+  _id: ID
+  field: String
+  value: String
+  valueNumber: Float
+  valueBoolean: Boolean
+  valueDate: AWSDateTime
+  media: [Media]
+  values: [String]
+  template: Template
+  page: Page
+  form: Form
+  response: Response
+  options: AWSJSON
+}
+
+type Template @aws_api_key @aws_cognito_user_pools {
+  _id: ID
+  title: String
+  slug: String
+  description: String
+  media: [Media]
+  fields: [Field2]
+  active: Boolean
+  inUse: Boolean
+  showInMenu: Boolean
+  options: AWSJSON
+  createdAt: AWSDateTime
+  createdBy: Response
+}
+
 type Response @aws_api_key @aws_cognito_user_pools {
   _id: ID
   count: Int
@@ -47,21 +94,6 @@ type Field2 @aws_api_key @aws_cognito_user_pools {
   form: Form
 }
 
-type Template @aws_api_key @aws_cognito_user_pools {
-  _id: ID
-  title: String
-  slug: String
-  description: String
-  media: [Media]
-  fields: [Field2]
-  active: Boolean
-  inUse: Boolean
-  showInMenu: Boolean
-  options: AWSJSON
-  createdAt: AWSDateTime
-  createdBy: Response
-}
-
 type User @aws_api_key @aws_cognito_user_pools {
   _id: ID!
   userId: String!
@@ -76,45 +108,43 @@ type User @aws_api_key @aws_cognito_user_pools {
   updatedBy: String
 }
 
-type Page @aws_api_key @aws_cognito_user_pools {
-  _id: ID
-  title: String
-  slug: String
-  authenticateUser: Boolean
-  description: String
-  active: Boolean
-  media: [Media]
-  fields: [Field2]
-  template: Template
-  options: AWSJSON
-  createdBy: User
-  createdAt: AWSDateTime
-  values: [Value]
+type Query {
+  getSection(_id: ID!): Section @aws_api_key @aws_cognito_user_pools
 }
 
-type Value @aws_api_key @aws_cognito_user_pools {
+input FieldInput {
+  _id: ID
+  label: String!
+  fieldType: String!
+  options: AWSJSON
+  template: ID
+  form: ID
+}
+
+input MediaInput {
+  url: String
+  caption: String
+}
+
+input ValueInput {
   _id: ID
   field: String
   value: String
   valueNumber: Float
   valueBoolean: Boolean
   valueDate: AWSDateTime
-  media: [Media]
+  media: [MediaInput]
   values: [String]
-  template: Template
-  page: Page
-  form: Form
-  response: Response
+  template: ID
+  page: ID
+  form: ID
+  response: ID
   options: AWSJSON
-}
-
-type Query {
-  getSection(_id: ID!): Section @aws_api_key @aws_cognito_user_pools
 }
 
 type Mutation {
   createSection: Section
-  updateSection(_id: ID!, fields: [Field2], values: [Value], options: AWSJSON): Section
+  updateSection(_id: ID!, fields: [FieldInput], values: [ValueInput], options: AWSJSON): Section
 }
 
 type Subscription {

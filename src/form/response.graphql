@@ -19,37 +19,6 @@ type Field2 @aws_api_key @aws_cognito_user_pools {
   form: Form
 }
 
-type Value @aws_api_key @aws_cognito_user_pools {
-  _id: ID
-  field: String
-  value: String
-  valueNumber: Float
-  valueBoolean: Boolean
-  valueDate: AWSDateTime
-  media: [Media]
-  values: [String]
-  template: Template
-  page: Page
-  form: Form
-  response: Response
-  options: AWSJSON
-}
-
-type Response @aws_api_key @aws_cognito_user_pools {
-  _id: ID
-  count: Int
-  formId: ID
-  appId: ID
-  parentResponseId: ID
-  workflowId: ID
-  values: [Value]
-  options: AWSJSON
-  createdBy: Response
-  updatedBy: ID
-  createdAt: AWSDateTime
-  updatedAt: AWSDateTime
-}
-
 type Template @aws_api_key @aws_cognito_user_pools {
   _id: ID
   title: String
@@ -63,6 +32,49 @@ type Template @aws_api_key @aws_cognito_user_pools {
   options: AWSJSON
   createdAt: AWSDateTime
   createdBy: Response
+}
+
+type User @aws_api_key @aws_cognito_user_pools {
+  _id: ID!
+  userId: String!
+  name: String!
+  email: String!
+  picture: String
+  active: Boolean!
+  confirmed: Boolean!
+  createdAt: String
+  createdBy: String
+  updatedAt: String
+  updatedBy: String
+}
+
+type Page @aws_api_key @aws_cognito_user_pools {
+  _id: ID
+  title: String
+  slug: String
+  authenticateUser: Boolean
+  description: String
+  active: Boolean
+  media: [Media]
+  fields: [Field2]
+  template: Template
+  options: AWSJSON
+  createdBy: User
+  createdAt: AWSDateTime
+  values: [Value]
+}
+
+type Form @aws_api_key @aws_cognito_user_pools {
+  _id: ID!
+  name: String
+  slug: String
+  fields: [Field2]
+  settings: AWSJSON
+  published: Boolean
+  createdBy: Response
+  updatedBy: ID
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
 }
 
 type Query {
@@ -124,50 +136,23 @@ type Subscription {
   responseSub(formId: ID): Response @aws_subscribe(mutations: ["createResponse", "updateResponse"])
   updatedResponse(_id: ID!): Response @aws_subscribe(mutations: ["updateResponse"])
   deletedResponse: ID @aws_subscribe(mutations: ["deleteResponse"])
-  feedDeleteSub: ID @aws_subscribe(mutations: ["deleteForm", "deleteResponse", "deleteComment"])
+  feedDeleteSub: ID @aws_subscribe(mutations: ["deleteResponse"])
 }
 
-type User @aws_api_key @aws_cognito_user_pools {
-  _id: ID!
-  userId: String!
-  name: String!
-  email: String!
-  picture: String
-  active: Boolean!
-  confirmed: Boolean!
-  createdAt: String
-  createdBy: String
-  updatedAt: String
-  updatedBy: String
-}
-
-type Page @aws_api_key @aws_cognito_user_pools {
+type Value @aws_api_key @aws_cognito_user_pools {
   _id: ID
-  title: String
-  slug: String
-  authenticateUser: Boolean
-  description: String
-  active: Boolean
+  field: String
+  value: String
+  valueNumber: Float
+  valueBoolean: Boolean
+  valueDate: AWSDateTime
   media: [Media]
-  fields: [Field2]
+  values: [String]
   template: Template
+  page: Page
+  form: Form
+  response: Response
   options: AWSJSON
-  createdBy: User
-  createdAt: AWSDateTime
-  values: [Value]
-}
-
-type Form @aws_api_key @aws_cognito_user_pools {
-  _id: ID!
-  name: String
-  slug: String
-  fields: [Field2]
-  settings: AWSJSON
-  published: Boolean
-  createdBy: Response
-  updatedBy: ID
-  createdAt: AWSDateTime
-  updatedAt: AWSDateTime
 }
 
 input MediaInput {
@@ -189,6 +174,21 @@ input ValueInput {
   form: ID
   response: ID
   options: AWSJSON
+}
+
+type Response @aws_api_key @aws_cognito_user_pools {
+  _id: ID
+  count: Int
+  formId: ID
+  appId: ID
+  parentResponseId: ID
+  workflowId: ID
+  values: [Value]
+  options: AWSJSON
+  createdBy: Response
+  updatedBy: ID
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
 }
 
 type Response2 @aws_api_key @aws_cognito_user_pools {
