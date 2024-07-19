@@ -32,18 +32,6 @@ Create your branch
 git checkout -b {branch-name}
 ```
 
-## Clone database
-
-Install [mongodb shell](https://www.mongodb.com/try/download/shell) then run these commands
-
-```bash
-mongodump --uri mongodb+srv://<mongodb-username>:<mongodb-password>@codemarket-staging.k16z7.mongodb.net/boossti-backend-vivekt
-```
-
-```bash
-mongorestore --uri mongodb+srv://<mongodb-username>:<mongodb-password>@codemarket-staging.k16z7.mongodb.net --db=<your-stage-name> dump/boossti-backend-vivekt
-```
-
 ## Installation
 
 Use the package manager [yarn](https://yarnpkg.com) to install dependecies.(Don't use npm install)
@@ -85,6 +73,20 @@ Remove all your stacks and all of their resources from AWS. Or optionally remove
 
 ```
 npx sst remove --stage {repository-name}-{your-branchname}
+
+## Clone database
+
+Install [mongodb shell](https://www.mongodb.com/try/download/shell) then run these commands
+
+```bash
+mongodump --uri mongodb+srv://<mongodb-username>:<mongodb-password>@codemarket-staging.k16z7.mongodb.net/boossti-backend-vivekt
+```
+
+```bash
+mongorestore --uri mongodb+srv://<mongodb-username>:<mongodb-password>@codemarket-staging.k16z7.mongodb.net --db=<your-stage-name> dump/boossti-backend-vivekt
+```
+
+
 
 example - npx sst remove --stage boossti-backend-sumij
 ```
