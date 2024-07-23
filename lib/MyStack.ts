@@ -64,6 +64,7 @@ export default class MyStack extends sst.Stack {
       },
       defaultFunctionProps: {
         timeout: 60,
+        runtime: 'nodejs20.x',
         environment: {
           SENDER_EMAIL: SENDER_EMAIL || '',
           DATABASE: `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@codemarket-staging.k16z7.mongodb.net/${scope.stage}?retryWrites=true&w=majority`,
