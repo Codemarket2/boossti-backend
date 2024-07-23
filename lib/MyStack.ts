@@ -1,7 +1,7 @@
 import * as sst from '@serverless-stack/resources';
 import { StringParameter } from '@aws-cdk/aws-ssm';
-import { AuthorizationType, UserPoolDefaultAction } from '@aws-cdk/aws-appsync';
-import { UserPool } from '@aws-cdk/aws-cognito';
+import { AuthorizationType, UserPoolDefaultAction } from 'aws-cdk-lib/aws-appsync';
+import { UserPool } from 'aws-cdk-lib/aws-cognito';
 import { Expiration, Duration } from '@aws-cdk/core';
 import dataSources from './dataSources';
 import resolvers from './resolvers';
