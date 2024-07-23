@@ -24,8 +24,8 @@
   },
   "dependencies": {
     "aws-cdk-lib": "^2.0.0",
-    "@serverless-stack/cli": "0.50.3",
-    "@serverless-stack/resources": "0.50.3",
+    "@serverless-stack/cli": "1.18.4",
+    "@serverless-stack/resources": "1.18.4",
     "@types/lodash": "^4.14.182",
     "aws-sdk": "^2.863.0",
     "axios": "^0.24.0",
