@@ -204,7 +204,8 @@ export const authorization = async ({
     console.log(error);
     // debugger;
     throw new Error(
-      `You are not authorized to perform this action, you don't have enough permission.`,
+      // `You are not authorized to perform this action, you don't have enough permission.`,
+      error,
     );
   }
 };
