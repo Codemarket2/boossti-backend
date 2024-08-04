@@ -37,6 +37,7 @@
     "lodash": "^4.17.21",
     "moment": "^2.29.1",
     "mongoose": "^6.3.3",
-    "slugify": "^1.6.0"
+    "slugify": "^1.6.0",
+    "graphql":"16.9.0"
   }
 }

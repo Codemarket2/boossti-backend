@@ -1,6 +1,6 @@
 import axios from 'axios';
 import gql from 'graphql-tag';
-import graphql from 'graphql';
+// import graphql from 'graphql';
 import { sendPushNotification } from '../../utils/onesignal';
 import { NotificationModel } from './notificationSchema';
 import { User } from '../../user/utils/userModel';
@@ -65,7 +65,7 @@ export const sendNotification = async (payload: payload) => {
               'x-api-key': GRAPHQL_API_KEY,
             },
             data: {
-              query: graphql.print(notificationMutation),
+              query: notificationMutation,
               variables: p,
             },
           });

@@ -88,7 +88,7 @@ export function MyStack({ stack, app }: sst.StackContext) {
   const csvFunction = new sst.Function(stack, 'MyApiLambda', {
     functionName: `${app.stage}-write-csv-to-mongodb`,
     handler: 'src/contact/csvFileLambda.handler',
-    memorySize: 4096,
+    memorySize: 3008,
     timeout: 900,
     environment: {
       EMAIL_VERIFICATION_API: EMAIL_VERIFICATION_API,
